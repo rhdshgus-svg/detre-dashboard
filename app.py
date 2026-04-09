@@ -4,13 +4,15 @@ import pandas as pd
 st.set_page_config(page_title="Detre Granluce 관제시스템", layout="centered")
 
 # ==========================================
-# 💎 프리미엄 UI/UX CSS (모바일 강제 고정 & 배너 최적화)
+# 💎 프리미엄 UI/UX CSS (모바일 강제 고정 & 상단 여백 최적화)
 # ==========================================
 st.markdown("""
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         * { font-family: 'Pretendard', sans-serif; }
-        .block-container { padding-top: 1.5rem; padding-bottom: 1rem; max-width: 650px; }
+        
+        /* 💡 화면 상단 여백 대폭 추가 (모바일에서 제목 잘림 완벽 방지) */
+        .block-container { padding-top: 3.5rem !important; padding-bottom: 1rem; max-width: 650px; }
         
         /* 모바일에서 제목 크기 자동 조절 */
         .premium-title { font-size: clamp(2.0em, 6vw, 2.8em); font-weight: 900; text-align: center; color: #2b6cb0; text-shadow: 0 4px 15px rgba(43, 108, 176, 0.3); margin-bottom: 0px; letter-spacing: 1px; }
@@ -33,12 +35,12 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 💡 구글 시트 연동 URL (링크 유지)
+# 💡 구글 시트 연동 URL (제공해주신 링크 적용 완료)
 # ==========================================
 SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQoR29bAcAP0KUBEvS3S6gn5Qz1MTKDJOxz-lW1UEyV_vOcISPxNW2uMuYMrz9HUw/pub?gid=1967078212&single=true&output=csv"
 LAYOUT_FILE = "디에트르 그랑루체 카페가입 현황.xlsx" 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=60) # 60초마다 구글 시트 실시간 연동
 def load_data():
     try:
         df_res = pd.read_csv(SHEET_CSV_URL, dtype=str)
@@ -64,7 +66,7 @@ if df_res.empty:
     st.stop()
 
 # ==========================================
-# 상단 타이틀 및 홍보 배너 (줄바꿈 최적화)
+# 상단 타이틀 및 홍보 배너
 # ==========================================
 st.markdown("<div class='premium-title'>Detre Granluce</div>", unsafe_allow_html=True)
 st.markdown("""
@@ -100,7 +102,7 @@ dong_not_joined = dong_total_units - dong_joined_units
 dong_rate = (dong_joined_units / dong_total_units) * 100 if dong_total_units > 0 else 0
 
 # ==========================================
-# 통계 박스 (모바일에서도 줄바꿈 안 깨지게 분리)
+# 통계 박스 
 # ==========================================
 with stats_container:
     st.markdown(f"""
@@ -126,7 +128,7 @@ with stats_container:
 st.write("") 
 
 # ==========================================
-# 🔥 모바일 가로 4칸 절대 고정 코드 (flex: 1 1 0; min-width: 0;)
+# 🔥 모바일 가로 4칸 절대 고정 코드 & 오류 방지 (One-line html)
 # ==========================================
 max_floor = max([int(ho[:2]) for ho in valid_ho_list if len(ho)==4]) if valid_ho_list else 20
 lines = sorted(list(set([int(ho[-1]) for ho in valid_ho_list if ho[-1].isdigit()]))) if valid_ho_list else [1,2,3,4]
@@ -134,13 +136,11 @@ lines = sorted(list(set([int(ho[-1]) for ho in valid_ho_list if ho[-1].isdigit()
 html_grid = "<div style='display: flex; flex-direction: column; gap: 4px;'>"
 
 for floor in range(max_floor, 0, -1):
-    # 💡 nowrap과 width:100%를 주어 브라우저가 절대 줄바꿈을 못하게 막습니다.
     html_grid += "<div style='display: flex; flex-wrap: nowrap !important; width: 100%; gap: 4px;'>"
     
     for line in lines:
         ho_str = f"{floor:02d}0{line}" 
         
-        # 💡 flex: 1 1 0; min-width: 0; 이 속성이 텍스트가 길어도 박스가 커지지 않고 무조건 4등분되게 만듭니다.
         base_style = "flex: 1 1 0; min-width: 0; min-height: 48px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; overflow: hidden; padding: 4px 1px;"
         
         if ho_str not in valid_ho_list:
