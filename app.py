@@ -5,7 +5,7 @@ import re
 st.set_page_config(page_title="Detre Granluce 관제시스템", layout="centered")
 
 # ==========================================
-# 💎 초밀착 컴팩트 UI/UX CSS (여백 제로 & 오와 열 완벽 정렬)
+# 💎 초밀착 컴팩트 UI/UX CSS (스트림릿 유리상자 파괴 & 100% 풀사이즈)
 # ==========================================
 st.markdown("""
     <style>
@@ -16,11 +16,10 @@ st.markdown("""
         footer {visibility: hidden;}
         header {visibility: hidden;}
         
-        /* 💡 1. 폰 화면 좌우 여백을 거의 0으로 만들어 꽉 차게 만듭니다 */
         .block-container { 
             padding-top: 1.5rem !important; 
             padding-bottom: 0.5rem !important; 
-            padding-left: 4px !important;  /* 좌우 4px만 남기고 여백 박살 */
+            padding-left: 4px !important;  
             padding-right: 4px !important; 
             max-width: 100% !important; 
         }
@@ -37,23 +36,32 @@ st.markdown("""
         .hl-green { color: #30D158; font-weight: 700; font-size: 1.05em; margin: 0 1px; }
         
         /* ==========================================
-           💡 2. 동 선택 버튼: 삐뚤빼뚤 방지 & 완벽한 5등분 가운데 정렬
+           💡 핵심: 스트림릿의 숨겨진 제약 풀기 & 완벽 정렬
            ========================================== */
-        div[data-testid="stRadio"] { 
+        
+        /* 1. 라디오 버튼을 감싸는 모든 스트림릿 기본 컨테이너를 가로 100%로 강제 확장 */
+        div.stRadio, 
+        div[data-testid="stRadio"],
+        div[data-testid="stRadio"] > div { 
             width: 100% !important; 
+            max-width: 100% !important;
         }
+
+        /* 2. 5칸 그리드 적용 (아파트 도면과 동일한 너비로 쫙 펴짐) */
         div[role="radiogroup"] {
             display: grid !important;
-            grid-template-columns: repeat(5, 1fr) !important; /* 무조건 5칸으로 딱 맞게 쪼갬 */
-            gap: 4px !important; /* 도면과 동일한 4px 간격 */
+            grid-template-columns: repeat(5, 1fr) !important;
+            gap: 4px !important;
             width: 100% !important;
             margin-bottom: 15px !important;
         }
+
+        /* 3. 버튼 자체 디자인 */
         div[role="radiogroup"] > label {
-            background-color: #111 !important; /* 투명 대신 약간 어두운 배경으로 각을 살림 */
+            background-color: #111 !important; 
             border: 1px solid #333 !important;
             border-radius: 6px !important;
-            padding: 12px 0px !important; /* 높이 넉넉하게 */
+            padding: 12px 0px !important; 
             margin: 0 !important;
             cursor: pointer !important;
             display: flex !important;
@@ -62,21 +70,31 @@ st.markdown("""
             width: 100% !important;
             box-sizing: border-box !important;
         }
+        
         div[role="radiogroup"] > label[data-checked="true"] {
             background: #D4AF37 !important; 
             border: 1px solid #FFECA1 !important;
         }
+
+        /* 4. 우측 쏠림의 원흉! 숨은 동그라미의 공간 차지까지 완전히 삭제 */
         div[role="radiogroup"] > label > div:first-child { 
-            display: none !important; /* 숨은 동그라미 완벽 삭제 */
+            display: none !important;
+            width: 0px !important;
+            min-width: 0px !important;
+            margin: 0px !important;
+            padding: 0px !important;
         }
-        
-        /* 💡 3. 글자가 절대 오른쪽으로 치우치지 않게 강제 중앙 정렬 */
+
+        /* 5. 숫자를 버튼 정중앙에 완벽하게 박아버리기 */
         div[role="radiogroup"] > label div[data-testid="stMarkdownContainer"] {
             width: 100% !important;
             display: flex !important;
             justify-content: center !important;
             align-items: center !important;
+            padding: 0 !important;
+            margin: 0 !important;
         }
+        
         div[role="radiogroup"] > label p { 
             font-size: 0.9em !important; 
             margin: 0 !important; 
@@ -85,12 +103,13 @@ st.markdown("""
             width: 100% !important;
             display: block !important;
         }
+        
         div[role="radiogroup"] > label[data-checked="true"] p {
             color: #1C1C1E !important;
             font-weight: 800 !important;
         }
 
-        /* 아파트 도면 글씨 크기 조정 */
+        /* 아파트 도면 설정 */
         .unit-num { font-size: 0.75em !important; font-weight: 800; letter-spacing: -0.5px; }
         .unit-nick { font-size: 0.6em !important; font-weight: 600; line-height: 1.1; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     </style>
@@ -145,7 +164,7 @@ all_dongs = sorted(all_dongs_raw, key=lambda x: int(re.sub(r'[^0-9]', '', x)) if
 if not all_dongs:
     st.stop()
 
-# 💡 '동' 글자 빼고 숫자만 렌더링
+# 💡 '동' 글자 빼고 숫자만 버튼으로 출력
 selected_dong = st.radio(
     "동 선택", 
     all_dongs, 
@@ -191,7 +210,7 @@ with stats_container:
     """, unsafe_allow_html=True)
     
 # ==========================================
-# 🔥 아파트 도면 모바일 가로 절대 고정 (여백 완전 일치)
+# 🔥 아파트 도면 모바일 가로 꽉 차게 절대 고정
 # ==========================================
 max_floor = max([int(ho[:2]) for ho in valid_ho_list if len(ho)==4]) if valid_ho_list else 20
 lines = sorted(list(set([int(ho[-1]) for ho in valid_ho_list if ho[-1].isdigit()]))) if valid_ho_list else [1,2,3,4]
