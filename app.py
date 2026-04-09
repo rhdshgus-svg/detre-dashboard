@@ -6,13 +6,23 @@ st.set_page_config(page_title="Detre Granluce 관제시스템", layout="centered
 # ==========================================
 # 💎 프리미엄 UI/UX CSS (모바일 강제 고정 & 상단 여백 최적화)
 # ==========================================
+# ==========================================
+# 💎 프리미엄 UI/UX CSS (모바일 강제 고정 & 상단 여백 최적화)
+# ==========================================
 st.markdown("""
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         * { font-family: 'Pretendard', sans-serif; }
         
+        /* 💡 스트림릿 기본 UI 완벽하게 숨기기 (이 부분을 추가하세요!) */
+        #MainMenu {visibility: hidden;} /* 우측 상단 햄버거 메뉴 숨기기 */
+        footer {visibility: hidden;}    /* 하단 Made with Streamlit 워터마크 숨기기 */
+        header {visibility: hidden;}    /* 상단 여백 및 기본 헤더 띠 숨기기 */
+        
         /* 💡 화면 상단 여백 대폭 추가 (모바일에서 제목 잘림 완벽 방지) */
         .block-container { padding-top: 3.5rem !important; padding-bottom: 1rem; max-width: 650px; }
+        
+        /* 이하 기존 코드 동일... */
         
         /* 모바일에서 제목 크기 자동 조절 */
         .premium-title { font-size: clamp(2.0em, 6vw, 2.8em); font-weight: 900; text-align: center; color: #2b6cb0; text-shadow: 0 4px 15px rgba(43, 108, 176, 0.3); margin-bottom: 0px; letter-spacing: 1px; }
