@@ -5,27 +5,23 @@ import re
 st.set_page_config(page_title="Detre Granluce 관제시스템", layout="centered")
 
 # ==========================================
-# 💎 초밀착 컴팩트 UI/UX CSS (여백 제거 및 버튼 압축)
+# 💎 초밀착 컴팩트 UI/UX CSS (버튼 가득 채우기 & 완벽 가운데 정렬)
 # ==========================================
 st.markdown("""
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         * { font-family: 'Pretendard', sans-serif; }
         
-        /* 스트림릿 기본 UI 숨기기 */
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
         header {visibility: hidden;}
         
-        /* 💡 화면 위아래 여백을 극한으로 줄임 */
         .block-container { padding-top: 1rem !important; padding-bottom: 0.5rem !important; padding-left: 0.5rem !important; padding-right: 0.5rem !important; max-width: 650px; }
         
-        /* 제목 및 배너 컴팩트화 */
         .premium-title { font-size: clamp(1.6em, 5vw, 2.2em); font-weight: 900; text-align: center; color: #2b6cb0; text-shadow: 0 2px 10px rgba(43, 108, 176, 0.3); margin-bottom: 0px; letter-spacing: 0px; }
         .promo-text { font-size: 0.65em; text-align: center; color: #888; font-weight: 300; margin-top: 4px; margin-bottom: 12px; line-height: 1.3; word-break: keep-all; }
         .promo-highlight { color: #D4AF37; font-weight: 600; }
         
-        /* 통계 박스 압축 (높이와 여백 최소화) */
         .stat-container { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
         .stat-box { background: linear-gradient(145deg, #1c1c1e, #121212); padding: 8px 5px; border-radius: 8px; border: 1px solid #333; text-align: center; }
         .stat-box.dong-box { border: 1px solid #D4AF37; }
@@ -33,18 +29,22 @@ st.markdown("""
         .hl-gold { color: #D4AF37; font-weight: 700; font-size: 1.05em; margin: 0 1px; }
         .hl-green { color: #30D158; font-weight: 700; font-size: 1.05em; margin: 0 1px; }
         
-        /* 💡 동 선택 버튼: 5열 촘촘한 그리드, 여백 거의 없음 */
+        /* 💡 동 선택 버튼: 가로 100% 꽉 채우기 & 가운데 정렬 & 크기 확대 */
+        div.row-widget.stRadio > div {
+            width: 100% !important; /* 오른쪽 빈 공간 제거, 꽉 채우기 */
+        }
         div[role="radiogroup"] {
             display: grid !important;
-            grid-template-columns: repeat(5, 1fr) !important; /* 5칸으로 촘촘하게 */
-            gap: 4px !important;
+            grid-template-columns: repeat(5, 1fr) !important;
+            gap: 6px !important;
+            width: 100% !important;
             margin-bottom: 12px !important;
         }
         div[role="radiogroup"] > label {
             background-color: transparent !important;
             border: 1px solid #444 !important;
             border-radius: 6px !important;
-            padding: 6px 0px !important; /* 버튼 위아래 높이 대폭 축소 */
+            padding: 10px 0px !important; /* 💡 네모 칸(버튼) 높이를 조금 더 크게 */
             margin: 0 !important;
             cursor: pointer !important;
             display: flex !important;
@@ -53,17 +53,31 @@ st.markdown("""
             width: 100% !important; 
         }
         div[role="radiogroup"] > label[data-checked="true"] {
-            background: #D4AF37 !important; /* 그라데이션 대신 심플한 골드로 변경하여 깔끔함 강조 */
+            background: #D4AF37 !important; 
             border: 1px solid #FFECA1 !important;
+        }
+        div[role="radiogroup"] > label > div:first-of-type { 
+            display: none !important; /* 기본 동그라미 버튼 완벽히 삭제 */
+        }
+        /* 💡 글자를 오른쪽 치우침 없이 무조건 한가운데로 강제 고정 */
+        div[role="radiogroup"] > label div[data-testid="stMarkdownContainer"] {
+            width: 100% !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            text-align: center !important;
+        }
+        div[role="radiogroup"] > label p { 
+            font-size: 0.9em !important; /* 숫자 글씨 크기도 약간 키움 */
+            margin: 0 !important; 
+            text-align: center !important;
+            width: 100% !important;
         }
         div[role="radiogroup"] > label[data-checked="true"] p {
             color: #1C1C1E !important;
             font-weight: 800 !important;
         }
-        div[role="radiogroup"] > label > div:first-of-type { display: none !important; }
-        div[role="radiogroup"] > label p { font-size: 0.85em !important; margin: 0 !important; }
 
-        /* 아파트 도면 압축 */
         .unit-num { font-size: 0.75em !important; font-weight: 800; letter-spacing: -0.5px; }
         .unit-nick { font-size: 0.6em !important; font-weight: 600; line-height: 1.1; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     </style>
@@ -118,8 +132,7 @@ all_dongs = sorted(all_dongs_raw, key=lambda x: int(re.sub(r'[^0-9]', '', x)) if
 if not all_dongs:
     st.stop()
 
-# 💡 핵심: format_func를 사용해 버튼 글씨에서 '동'을 빼고 숫자만 보여줌! 
-# label_visibility="collapsed" 를 통해 "상세 조회할 동 클릭" 이라는 글자도 숨겨 공간 절약
+# 💡 label_visibility="collapsed" 를 통해 글자 공간을 완전히 숨기고 가로로 꽉 채웁니다
 selected_dong = st.radio(
     "동 선택", 
     all_dongs, 
@@ -178,7 +191,6 @@ for floor in range(max_floor, 0, -1):
     for line in lines:
         ho_str = f"{floor:02d}0{line}" 
         
-        # 💡 셀 높이(min-height)를 38px로 극한으로 줄임
         base_style = "flex: 1 1 0; min-width: 0; min-height: 38px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; overflow: hidden; padding: 2px 0px;"
         
         if ho_str not in valid_ho_list:
