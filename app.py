@@ -156,10 +156,10 @@ if df_res.empty:
 st.markdown("""
 <div class='premium-title'>Detre Granluce</div>
 <div class='promo-title'>[Sol 운명상점] 사주 & MBTI 솔루션</div>
-<div class='promo-subtitle'>당신의 운명을 낱낱이 파헤쳐드립니다 🔮 <span style='font-size:0.9em;'>(213동 102호 팡)</span></div>
+<div class='promo-subtitle'>당신의 운명을 낱낱이 파헤쳐드립니다 🔮 <span style='font-size:0.9em;'>(213동 102호 팡도사)</span></div>
 <div class='kakao-container'>
     <a href="https://open.kakao.com/o/gEkb84oi" target="_blank" class='kakao-btn'>
-        💬 카카오톡 오픈채팅 문의하기
+        💬 카카오톡 문의하기(깨알광고)
     </a>
 </div>
 """, unsafe_allow_html=True)
