@@ -27,7 +27,7 @@ st.markdown("""
 # 💡 핵심: 구글 시트 연동 (진짜 자동화!)
 # ==========================================
 # 아까 복사해둔 구글 시트 CSV 링크를 아래 따옴표 안에 붙여넣으세요!
-SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQoR29bAcAP0KUBEvS3S6gn5Qz1MTKDJOxz-lW1UEyV_vOcISPxNW2uMuYMrz9HUw/pub?gid=1967078212&single=true&output=csv_복사한_링크를_붙여넣으세요"
+SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQoR29bAcAP0KUBEvS3S6gn5Qz1MTKDJOxz-lW1UEyV_vOcISPxNW2uMuYMrz9HUw/pub?gid=1967078212&single=true&output=csv"
 
 # 동호 코드 뼈대는 변하지 않으니 기존 엑셀을 그대로 씁니다.
 LAYOUT_FILE = "디에트르 그랑루체 카페가입 현황.xlsx" 
