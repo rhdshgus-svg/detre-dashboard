@@ -5,7 +5,7 @@ import re
 st.set_page_config(page_title="Detre Granluce 관제시스템", layout="centered")
 
 # ==========================================
-# 💎 이도의 필살기: 여백 제로 & 세련된 밑줄 탭(Tab) 디자인!
+# 💎 이도의 필살기: 100% 꽉 채우기 & 카카오톡 배너 CSS
 # ==========================================
 st.markdown("""
     <style>
@@ -25,10 +25,31 @@ st.markdown("""
             max-width: 100% !important; 
         }
         
-        .premium-title { font-size: clamp(1.6em, 5vw, 2.2em); font-weight: 900; text-align: center; color: #2b6cb0; text-shadow: 0 2px 10px rgba(43, 108, 176, 0.3); margin-bottom: 0px; letter-spacing: 0px; }
-        .promo-text { font-size: 0.65em; text-align: center; color: #888; font-weight: 300; margin-top: 4px; margin-bottom: 12px; line-height: 1.3; word-break: keep-all; }
-        .promo-highlight { color: #D4AF37; font-weight: 600; }
+        /* 타이틀 및 홍보 배너 중앙 정렬 */
+        .premium-title { font-size: clamp(1.8em, 6vw, 2.4em); font-weight: 900; text-align: center; color: #2b6cb0; text-shadow: 0 2px 10px rgba(43, 108, 176, 0.3); margin-bottom: 5px; letter-spacing: 0px; }
+        .promo-title { font-size: 0.85em; text-align: center; color: #D4AF37; font-weight: 700; margin-top: 0px; margin-bottom: 5px; }
+        .promo-subtitle { font-size: 0.75em; text-align: center; color: #aaa; font-weight: 400; margin-bottom: 12px; }
         
+        /* 카카오톡 문의하기 버튼 디자인 */
+        .kakao-btn {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #FEE500;
+            color: #191919 !important;
+            font-weight: 800;
+            font-size: 0.85em;
+            padding: 10px 24px;
+            border-radius: 12px;
+            text-decoration: none !important;
+            box-shadow: 0 4px 10px rgba(254, 229, 0, 0.3);
+            margin-bottom: 20px;
+            transition: all 0.2s ease;
+        }
+        .kakao-btn:active { transform: scale(0.95); }
+        .kakao-container { text-align: center; width: 100%; }
+
+        /* 통계 박스 */
         .stat-container { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; width: 100%; }
         .stat-box { background: linear-gradient(145deg, #1c1c1e, #121212); padding: 8px 5px; border-radius: 6px; border: 1px solid #333; text-align: center; }
         .stat-box.dong-box { border: 1px solid #D4AF37; }
@@ -37,33 +58,26 @@ st.markdown("""
         .hl-green { color: #30D158; font-weight: 700; font-size: 1.05em; margin: 0 1px; }
         
         /* ==========================================
-           💡 아버님 아이디어 반영: 네모 칸 버리고 밑줄 탭(Tab) 스타일로 꽉 채우기!
+           💡 동 선택: 밑줄 탭(Tab) 스타일로 100% 꽉 채우기
            ========================================== */
+        div[data-testid="stRadio"] { width: 100% !important; }
+        label[data-testid="stWidgetLabel"] { display: none !important; }
         
-        div[data-testid="stRadio"] { 
-            width: 100% !important; 
-        }
-        label[data-testid="stWidgetLabel"] { 
-            display: none !important; 
-        }
-        
-        /* 아파트 도면과 동일한 Flexbox 원리를 적용하여 100% 꽉 채우기 */
         div[role="radiogroup"] {
             display: flex !important;
             flex-wrap: wrap !important;
             width: 100% !important;
-            gap: 2px !important; /* 탭 간격을 최소화하여 밀착시킴 */
+            gap: 2px !important;
             justify-content: flex-start !important;
             margin-bottom: 16px !important;
         }
         
-        /* 네모 박스 버리고 세련된 하단 밑줄 탭 디자인으로 변경 */
         div[role="radiogroup"] > label {
-            flex: 1 1 calc(20% - 2px) !important; /* 5칸에 맞춰 알아서 쭉쭉 늘어남! 우측 공백 원천 차단 */
+            flex: 1 1 calc(20% - 2px) !important; 
             min-width: calc(20% - 2px) !important;
-            background-color: transparent !important; /* 네모 박스 배경 제거 */
+            background-color: transparent !important;
             border: none !important;
-            border-bottom: 2px solid #333 !important; /* 심플한 회색 밑줄 */
+            border-bottom: 2px solid #333 !important; 
             border-radius: 0px !important;
             padding: 10px 0px !important;
             margin: 0 !important;
@@ -71,29 +85,21 @@ st.markdown("""
             cursor: pointer !important;
         }
         
-        /* 선택된 동은 밑에서부터 은은한 황금빛이 올라오는 고급스러운 효과 */
         div[role="radiogroup"] > label[data-checked="true"] {
             background: linear-gradient(to top, rgba(212, 175, 55, 0.2), transparent) !important; 
-            border-bottom: 2px solid #D4AF37 !important; /* 황금색 굵은 밑줄 */
+            border-bottom: 2px solid #D4AF37 !important; 
         }
         
-        /* 짜증나는 숨은 동그라미 흔적 완벽 소멸 */
-        div[role="radiogroup"] > label > div:first-child { 
-            display: none !important; 
-            width: 0 !important;
-        }
+        div[role="radiogroup"] > label > div:first-child { display: none !important; width: 0 !important; }
         
-        /* 숫자는 언제나 정중앙에 위치하도록 강제 고정 */
         div[role="radiogroup"] > label p { 
             font-size: 0.9em !important; 
-            color: #888 !important; /* 기본 글씨는 약간 흐린 회색 */
+            color: #888 !important; 
             text-align: center !important;
             width: 100% !important;
             margin: 0 !important;
             padding: 0 !important;
         }
-        
-        /* 선택된 숫자 글씨는 황금색으로 진하게 */
         div[role="radiogroup"] > label[data-checked="true"] p {
             color: #D4AF37 !important; 
             font-weight: 800 !important;
@@ -120,6 +126,12 @@ def load_data():
         df_res['동'] = df_res['동'].astype(str).str.extract(r'(\d+)')[0] + "동"
         df_res['호'] = df_res['호'].astype(str).str.extract(r'(\d+)')[0].str.zfill(4) 
         
+        # 💡 핵심 방어망 1: 띄어쓰기 등 공백을 제거하여 완벽하게 동일한 닉네임으로 통일시킴
+        df_res['닉네임'] = df_res['닉네임'].str.strip()
+        
+        # 💡 핵심 방어망 2: 같은 동, 같은 호수에 완전히 똑같은 닉네임이 여러 번 제출된 경우 중복 데이터 1개만 남기고 싹 삭제
+        df_res = df_res.drop_duplicates(subset=['동', '호', '닉네임'])
+        
         df_layout = pd.read_excel(LAYOUT_FILE, sheet_name='동호 코드', skiprows=2, usecols="A:B", header=None, dtype=str)
         df_layout.columns = ['동', '호'] 
         df_layout = df_layout.dropna()
@@ -137,12 +149,16 @@ if df_res.empty:
     st.stop()
 
 # ==========================================
-# 상단 타이틀 및 홍보 배너
+# 🚀 상단 타이틀 및 특급 영업용 카카오톡 배너
 # ==========================================
-st.markdown("<div class='premium-title'>Detre Granluce</div>", unsafe_allow_html=True)
 st.markdown("""
-<div class='promo-text'>
-    <span class='promo-highlight'>Sol 운명상점</span> 사주&MBTI 솔루션 <span style='color:#555;'>(213동 102호 팡)</span>
+<div class='premium-title'>Detre Granluce</div>
+<div class='promo-title'>[Sol 운명상점] 사주 & MBTI 솔루션</div>
+<div class='promo-subtitle'>당신의 운명을 낱낱이 파헤쳐드립니다 🔮 <span style='font-size:0.9em;'>(213동 102호 팡)</span></div>
+<div class='kakao-container'>
+    <a href="https://open.kakao.com/o/gEkb84oi" target="_blank" class='kakao-btn'>
+        💬 카카오톡 오픈채팅 문의하기
+    </a>
 </div>
 """, unsafe_allow_html=True)
 
@@ -154,14 +170,7 @@ all_dongs = sorted(all_dongs_raw, key=lambda x: int(re.sub(r'[^0-9]', '', x)) if
 if not all_dongs:
     st.stop()
 
-# 💡 '동' 글자 빼고 숫자만 버튼으로 출력
-selected_dong = st.radio(
-    "동 선택", 
-    all_dongs, 
-    horizontal=True, 
-    format_func=lambda x: x.replace("동", ""),
-    label_visibility="collapsed" 
-)
+selected_dong = st.radio("동 선택", all_dongs, horizontal=True, format_func=lambda x: x.replace("동", ""), label_visibility="collapsed")
 
 total_units = len(df_layout) 
 df_res_unique = df_res.drop_duplicates(subset=['동', '호']) 
@@ -170,7 +179,10 @@ total_not_joined = total_units - total_joined
 total_rate = (total_joined / total_units) * 100 if total_units > 0 else 0
 
 dong_res = df_res[df_res['동'] == selected_dong]
-resident_dict = dong_res.groupby('호')['닉네임'].apply(lambda x: '<br>'.join(x)).to_dict()
+
+# 💡 핵심 방어망 3: 만약을 대비해 합칠 때도 고유한(unique) 닉네임만 모아서 줄바꿈(<br>) 처리
+resident_dict = dong_res.groupby('호')['닉네임'].apply(lambda x: '<br>'.join(x.unique())).to_dict()
+
 dong_joined_units = len(resident_dict)
 
 dong_layout = df_layout[df_layout['동'] == selected_dong]
