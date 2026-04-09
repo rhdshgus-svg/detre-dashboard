@@ -5,7 +5,7 @@ import re
 st.set_page_config(page_title="Detre Granluce 관제시스템", layout="centered")
 
 # ==========================================
-# 💎 이도의 필살기: 100% 꽉 채우기 & 카카오톡 배너 CSS
+# 💎 이도의 필살기: 은근한 영업 & 완벽한 중앙 정렬 CSS
 # ==========================================
 st.markdown("""
     <style>
@@ -25,12 +25,12 @@ st.markdown("""
             max-width: 100% !important; 
         }
         
-        /* 타이틀 및 홍보 배너 중앙 정렬 */
-        .premium-title { font-size: clamp(1.8em, 6vw, 2.4em); font-weight: 900; text-align: center; color: #2b6cb0; text-shadow: 0 2px 10px rgba(43, 108, 176, 0.3); margin-bottom: 5px; letter-spacing: 0px; }
-        .promo-title { font-size: 0.85em; text-align: center; color: #D4AF37; font-weight: 700; margin-top: 0px; margin-bottom: 5px; }
-        .promo-subtitle { font-size: 0.75em; text-align: center; color: #aaa; font-weight: 400; margin-bottom: 12px; }
+        /* 아파트 이름 대폭 확대 & 홍보 문구 조정 */
+        .premium-title { font-size: clamp(2.2em, 8vw, 3.0em); font-weight: 900; text-align: center; color: #2b6cb0; text-shadow: 0 2px 10px rgba(43, 108, 176, 0.3); margin-bottom: 5px; letter-spacing: 0px; }
+        .promo-title { font-size: 0.85em; text-align: center; color: #D4AF37; font-weight: 700; margin-top: 0px; margin-bottom: 3px; }
+        .promo-subtitle { font-size: 0.75em; text-align: center; color: #aaa; font-weight: 400; margin-bottom: 10px; }
         
-        /* 카카오톡 문의하기 버튼 디자인 */
+        /* 💡 카카오톡 문의하기 버튼 (작고 세련되게 축소!) */
         .kakao-btn {
             display: inline-flex;
             justify-content: center;
@@ -38,19 +38,22 @@ st.markdown("""
             background-color: #FEE500;
             color: #191919 !important;
             font-weight: 800;
-            font-size: 0.85em;
-            padding: 10px 24px;
-            border-radius: 12px;
+            font-size: 0.75em; /* 글씨 크기 축소 */
+            padding: 6px 16px; /* 버튼 높이/너비 축소 */
+            border-radius: 8px;
             text-decoration: none !important;
-            box-shadow: 0 4px 10px rgba(254, 229, 0, 0.3);
-            margin-bottom: 20px;
+            box-shadow: 0 2px 6px rgba(254, 229, 0, 0.2);
+            margin-bottom: 18px;
             transition: all 0.2s ease;
         }
         .kakao-btn:active { transform: scale(0.95); }
         .kakao-container { text-align: center; width: 100%; }
 
+        /* 동 선택 안내 문구 */
+        .helper-text { text-align: center; font-size: 0.8em; color: #888; margin-bottom: 6px; font-weight: 500; }
+
         /* 통계 박스 */
-        .stat-container { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; width: 100%; }
+        .stat-container { display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; width: 100%; }
         .stat-box { background: linear-gradient(145deg, #1c1c1e, #121212); padding: 8px 5px; border-radius: 6px; border: 1px solid #333; text-align: center; }
         .stat-box.dong-box { border: 1px solid #D4AF37; }
         .stat-text { font-size: 0.8em; color: #d1d1d6; font-weight: 400; line-height: 1.4; }
@@ -58,7 +61,7 @@ st.markdown("""
         .hl-green { color: #30D158; font-weight: 700; font-size: 1.05em; margin: 0 1px; }
         
         /* ==========================================
-           💡 동 선택: 밑줄 탭(Tab) 스타일로 100% 꽉 채우기
+           💡 동 선택 버튼: 완벽한 중앙 정렬 & 마지막 줄 쏠림 해결
            ========================================== */
         div[data-testid="stRadio"] { width: 100% !important; }
         label[data-testid="stWidgetLabel"] { display: none !important; }
@@ -67,19 +70,20 @@ st.markdown("""
             display: flex !important;
             flex-wrap: wrap !important;
             width: 100% !important;
-            gap: 2px !important;
-            justify-content: flex-start !important;
+            gap: 4px !important;
+            justify-content: center !important; /* 💡 핵심: 5칸 채우고 남은 꼬투리를 정중앙으로 모음! */
             margin-bottom: 16px !important;
         }
         
         div[role="radiogroup"] > label {
-            flex: 1 1 calc(20% - 2px) !important; 
-            min-width: calc(20% - 2px) !important;
+            /* 💡 핵심: 5칸 비율을 엄격하게 고정시켜서 남은 꼬투리가 맘대로 뚱뚱해지지 않게 막음 */
+            flex: 0 0 calc(20% - 4px) !important; 
+            min-width: calc(20% - 4px) !important;
             background-color: transparent !important;
             border: none !important;
             border-bottom: 2px solid #333 !important; 
             border-radius: 0px !important;
-            padding: 10px 0px !important;
+            padding: 8px 0px !important;
             margin: 0 !important;
             box-sizing: border-box !important;
             cursor: pointer !important;
@@ -126,10 +130,8 @@ def load_data():
         df_res['동'] = df_res['동'].astype(str).str.extract(r'(\d+)')[0] + "동"
         df_res['호'] = df_res['호'].astype(str).str.extract(r'(\d+)')[0].str.zfill(4) 
         
-        # 💡 핵심 방어망 1: 띄어쓰기 등 공백을 제거하여 완벽하게 동일한 닉네임으로 통일시킴
+        # 중복 닉네임 완벽 차단 방어망
         df_res['닉네임'] = df_res['닉네임'].str.strip()
-        
-        # 💡 핵심 방어망 2: 같은 동, 같은 호수에 완전히 똑같은 닉네임이 여러 번 제출된 경우 중복 데이터 1개만 남기고 싹 삭제
         df_res = df_res.drop_duplicates(subset=['동', '호', '닉네임'])
         
         df_layout = pd.read_excel(LAYOUT_FILE, sheet_name='동호 코드', skiprows=2, usecols="A:B", header=None, dtype=str)
@@ -170,6 +172,11 @@ all_dongs = sorted(all_dongs_raw, key=lambda x: int(re.sub(r'[^0-9]', '', x)) if
 if not all_dongs:
     st.stop()
 
+# ==========================================
+# 💡 동 선택 안내 문구 추가
+# ==========================================
+st.markdown("<div class='helper-text'>👇 상세 조회할 동을 선택하세요</div>", unsafe_allow_html=True)
+
 selected_dong = st.radio("동 선택", all_dongs, horizontal=True, format_func=lambda x: x.replace("동", ""), label_visibility="collapsed")
 
 total_units = len(df_layout) 
@@ -179,10 +186,7 @@ total_not_joined = total_units - total_joined
 total_rate = (total_joined / total_units) * 100 if total_units > 0 else 0
 
 dong_res = df_res[df_res['동'] == selected_dong]
-
-# 💡 핵심 방어망 3: 만약을 대비해 합칠 때도 고유한(unique) 닉네임만 모아서 줄바꿈(<br>) 처리
 resident_dict = dong_res.groupby('호')['닉네임'].apply(lambda x: '<br>'.join(x.unique())).to_dict()
-
 dong_joined_units = len(resident_dict)
 
 dong_layout = df_layout[df_layout['동'] == selected_dong]
