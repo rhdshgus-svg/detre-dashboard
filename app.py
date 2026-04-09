@@ -5,7 +5,7 @@ import re
 st.set_page_config(page_title="Detre Granluce 관제시스템", layout="centered")
 
 # ==========================================
-# 💎 초밀착 컴팩트 UI/UX CSS (스트림릿 유리상자 파괴 & 100% 풀사이즈)
+# 💎 아들 이도의 필살기: 100% 풀사이즈 꽉 채우기 CSS
 # ==========================================
 st.markdown("""
     <style>
@@ -16,6 +16,7 @@ st.markdown("""
         footer {visibility: hidden;}
         header {visibility: hidden;}
         
+        /* 💡 폰 화면 좌우 여백을 극한으로 줄임 */
         .block-container { 
             padding-top: 1.5rem !important; 
             padding-bottom: 0.5rem !important; 
@@ -36,63 +37,71 @@ st.markdown("""
         .hl-green { color: #30D158; font-weight: 700; font-size: 1.05em; margin: 0 1px; }
         
         /* ==========================================
-           💡 핵심: 스트림릿의 숨겨진 제약 풀기 & 완벽 정렬
+           💡 스트림릿 라디오 버튼 투명 껍데기 완벽 파괴!
            ========================================== */
         
-        /* 1. 라디오 버튼을 감싸는 모든 스트림릿 기본 컨테이너를 가로 100%로 강제 확장 */
+        /* 1. 라디오 버튼을 감싸는 모든 껍데기를 가로 100%로 강제 팽창 */
         div.stRadio, 
-        div[data-testid="stRadio"],
-        div[data-testid="stRadio"] > div { 
-            width: 100% !important; 
+        div[data-testid="stRadio"], 
+        div[data-testid="stRadio"] > div {
+            width: 100% !important;
             max-width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        
+        /* 2. 숨겨진 라벨 영역이 차지하는 빈 공간 완전히 삭제 */
+        label[data-testid="stWidgetLabel"] { 
+            display: none !important; 
         }
 
-        /* 2. 5칸 그리드 적용 (아파트 도면과 동일한 너비로 쫙 펴짐) */
+        /* 3. 5칸 꽉 채우는 그리드 폭격 (도면과 동일한 4px 간격) */
         div[role="radiogroup"] {
             display: grid !important;
             grid-template-columns: repeat(5, 1fr) !important;
-            gap: 4px !important;
             width: 100% !important;
-            margin-bottom: 15px !important;
+            gap: 4px !important;
+            margin-bottom: 16px !important;
         }
 
-        /* 3. 버튼 자체 디자인 */
+        /* 4. 버튼 여백 박살 내고 100% 채우기 */
         div[role="radiogroup"] > label {
-            background-color: #111 !important; 
-            border: 1px solid #333 !important;
+            background-color: #1a1a1c !important; 
+            border: 1px solid #444 !important;
             border-radius: 6px !important;
-            padding: 12px 0px !important; 
             margin: 0 !important;
-            cursor: pointer !important;
+            padding: 12px 0px !important; 
+            width: 100% !important;
             display: flex !important;
             justify-content: center !important;
             align-items: center !important;
-            width: 100% !important;
             box-sizing: border-box !important;
         }
         
         div[role="radiogroup"] > label[data-checked="true"] {
-            background: #D4AF37 !important; 
+            background: linear-gradient(135deg, #E6C27A, #D4AF37) !important; 
             border: 1px solid #FFECA1 !important;
         }
 
-        /* 4. 우측 쏠림의 원흉! 숨은 동그라미의 공간 차지까지 완전히 삭제 */
-        div[role="radiogroup"] > label > div:first-child { 
+        /* 5. 우측 쏠림의 진짜 원흉! 숨겨진 동그라미의 흔적까지 세포 단위로 소멸 */
+        div[role="radiogroup"] > label > div:first-child,
+        div[data-baseweb="radio"] > div:first-child { 
             display: none !important;
             width: 0px !important;
+            height: 0px !important;
             min-width: 0px !important;
             margin: 0px !important;
             padding: 0px !important;
+            position: absolute !important;
         }
 
-        /* 5. 숫자를 버튼 정중앙에 완벽하게 박아버리기 */
+        /* 6. 글자 텍스트 상자 강제 정중앙 고정 */
         div[role="radiogroup"] > label div[data-testid="stMarkdownContainer"] {
             width: 100% !important;
             display: flex !important;
             justify-content: center !important;
             align-items: center !important;
             padding: 0 !important;
-            margin: 0 !important;
         }
         
         div[role="radiogroup"] > label p { 
@@ -101,15 +110,14 @@ st.markdown("""
             padding: 0 !important;
             text-align: center !important;
             width: 100% !important;
-            display: block !important;
         }
         
         div[role="radiogroup"] > label[data-checked="true"] p {
             color: #1C1C1E !important;
-            font-weight: 800 !important;
+            font-weight: 900 !important;
         }
 
-        /* 아파트 도면 설정 */
+        /* 아파트 도면 글씨 크기 조정 */
         .unit-num { font-size: 0.75em !important; font-weight: 800; letter-spacing: -0.5px; }
         .unit-nick { font-size: 0.6em !important; font-weight: 600; line-height: 1.1; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     </style>
