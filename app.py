@@ -5,7 +5,7 @@ import re
 st.set_page_config(page_title="Detre Granluce 관제시스템", layout="centered")
 
 # ==========================================
-# 💎 초밀착 컴팩트 UI/UX CSS (버튼 가득 채우기 & 완벽 가운데 정렬)
+# 💎 초밀착 컴팩트 UI/UX CSS (완벽한 가운데 정렬 & 풀사이즈 적용)
 # ==========================================
 st.markdown("""
     <style>
@@ -16,7 +16,8 @@ st.markdown("""
         footer {visibility: hidden;}
         header {visibility: hidden;}
         
-        .block-container { padding-top: 1rem !important; padding-bottom: 0.5rem !important; padding-left: 0.5rem !important; padding-right: 0.5rem !important; max-width: 650px; }
+        /* 💡 전체 화면 위아래/좌우 여백을 최소화하여 꽉 차게 만듭니다 */
+        .block-container { padding-top: 1.5rem !important; padding-bottom: 0.5rem !important; padding-left: 0.5rem !important; padding-right: 0.5rem !important; max-width: 650px; }
         
         .premium-title { font-size: clamp(1.6em, 5vw, 2.2em); font-weight: 900; text-align: center; color: #2b6cb0; text-shadow: 0 2px 10px rgba(43, 108, 176, 0.3); margin-bottom: 0px; letter-spacing: 0px; }
         .promo-text { font-size: 0.65em; text-align: center; color: #888; font-weight: 300; margin-top: 4px; margin-bottom: 12px; line-height: 1.3; word-break: keep-all; }
@@ -29,49 +30,55 @@ st.markdown("""
         .hl-gold { color: #D4AF37; font-weight: 700; font-size: 1.05em; margin: 0 1px; }
         .hl-green { color: #30D158; font-weight: 700; font-size: 1.05em; margin: 0 1px; }
         
-        /* 💡 동 선택 버튼: 가로 100% 꽉 채우기 & 가운데 정렬 & 크기 확대 */
-        div.row-widget.stRadio > div {
-            width: 100% !important; /* 오른쪽 빈 공간 제거, 꽉 채우기 */
+        /* ==========================================
+           💡 동 선택 버튼: 우측 치우침 해결 & 100% 풀사이즈 
+           ========================================== */
+        /* 1. 가장 바깥쪽 컨테이너를 가로 100%로 강제 확장 */
+        div[data-testid="stRadio"] { 
+            width: 100% !important; 
         }
+        /* 2. 5칸 그리드 적용 */
         div[role="radiogroup"] {
             display: grid !important;
             grid-template-columns: repeat(5, 1fr) !important;
-            gap: 6px !important;
+            gap: 4px !important;
             width: 100% !important;
-            margin-bottom: 12px !important;
+            margin-bottom: 15px !important;
         }
+        /* 3. 버튼 디자인 (여백 완전 제거 및 가운데 정렬) */
         div[role="radiogroup"] > label {
             background-color: transparent !important;
             border: 1px solid #444 !important;
             border-radius: 6px !important;
-            padding: 10px 0px !important; /* 💡 네모 칸(버튼) 높이를 조금 더 크게 */
             margin: 0 !important;
+            padding: 12px 0px !important; /* 상하 크기를 더 키워서 터치하기 편하게 만듦, 좌우 여백은 0 */
             cursor: pointer !important;
             display: flex !important;
             justify-content: center !important;
             align-items: center !important;
-            width: 100% !important; 
+            width: 100% !important;
+            box-sizing: border-box !important;
         }
+        /* 4. 선택된 버튼 황금색 강조 */
         div[role="radiogroup"] > label[data-checked="true"] {
             background: #D4AF37 !important; 
             border: 1px solid #FFECA1 !important;
         }
-        div[role="radiogroup"] > label > div:first-of-type { 
-            display: none !important; /* 기본 동그라미 버튼 완벽히 삭제 */
+        /* 5. 💡 우측 치우침의 진짜 범인! 숨겨진 동그라미의 공간 자체를 소멸시킴 */
+        div[role="radiogroup"] > label > div:first-child { 
+            display: none !important;
+            width: 0px !important;
+            margin: 0px !important;
+            padding: 0px !important;
         }
-        /* 💡 글자를 오른쪽 치우침 없이 무조건 한가운데로 강제 고정 */
-        div[role="radiogroup"] > label div[data-testid="stMarkdownContainer"] {
-            width: 100% !important;
-            display: flex !important;
-            justify-content: center !important;
-            align-items: center !important;
-            text-align: center !important;
-        }
+        /* 6. 숫자 텍스트를 한가운데로 강력하게 고정 */
         div[role="radiogroup"] > label p { 
-            font-size: 0.9em !important; /* 숫자 글씨 크기도 약간 키움 */
+            font-size: 0.9em !important; 
             margin: 0 !important; 
+            padding: 0 !important;
             text-align: center !important;
             width: 100% !important;
+            display: block !important;
         }
         div[role="radiogroup"] > label[data-checked="true"] p {
             color: #1C1C1E !important;
@@ -132,7 +139,7 @@ all_dongs = sorted(all_dongs_raw, key=lambda x: int(re.sub(r'[^0-9]', '', x)) if
 if not all_dongs:
     st.stop()
 
-# 💡 label_visibility="collapsed" 를 통해 글자 공간을 완전히 숨기고 가로로 꽉 채웁니다
+# 💡 선택 위젯 
 selected_dong = st.radio(
     "동 선택", 
     all_dongs, 
@@ -178,7 +185,7 @@ with stats_container:
     """, unsafe_allow_html=True)
     
 # ==========================================
-# 🔥 아파트 도면 모바일 가로 절대 고정 (여백 최소화)
+# 🔥 아파트 도면 (여백 최소화)
 # ==========================================
 max_floor = max([int(ho[:2]) for ho in valid_ho_list if len(ho)==4]) if valid_ho_list else 20
 lines = sorted(list(set([int(ho[-1]) for ho in valid_ho_list if ho[-1].isdigit()]))) if valid_ho_list else [1,2,3,4]
