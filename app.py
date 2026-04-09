@@ -2,7 +2,15 @@ import streamlit as st
 import pandas as pd
 import re
 
-st.set_page_config(page_title="Detre Granluce 관제시스템", layout="centered")
+# ==========================================
+# 💡 링크 공유 시 뜨는 제목과 아이콘(왕관 -> 아파트) 변경
+# ==========================================
+st.set_page_config(
+    page_title="디에트르 그랑루체 가입현황",  # 카톡에 뜨는 제목
+    page_icon="🏢",                        # 왕관 대신 아파트 이모티콘 
+    layout="centered"
+)
+
 
 # ==========================================
 # 💎 이도의 마스터피스: 프리미엄 디자인 & 완벽 정렬 CSS
