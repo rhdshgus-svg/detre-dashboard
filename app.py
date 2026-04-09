@@ -92,7 +92,7 @@ all_dongs = sorted(df_layout['동'].unique().tolist())
 if not all_dongs:
     st.stop()
 
-selected_dong = st.selectbox("🔍 상세 조회할 동 선택", all_dongs)
+selected_dong = st.radio("🔍 상세 조회할 동 클릭", all_dongs, horizontal=True)
 
 total_units = len(df_layout) 
 df_res_unique = df_res.drop_duplicates(subset=['동', '호']) 
