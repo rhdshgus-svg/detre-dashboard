@@ -5,7 +5,7 @@ import re
 st.set_page_config(page_title="Detre Granluce 관제시스템", layout="centered")
 
 # ==========================================
-# 💎 이도의 필살기: 은근한 영업 & 완벽한 중앙 정렬 CSS
+# 💎 이도의 마스터피스: 프리미엄 디자인 & 완벽 정렬 CSS
 # ==========================================
 st.markdown("""
     <style>
@@ -30,7 +30,7 @@ st.markdown("""
         .promo-title { font-size: 0.85em; text-align: center; color: #D4AF37; font-weight: 700; margin-top: 0px; margin-bottom: 3px; }
         .promo-subtitle { font-size: 0.75em; text-align: center; color: #aaa; font-weight: 400; margin-bottom: 10px; }
         
-        /* 💡 카카오톡 문의하기 버튼 (작고 세련되게 축소!) */
+        /* 💡 카카오톡 문의하기 버튼 */
         .kakao-btn {
             display: inline-flex;
             justify-content: center;
@@ -38,16 +38,30 @@ st.markdown("""
             background-color: #FEE500;
             color: #191919 !important;
             font-weight: 800;
-            font-size: 0.75em; /* 글씨 크기 축소 */
-            padding: 6px 16px; /* 버튼 높이/너비 축소 */
+            font-size: 0.75em; 
+            padding: 6px 16px; 
             border-radius: 8px;
             text-decoration: none !important;
             box-shadow: 0 2px 6px rgba(254, 229, 0, 0.2);
-            margin-bottom: 18px;
+            margin-bottom: 12px; /* 간격 살짝 조절 */
             transition: all 0.2s ease;
         }
         .kakao-btn:active { transform: scale(0.95); }
         .kakao-container { text-align: center; width: 100%; }
+
+        /* 💡 신의 한 수: 임원진 헌정(?) 및 업데이트 안내 박스 */
+        .notice-text {
+            text-align: center;
+            font-size: 0.75em;
+            color: #ff9f0a; /* 주황빛 경고/안내 색상으로 눈에 띄게 */
+            font-weight: 600;
+            margin-bottom: 18px;
+            padding: 8px 10px;
+            background-color: rgba(255, 159, 10, 0.1); /* 은은한 배경색 */
+            border-radius: 8px;
+            border: 1px solid rgba(255, 159, 10, 0.2);
+            word-break: keep-all;
+        }
 
         /* 동 선택 안내 문구 */
         .helper-text { text-align: center; font-size: 0.8em; color: #888; margin-bottom: 6px; font-weight: 500; }
@@ -71,12 +85,11 @@ st.markdown("""
             flex-wrap: wrap !important;
             width: 100% !important;
             gap: 4px !important;
-            justify-content: center !important; /* 💡 핵심: 5칸 채우고 남은 꼬투리를 정중앙으로 모음! */
+            justify-content: center !important; 
             margin-bottom: 16px !important;
         }
         
         div[role="radiogroup"] > label {
-            /* 💡 핵심: 5칸 비율을 엄격하게 고정시켜서 남은 꼬투리가 맘대로 뚱뚱해지지 않게 막음 */
             flex: 0 0 calc(20% - 4px) !important; 
             min-width: calc(20% - 4px) !important;
             background-color: transparent !important;
@@ -151,7 +164,7 @@ if df_res.empty:
     st.stop()
 
 # ==========================================
-# 🚀 상단 타이틀 및 특급 영업용 카카오톡 배너
+# 🚀 상단 타이틀, 카톡 배너, 그리고 임원진 헌정 멘트!
 # ==========================================
 st.markdown("""
 <div class='premium-title'>Detre Granluce</div>
@@ -161,6 +174,9 @@ st.markdown("""
     <a href="https://open.kakao.com/o/gEkb84oi" target="_blank" class='kakao-btn'>
         💬 카카오톡 문의하기(깨알광고)
     </a>
+</div>
+<div class='notice-text'>
+    🚨 미입력 또는 신규가입하신 분께서는 꼭 회장 및 임원진에게 업데이트 요청해주세요!
 </div>
 """, unsafe_allow_html=True)
 
