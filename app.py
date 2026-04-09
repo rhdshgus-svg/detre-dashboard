@@ -176,7 +176,7 @@ st.markdown("""
     </a>
 </div>
 <div class='notice-text'>
-    🚨 미입력 또는 신규가입하신 분께서는 꼭 회장 및 임원진에게 업데이트 요청해주세요!
+    🚨 누락 또는 신규가입하신 분께서는 꼭 회장님 및 임원진에게 업데이트 요청해주세요!
 </div>
 """, unsafe_allow_html=True)
 
