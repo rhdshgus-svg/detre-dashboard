@@ -1,56 +1,84 @@
 import streamlit as st
 import pandas as pd
+import re # 숫자 정렬을 위한 라이브러리 추가
 
 st.set_page_config(page_title="Detre Granluce 관제시스템", layout="centered")
 
 # ==========================================
-# 💎 프리미엄 UI/UX CSS (모바일 강제 고정 & 상단 여백 최적화)
-# ==========================================
-# ==========================================
-# 💎 프리미엄 UI/UX CSS (모바일 강제 고정 & 상단 여백 최적화)
+# 💎 프리미엄 UI/UX CSS (동 버튼 4열 완벽 정렬 추가)
 # ==========================================
 st.markdown("""
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         * { font-family: 'Pretendard', sans-serif; }
         
-        /* 💡 스트림릿 기본 UI 완벽하게 숨기기 (이 부분을 추가하세요!) */
-        #MainMenu {visibility: hidden;} /* 우측 상단 햄버거 메뉴 숨기기 */
-        footer {visibility: hidden;}    /* 하단 Made with Streamlit 워터마크 숨기기 */
-        header {visibility: hidden;}    /* 상단 여백 및 기본 헤더 띠 숨기기 */
+        /* 스트림릿 기본 UI 숨기기 */
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        header {visibility: hidden;}
         
-        /* 💡 화면 상단 여백 대폭 추가 (모바일에서 제목 잘림 완벽 방지) */
+        /* 화면 상단 여백 (제목 잘림 방지) */
         .block-container { padding-top: 3.5rem !important; padding-bottom: 1rem; max-width: 650px; }
         
-        /* 이하 기존 코드 동일... */
-        
-        /* 모바일에서 제목 크기 자동 조절 */
         .premium-title { font-size: clamp(2.0em, 6vw, 2.8em); font-weight: 900; text-align: center; color: #2b6cb0; text-shadow: 0 4px 15px rgba(43, 108, 176, 0.3); margin-bottom: 0px; letter-spacing: 1px; }
-        
-        /* 홍보 문구 모바일 최적화 (줄바꿈 및 간격) */
         .promo-text { font-size: clamp(0.7em, 2.5vw, 0.8em); text-align: center; color: #888; font-weight: 300; margin-top: 8px; margin-bottom: 25px; line-height: 1.5; word-break: keep-all; }
         .promo-highlight { color: #D4AF37; font-weight: 600; }
         
-        /* 통계 박스 모바일 최적화 */
         .stat-box { background: linear-gradient(145deg, #1c1c1e, #121212); padding: 15px 10px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #333; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .stat-box.dong-box { border: 1px solid #D4AF37; background: linear-gradient(145deg, #221e10, #121212); }
         .stat-text { font-size: clamp(0.85em, 3vw, 0.95em); color: #d1d1d6; font-weight: 400; line-height: 1.8; }
         .hl-gold { color: #D4AF37; font-weight: 700; font-size: 1.1em; margin: 0 2px; }
         .hl-green { color: #30D158; font-weight: 700; font-size: 1.1em; margin: 0 2px; }
         
-        /* 호수/닉네임 폰트 사이즈 강제 고정 및 텍스트 삐져나옴 방지 */
+        /* 💡 동 선택 버튼: 무조건 4칸 격자(Grid)로 자로 잰 듯이 정렬 */
+        div[role="radiogroup"] {
+            display: grid !important;
+            grid-template-columns: repeat(4, 1fr) !important; /* 4열로 강제 분할 */
+            gap: 6px !important;
+            margin-bottom: 15px !important;
+        }
+        div[role="radiogroup"] > label {
+            background-color: #1C1C1E !important;
+            border: 1px solid #333 !important;
+            border-radius: 8px !important;
+            padding: 10px 0px !important; /* 상하 여백만 주고 좌우는 꽉 채움 */
+            margin: 0 !important;
+            cursor: pointer !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            width: 100% !important; /* 칸 너비에 100% 맞춤 */
+        }
+        div[role="radiogroup"] > label[data-checked="true"] {
+            background: linear-gradient(135deg, #E6C27A, #D4AF37) !important;
+            border: 1px solid #FFECA1 !important;
+            box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3) !important;
+        }
+        div[role="radiogroup"] > label[data-checked="true"] p {
+            color: #1C1C1E !important;
+            font-weight: 800 !important;
+        }
+        div[role="radiogroup"] > label > div:first-of-type {
+            display: none !important; /* 촌스러운 기본 동그라미 숨기기 */
+        }
+        /* 동 버튼 글씨 크기 조정 */
+        div[role="radiogroup"] > label p {
+            font-size: clamp(0.75em, 2.5vw, 0.9em) !important;
+            margin: 0 !important;
+        }
+
         .unit-num { font-size: clamp(0.7em, 2.5vw, 0.9em) !important; font-weight: 800; letter-spacing: 0px; }
         .unit-nick { font-size: clamp(0.55em, 2vw, 0.65em) !important; font-weight: 600; line-height: 1.3; margin-top: 3px; word-break: keep-all; overflow: hidden; text-overflow: ellipsis; }
     </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 💡 구글 시트 연동 URL (제공해주신 링크 적용 완료)
+# 💡 구글 시트 연동 URL
 # ==========================================
 SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQoR29bAcAP0KUBEvS3S6gn5Qz1MTKDJOxz-lW1UEyV_vOcISPxNW2uMuYMrz9HUw/pub?gid=1967078212&single=true&output=csv"
 LAYOUT_FILE = "디에트르 그랑루체 카페가입 현황.xlsx" 
 
-@st.cache_data(ttl=60) # 60초마다 구글 시트 실시간 연동
+@st.cache_data(ttl=60)
 def load_data():
     try:
         df_res = pd.read_csv(SHEET_CSV_URL, dtype=str)
@@ -88,10 +116,14 @@ st.markdown("""
 
 stats_container = st.container()
 
-all_dongs = sorted(df_layout['동'].unique().tolist())
+# 💡 핵심: 201동, 202동 등 숫자 순서대로 완벽하게 오름차순 정렬!
+all_dongs_raw = df_layout['동'].unique().tolist()
+all_dongs = sorted(all_dongs_raw, key=lambda x: int(re.sub(r'[^0-9]', '', x)) if re.sub(r'[^0-9]', '', x).isdigit() else 0)
+
 if not all_dongs:
     st.stop()
 
+# 라디오 버튼으로 동 선택 (키보드 팝업 방지 및 4열 정렬 적용됨)
 selected_dong = st.radio("🔍 상세 조회할 동 클릭", all_dongs, horizontal=True)
 
 total_units = len(df_layout) 
@@ -111,9 +143,6 @@ dong_total_units = len(valid_ho_list)
 dong_not_joined = dong_total_units - dong_joined_units
 dong_rate = (dong_joined_units / dong_total_units) * 100 if dong_total_units > 0 else 0
 
-# ==========================================
-# 통계 박스 
-# ==========================================
 with stats_container:
     st.markdown(f"""
     <div class='stat-box'>
@@ -138,7 +167,7 @@ with stats_container:
 st.write("") 
 
 # ==========================================
-# 🔥 모바일 가로 4칸 절대 고정 코드 & 오류 방지 (One-line html)
+# 🔥 아파트 도면 모바일 가로 4칸 절대 고정
 # ==========================================
 max_floor = max([int(ho[:2]) for ho in valid_ho_list if len(ho)==4]) if valid_ho_list else 20
 lines = sorted(list(set([int(ho[-1]) for ho in valid_ho_list if ho[-1].isdigit()]))) if valid_ho_list else [1,2,3,4]
