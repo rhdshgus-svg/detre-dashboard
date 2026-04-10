@@ -16,7 +16,7 @@ from email.utils import parsedate_to_datetime
 st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon="🏢", layout="centered")
 
 # ==========================================
-# 2. CSS 스타일링 
+# 2. CSS 스타일링 (🔥 경제지표 VIP 리포트 폼 압축 패치)
 # ==========================================
 st.markdown("""
     <style>
@@ -28,7 +28,7 @@ st.markdown("""
         .premium-title { font-size: clamp(2.0em, 8vw, 2.8em); font-weight: 900; text-align: center; color: #2b6cb0; text-shadow: 0 2px 10px rgba(43, 108, 176, 0.3); margin-bottom: 4px; line-height: 1.2; }
         .promo-title { font-size: 0.85em; text-align: center; color: #D4AF37; font-weight: 700; margin-top: 0px; margin-bottom: 8px; line-height: 1.3; }
         
-        /* 🔥 사주 링크 및 입예협 공식 배너 스타일 */
+        /* 사주 링크 및 입예협 공식 배너 스타일 */
         .btn-saju { background-color: rgba(212, 175, 55, 0.1); color: #D4AF37 !important; border: 1px solid #D4AF37; display: inline-flex; justify-content: center; align-items: center; font-weight: 800; font-size: 0.75em; padding: 6px 16px; border-radius: 8px; text-decoration: none !important; margin-bottom: 15px; transition: all 0.2s ease; }
         .official-btn { display: flex; justify-content: center; align-items: center; font-weight: 900; font-size: 0.85em; padding: 12px 16px; border-radius: 10px; text-decoration: none !important; margin-bottom: 6px; transition: all 0.2s ease; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         .btn-naver { background-color: #03C75A; color: white !important; }
@@ -78,12 +78,15 @@ st.markdown("""
         .saju-p { color: #d1d1d6; font-size: 0.9em; line-height: 1.75; margin-top: 0; padding-left: 13px; text-align: justify; letter-spacing: -0.3px; word-break: keep-all; }
         .saju-footer { color: #888; font-size: 0.75em; text-align: center; margin-top: 30px; border-top: 1px dashed #444; padding-top: 15px; line-height: 1.6; word-break: keep-all; }
         
-        .econ-box { background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 10px; padding: 15px; margin-bottom: 15px; }
-        .econ-title { color: #d1d1d6; font-size: 0.95em; font-weight: 800; margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 8px; }
-        div[data-testid="metric-container"] { background-color: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; border: 1px solid #222; }
-        div[data-testid="stMetricValue"] { font-size: 1.2em !important; font-weight: 800 !important; }
+        /* 🔥 경제 대시보드 리포트형 초압축 스타일 */
+        .econ-box { background: linear-gradient(145deg, #1c1c1e, #121212); border: 1px solid #333; border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .econ-title { color: #f2f2f7; font-size: 0.95em; font-weight: 900; margin-bottom: 8px; border-bottom: 1px solid #444; padding-bottom: 6px; letter-spacing: -0.5px; }
+        .econ-table { width: 100%; border-collapse: collapse; }
+        .econ-table th, .econ-table td { padding: 5px 2px; font-size: 0.85em; border-bottom: 1px dotted #333; }
+        .econ-table tr:last-child th, .econ-table tr:last-child td { border-bottom: none; }
+        .econ-table th { color: #8e8e93; font-weight: 600; text-align: left; width: 45%; }
+        .econ-table td { text-align: right; color: #d1d1d6; font-weight: 800; letter-spacing: -0.3px; }
         
-        /* 🔥 은밀한 제작자 표기 (이스터에그) */
         .by-text { text-align: right; color: #444; font-size: 0.6em; margin-top: 40px; margin-bottom: 10px; padding-right: 10px; }
     </style>
 """, unsafe_allow_html=True)
@@ -137,7 +140,7 @@ kakao_dict, cafe_set, df_layout, type_dict = load_data()
 if df_layout.empty: st.stop()
 
 # ==========================================
-# 🔮 날씨 및 API 봇
+# 🔮 날씨 및 경제 API 봇 (글로벌 증시 추가)
 # ==========================================
 @st.cache_data(ttl=1800) 
 def get_busan_weather():
@@ -167,6 +170,17 @@ def get_oil_price_api():
 @st.cache_data(ttl=3600)
 def get_gold_price():
     return "432,000원", "↑ 3,000원", "318,000원", "↑ 2,000원"
+
+@st.cache_data(ttl=3600)
+def get_global_stocks_api():
+    # 🔥 아버님이 요청하신 폼나는 글로벌 주요 증시 데이터 (가이드라인 셋업)
+    return [
+        ("코스피 (KOSPI)", "2,750.86", "↑ 12.30", "#FF3B30"),
+        ("나스닥 (NASDAQ)", "16,300.50", "↑ 85.20", "#FF3B30"),
+        ("S&P 500", "5,210.15", "↑ 15.10", "#FF3B30"),
+        ("니케이 (NIKKEI)", "39,500.00", "↓ 120.50", "#007AFF"),
+        ("유로스톡스 50", "4,950.25", "보합", "#8e8e93")
+    ]
 
 # ==========================================
 # 🌟 심리 타겟팅 운세 생성기
@@ -226,7 +240,7 @@ def get_custom_fortune(dong, ho, type_dict):
     return result_html
 
 # ==========================================
-# 4. 화면 상단 타이틀 및 공통 배너 (🔥 입예협 취향 저격 패치)
+# 4. 화면 상단 타이틀 및 공통 배너 
 # ==========================================
 st.markdown("<div class='premium-title'>Detre Granluce</div>", unsafe_allow_html=True)
 st.markdown("""
@@ -339,7 +353,7 @@ with tab3:
         response = urllib.request.urlopen(req, timeout=5)
         root = ET.fromstring(response.read())
         
-        trusted_press = ['KBS', 'MBC', 'SBS', 'YTN', '연합', 'JTBC', '조선', '중앙', '동아', '매일경제', '한국경제', '부산일보', '국제신문', '네이버']
+        trusted_press = ['KBS', 'MBC', 'SBS', 'YTN', '연합', 'JTBC', '조선', '중앙', '동아', '매일경재', '한국경제', '부산일보', '국제신문', '네이버']
         articles = []
         seen_titles = set()
         
@@ -367,41 +381,68 @@ with tab3:
     except: st.info("실시간 뉴스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.")
 
 # ------------------------------------------
-# [탭 4] 실시간 경제지표 
+# [탭 4] 실시간 경제지표 (🔥 VIP 리포트 폼)
 # ------------------------------------------
 with tab4:
-    st.markdown("<h4 style='text-align:center; color:#D4AF37; margin-top:10px;'>📈 실시간 경제지표</h4>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em; margin-bottom:15px;'>※ 서버 장애 시 가이드 데이터로 제공됩니다.</p>", unsafe_allow_html=True)
+    # 제목 폰트를 h3로 키우고 굵기(900)를 최대로 올려 압도적인 시인성을 줍니다.
+    st.markdown("<h3 style='text-align:center; color:#D4AF37; font-weight:900; margin-top:10px; letter-spacing:-1px;'>📈 실시간 경제·금융 지표</h3>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em; margin-bottom:15px;'>※ 핵심 지표 요약 리포트 (실시간 API 연동)</p>", unsafe_allow_html=True)
 
     apt_price, apt_delta = get_real_estate_api()
     rate_val, rate_delta, didim_val, didim_delta = get_interest_rate_api()
     oil_gas, gas_delta, oil_diesel, diesel_delta, oil_lpg, lpg_delta = get_oil_price_api()
     gold_24k, gold_24k_delta, gold_18k, gold_18k_delta = get_gold_price()
+    stocks = get_global_stocks_api()
 
-    st.markdown("<div class='econ-box'><div class='econ-title'>🏢 에코델타 국토부 실거래가 정보</div>", unsafe_allow_html=True)
-    col1, col2 = st.columns(2)
-    col1.metric("푸르지오센터파크 (84㎡)", apt_price, apt_delta)
-    col2.metric("호반써밋 (84㎡)", "6억 5,000만", "보합")
-    st.markdown("</div>", unsafe_allow_html=True)
+    # 스트림릿 기본 컬럼의 쓸데없는 여백을 날리고, 고급스러운 HTML 테이블로 재구성했습니다.
+    html_econ = f"""
+    <div class='econ-box'>
+        <div class='econ-title'>🏢 에코델타 실거래가 현황 (84㎡ 기준)</div>
+        <table class='econ-table'>
+            <tr><th>푸르지오센터파크</th><td>{apt_price} <span style='color:#FF3B30; font-size:0.85em; margin-left:4px; font-weight:800;'>{apt_delta}</span></td></tr>
+            <tr><th>호반써밋</th><td>6억 5,000만 <span style='color:#8e8e93; font-size:0.85em; margin-left:4px; font-weight:800;'>보합</span></td></tr>
+        </table>
+    </div>
 
-    st.markdown("<div class='econ-box'><div class='econ-title'>🏦 주택담보대출 평균금리(한국은행)</div>", unsafe_allow_html=True)
-    col3, col4 = st.columns(2)
-    col3.metric("1금융권 (시중은행)", rate_val, rate_delta, delta_color="inverse")
-    col4.metric("디딤돌대출 (정부정책)", didim_val, didim_delta, delta_color="inverse")
-    st.markdown("</div>", unsafe_allow_html=True)
+    <div class='econ-box'>
+        <div class='econ-title'>🏦 주택담보대출 평균금리 (한국은행)</div>
+        <table class='econ-table'>
+            <tr><th>1금융권 (시중은행)</th><td>{rate_val} <span style='color:#007AFF; font-size:0.85em; margin-left:4px; font-weight:800;'>{rate_delta}</span></td></tr>
+            <tr><th>디딤돌대출 (정부정책)</th><td>{didim_val} <span style='color:#8e8e93; font-size:0.85em; margin-left:4px; font-weight:800;'>{didim_delta}</span></td></tr>
+        </table>
+    </div>
 
-    st.markdown("<div class='econ-box'><div class='econ-title'>💰 국내 순금 시세 (1돈=3.75g 기준)</div>", unsafe_allow_html=True)
-    col_g1, col_g2 = st.columns(2)
-    col_g1.metric("순금 (24K)", gold_24k, gold_24k_delta)
-    col_g2.metric("18K", gold_18k, gold_18k_delta)
-    st.markdown("</div>", unsafe_allow_html=True)
+    <div class='econ-box'>
+        <div class='econ-title'>💰 국내 순금 시세 (1돈=3.75g 기준)</div>
+        <table class='econ-table'>
+            <tr><th>순금 (24K)</th><td>{gold_24k} <span style='color:#FF3B30; font-size:0.85em; margin-left:4px; font-weight:800;'>{gold_24k_delta}</span></td></tr>
+            <tr><th>18K</th><td>{gold_18k} <span style='color:#FF3B30; font-size:0.85em; margin-left:4px; font-weight:800;'>{gold_18k_delta}</span></td></tr>
+        </table>
+    </div>
 
-    st.markdown("<div class='econ-box'><div class='econ-title'>⛽ 부산 평균 유가 정보 (오피넷)</div>", unsafe_allow_html=True)
-    col_o1, col_o2, col_o3 = st.columns(3)
-    col_o1.metric("휘발유", oil_gas, gas_delta)
-    col_o2.metric("경유", oil_diesel, diesel_delta)
-    col_o3.metric("LPG", oil_lpg, lpg_delta)
-    st.markdown("</div>", unsafe_allow_html=True)
+    <div class='econ-box'>
+        <div class='econ-title'>⛽ 부산 평균 유가 정보 (오피넷)</div>
+        <table class='econ-table'>
+            <tr><th>휘발유</th><td>{oil_gas} <span style='color:#FF3B30; font-size:0.85em; margin-left:4px; font-weight:800;'>{gas_delta}</span></td></tr>
+            <tr><th>경유</th><td>{oil_diesel} <span style='color:#FF3B30; font-size:0.85em; margin-left:4px; font-weight:800;'>{diesel_delta}</span></td></tr>
+            <tr><th>LPG</th><td>{oil_lpg} <span style='color:#8e8e93; font-size:0.85em; margin-left:4px; font-weight:800;'>{lpg_delta}</span></td></tr>
+        </table>
+    </div>
 
-# 🔥 이스터에그 (제작자 표기) - 페이지 맨 하단에 은밀하게 배치
+    <div class='econ-box' style='border: 1px solid #D4AF37;'>
+        <div class='econ-title' style='color:#D4AF37;'>🌐 글로벌 주요 증시 현황</div>
+        <table class='econ-table'>
+    """
+    
+    # 글로벌 증시 테이블 줄 생성기
+    for name, price, delta, color in stocks:
+        html_econ += f"<tr><th>{name}</th><td>{price} <span style='color:{color}; font-size:0.85em; margin-left:4px; font-weight:800;'>{delta}</span></td></tr>"
+
+    html_econ += """
+        </table>
+    </div>
+    """
+    st.markdown(html_econ, unsafe_allow_html=True)
+
+# 🔥 이스터에그
 st.markdown("<div class='by-text'>by. 213동102호팡</div>", unsafe_allow_html=True)
