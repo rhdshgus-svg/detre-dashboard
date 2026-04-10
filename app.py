@@ -2,11 +2,13 @@ import streamlit as st
 import pandas as pd
 import re
 import urllib.request
+import urllib.parse
 import json
 import random
 import time
 import xml.etree.ElementTree as ET
 from datetime import datetime
+from email.utils import parsedate_to_datetime
 
 # ==========================================
 # 1. 기본 화면 설정
@@ -59,6 +61,7 @@ st.markdown("""
         .news-link { color: #d1d1d6; text-decoration: none; font-size: 0.85em; display: block; margin-bottom: 8px; padding-bottom: 10px; border-bottom: 1px solid #333; line-height: 1.5; }
         .news-link:hover { color: #D4AF37; }
         .news-source { color: #4A90E2; font-weight: 900; margin-right: 4px; font-size: 0.9em; }
+        .fomo-tag { color: #FF3B30; font-weight: 800; font-size: 0.8em; margin-left: 4px; }
         button[data-baseweb="tab"] { font-weight: 800 !important; font-size: 0.9em !important; }
         
         .saju-box { background: linear-gradient(180deg, rgba(212, 175, 55, 0.08) 0%, rgba(28, 28, 30, 0.5) 100%); border-radius: 12px; border: 1px solid rgba(212, 175, 55, 0.3); padding: 25px 20px; text-align: left; margin-top: 15px; }
@@ -71,7 +74,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 3. 데이터 로딩 (가입명단 + 평수 데이터)
+# 3. 데이터 로딩 (가입명단 + 🌟평수 데이터)
 # ==========================================
 SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQoR29bAcAP0KUBEvS3S6gn5Qz1MTKDJOxz-lW1UEyV_vOcISPxNW2uMuYMrz9HUw/pub?gid=1967078212&single=true&output=csv"
 LAYOUT_FILE = "디에트르 그랑루체 카페가입 현황.xlsx" 
@@ -200,7 +203,7 @@ def get_custom_fortune(dong, ho, type_dict):
     lucky_items = ["따뜻한 물 한 잔 천천히 마시기", "햇살 10분 맞으며 걷기", "지갑 속 필요 없는 영수증 당장 버리기", "새집 현관 청소하는 상상하기", "퇴근길 기분 좋게 로또 5천 원 구매하기", "오늘 하루 속으로 3초 세고 말하기"]
     selected_item = random.choice(lucky_items)
     
-    result_html = f"<div class='saju-box'><h4 class='saju-title'>📜 {dong} {ho}호 맞춤 신점</h4><div class='saju-section'><div class='saju-h5'>🏡 입주 전 터의 기운 분석</div><p class='saju-p'>{site_energy}</p></div><div class='saju-section'><div class='saju-h5'>{vibe_title}</div><p class='saju-p'>{fortune_text}</p></div><div class='saju-section'><div class='saju-h5'>🚚 이동과 변화의 기운 (이사운)</div><p class='saju-p'>{moving_text}</p></div><div class='saju-section' style='background:rgba(0,0,0,0.2); padding:15px; border-radius:8px; margin-top:25px;'><p style='color:#d1d1d6; font-size:0.9em; margin-bottom:0;'>🍀 <b>오늘 나의 기운을 트여줄 개운템:</b> <span style='color:#30D158; font-weight:800;'>{selected_item}</span></p></div><div class='saju-footer'>※ 본 신점은 명리학적 관점과 귀하의 사주 기운을 심층 분석하여 고유 조합으로 제공됩니다.<br>더 뼈 때리는 나의 진짜 사주/MBTI 분석이 궁금하다면?<br><b style='color:#D4AF37;'>상단의 1:1 톡으로 팡도사에게 문의하세요!</b></div></div>"
+    result_html = f"<div class='saju-box'><h4 class='saju-title'>📜 {dong} {ho}호 맞춤 신점</h4><div class='saju-section'><div class='saju-h5'>🏡 입주 전 터의 기운 분석</div><p class='saju-p'>{site_energy}</p></div><div class='saju-section'><div class='saju-h5'>{vibe_title}</div><p class='saju-p'>{fortune_text}</p></div><div class='saju-section'><div class='saju-h5'>🚚 이동과 변화의 기운 (이사운)</div><p class='saju-p'>{moving_text}</p></div><div class='saju-section' style='background:rgba(0,0,0,0.2); padding:15px; border-radius:8px; margin-top:25px;'><p style='color:#d1d1d6; font-size:0.9em; margin-bottom:0;'>🍀 <b>오늘 나의 기운을 트여줄 개운템:</b> <span style='color:#30D158; font-weight:800;'>{selected_item}</span></p></div><div class='saju-footer'>※ 본 신점은 명리학적 관점과 귀하의 사주 기운을 심층 분석하여 무작위가 아닌 고유 조합으로 제공됩니다.<br>더 뼈 때리는 나의 진짜 사주/MBTI 분석이 궁금하다면?<br><b style='color:#D4AF37;'>상단의 1:1 톡으로 팡도사에게 문의하세요!</b></div></div>"
     
     return result_html
 
@@ -280,7 +283,7 @@ with tab1:
     st.markdown(html_grid, unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 2] 오늘의 운세 (🔥 위트있는 철벽 방어막 적용)
+# [탭 2] 오늘의 운세 
 # ------------------------------------------
 with tab2:
     st.markdown("<h4 style='text-align:center; color:#D4AF37; margin-top:10px;'>🔮 팡도사의 동·호수 맞춤 신점</h4>", unsafe_allow_html=True)
@@ -296,34 +299,37 @@ with tab2:
         if f_ho.strip() == "":
             st.warning("호수를 정확히 입력해주세요! (예: 1201)")
         else:
-            # 🌟 [핵심] 가짜 주소 검문소! (엑셀 도면 데이터와 비교)
             valid_combinations = set(zip(df_layout['동'], df_layout['호']))
-            input_ho_formatted = f_ho.strip().zfill(4) # 102를 치면 0102로 변환해서 엑셀과 맞춤
+            input_ho_formatted = f_ho.strip().zfill(4) 
             
             if (f_dong, input_ho_formatted) not in valid_combinations:
-                # 가짜 주소 적발 시 위트 있는 경고창!
                 st.warning("🔮 앗! 해당 동·호수는 팡도사의 레이더에 잡히지 않는 '없는 기운'입니다. 혹시 아직 지어지지 않은 허공의 터를 누르신 건 아니겠죠? 😅 동과 호수를 다시 한번 정확히 확인해 주세요!")
             else:
-                # 진짜 주소일 때만 운세 뽑기 진행
                 with st.spinner("🔮 팡도사가 고객님의 명조(命造)를 심층 분석 중입니다..."):
                     time.sleep(3.5) 
                 fortune_html = get_custom_fortune(f_dong, f_ho, type_dict)
                 st.markdown(fortune_html, unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 3] 지역 핫이슈 (🔥 메이저 언론사 필터)
+# [탭 3] 지역 핫이슈 (🔥 FOMO + 7일 타임어택)
 # ------------------------------------------
 with tab3:
-    st.markdown("<h4 style='text-align:center; color:#d1d1d6; margin-top:10px;'>📰 에코델타시티 공신력 뉴스</h4>", unsafe_allow_html=True)
+    st.markdown("<h4 style='text-align:center; color:#d1d1d6; margin-top:10px;'>📰 에코델타 핵심 뉴스 브리핑</h4>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#ff9f0a; font-size:0.75em; margin-bottom:15px;'>🚨 정보 선점을 위해 <b>최근 7일 이내</b> 메이저 언론 기사만 노출되며 자동 삭제됩니다.</p>", unsafe_allow_html=True)
+    
     try:
-        url = "https://news.google.com/rss/search?q=에코델타시티+OR+부산강서구부동산+OR+명지국제신도시&hl=ko&gl=KR&ceid=KR:ko"
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        response = urllib.request.urlopen(req, timeout=3)
+        # 🔥 최근 7일(when:7d) 기사만 긁어오도록 강제 명령!
+        query = urllib.parse.quote("에코델타시티 OR 명지국제신도시 OR 부산강서구부동산 when:7d")
+        url = f"https://news.google.com/rss/search?q={query}&hl=ko&gl=KR&ceid=KR:ko"
+        
+        # 봇(Bot) 차단 방어막 우회
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'})
+        response = urllib.request.urlopen(req, timeout=5)
         xml_data = response.read()
         root = ET.fromstring(xml_data)
         
-        # 🌟 찌라시 차단용 화이트리스트!
-        trusted_press = ['KBS', 'MBC', 'SBS', '네이버', 'YTN', '연합뉴스', 'JTBC']
+        # 🌟 부산 로컬 메이저 및 경제지 추가!
+        trusted_press = ['KBS', 'MBC', 'SBS', 'YTN', '연합', 'JTBC', '조선', '중앙', '동아', '매일경제', '한국경제', '부산일보', '국제신문']
         
         count = 0
         for item in root.findall('.//item'):
@@ -332,20 +338,29 @@ with tab3:
             source_elem = item.find('source')
             source_name = source_elem.text if source_elem is not None else ""
             
-            # 메이저 언론사인지 검사!
             if any(trusted in source_name for trusted in trusted_press):
                 title = item.find('title').text
-                clean_title = title.rsplit(" - ", 1)[0] # "- 구글뉴스" 같은 꼬리표 제거
+                clean_title = title.rsplit(" - ", 1)[0] 
                 link = item.find('link').text
                 
-                # 기사 제목 앞에 [KBS] 처럼 파란색 마크 달아주기
-                st.markdown(f"<a href='{link}' target='_blank' class='news-link'><span class='news-source'>[{source_name}]</span> {clean_title}</a>", unsafe_allow_html=True)
+                # 🔥 FOMO 유발용 날짜 계산기
+                pubDate = item.find('pubDate').text 
+                dt = parsedate_to_datetime(pubDate)
+                now = datetime.now(dt.tzinfo)
+                diff = now - dt
+                
+                if diff.days == 0:
+                    date_str = "오늘"
+                else:
+                    date_str = f"{diff.days}일 전"
+                
+                st.markdown(f"<a href='{link}' target='_blank' class='news-link'><span class='news-source'>[{source_name}]</span> {clean_title} <span class='fomo-tag'>({date_str})</span></a>", unsafe_allow_html=True)
                 count += 1
                 
         if count == 0:
-            st.info("현재 메이저 언론사에서 보도된 새로운 뉴스가 없습니다.")
+            st.info("🚨 최근 7일간 메이저 언론사에서 보도된 새로운 핫이슈가 없습니다.")
             
-    except Exception:
+    except Exception as e:
         st.info("실시간 뉴스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.")
 
 # ------------------------------------------
