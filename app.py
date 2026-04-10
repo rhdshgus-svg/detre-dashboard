@@ -56,8 +56,9 @@ st.markdown("""
         .red-badge { background-color: #FF3B30; color: white; border: 1px solid #c22820; }
         .yellow-badge { background-color: #4A90E2; color: white; border: 1px solid #2a6fb8; } 
         
-        .news-link { color: #d1d1d6; text-decoration: none; font-size: 0.85em; display: block; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #333; line-height: 1.5; }
+        .news-link { color: #d1d1d6; text-decoration: none; font-size: 0.85em; display: block; margin-bottom: 8px; padding-bottom: 10px; border-bottom: 1px solid #333; line-height: 1.5; }
         .news-link:hover { color: #D4AF37; }
+        .news-source { color: #4A90E2; font-weight: 900; margin-right: 4px; font-size: 0.9em; }
         button[data-baseweb="tab"] { font-weight: 800 !important; font-size: 0.9em !important; }
         
         .saju-box { background: linear-gradient(180deg, rgba(212, 175, 55, 0.08) 0%, rgba(28, 28, 30, 0.5) 100%); border-radius: 12px; border: 1px solid rgba(212, 175, 55, 0.3); padding: 25px 20px; text-align: left; margin-top: 15px; }
@@ -70,7 +71,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 3. 데이터 로딩 (가입명단 + 🌟평수 데이터)
+# 3. 데이터 로딩 (가입명단 + 평수 데이터)
 # ==========================================
 SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQoR29bAcAP0KUBEvS3S6gn5Qz1MTKDJOxz-lW1UEyV_vOcISPxNW2uMuYMrz9HUw/pub?gid=1967078212&single=true&output=csv"
 LAYOUT_FILE = "디에트르 그랑루체 카페가입 현황.xlsx" 
@@ -145,7 +146,7 @@ def get_busan_weather():
         return "맑음" 
 
 # ==========================================
-# 🌟 [핵심] 심리 타겟팅 운세 생성기
+# 🌟 [핵심] 심리 타겟팅(바넘 효과) 운세 생성기
 # ==========================================
 def get_custom_fortune(dong, ho, type_dict):
     today_str = datetime.now().strftime("%Y%m%d")
@@ -279,7 +280,7 @@ with tab1:
     st.markdown(html_grid, unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 2] 오늘의 운세 
+# [탭 2] 오늘의 운세 (🔥 위트있는 철벽 방어막 적용)
 # ------------------------------------------
 with tab2:
     st.markdown("<h4 style='text-align:center; color:#D4AF37; margin-top:10px;'>🔮 팡도사의 동·호수 맞춤 신점</h4>", unsafe_allow_html=True)
@@ -295,37 +296,55 @@ with tab2:
         if f_ho.strip() == "":
             st.warning("호수를 정확히 입력해주세요! (예: 1201)")
         else:
-            # 🔥 도면 데이터 교차 검증 (방어막)
+            # 🌟 [핵심] 가짜 주소 검문소! (엑셀 도면 데이터와 비교)
             valid_combinations = set(zip(df_layout['동'], df_layout['호']))
-            input_ho_formatted = f_ho.strip().zfill(4)
+            input_ho_formatted = f_ho.strip().zfill(4) # 102를 치면 0102로 변환해서 엑셀과 맞춤
             
             if (f_dong, input_ho_formatted) not in valid_combinations:
+                # 가짜 주소 적발 시 위트 있는 경고창!
                 st.warning("🔮 앗! 해당 동·호수는 팡도사의 레이더에 잡히지 않는 '없는 기운'입니다. 혹시 아직 지어지지 않은 허공의 터를 누르신 건 아니겠죠? 😅 동과 호수를 다시 한번 정확히 확인해 주세요!")
             else:
+                # 진짜 주소일 때만 운세 뽑기 진행
                 with st.spinner("🔮 팡도사가 고객님의 명조(命造)를 심층 분석 중입니다..."):
                     time.sleep(3.5) 
                 fortune_html = get_custom_fortune(f_dong, f_ho, type_dict)
                 st.markdown(fortune_html, unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 3] 지역 핫이슈 
+# [탭 3] 지역 핫이슈 (🔥 메이저 언론사 필터)
 # ------------------------------------------
 with tab3:
-    st.markdown("<h4 style='text-align:center; color:#d1d1d6; margin-top:10px;'>📰 에코델타시티 실시간 뉴스</h4>", unsafe_allow_html=True)
+    st.markdown("<h4 style='text-align:center; color:#d1d1d6; margin-top:10px;'>📰 에코델타시티 공신력 뉴스</h4>", unsafe_allow_html=True)
     try:
-        url = "https://news.google.com/rss/search?q=에코델타시티+OR+부동산정책+OR+강서구부동산&hl=ko&gl=KR&ceid=KR:ko"
+        url = "https://news.google.com/rss/search?q=에코델타시티+OR+부산강서구부동산+OR+명지국제신도시&hl=ko&gl=KR&ceid=KR:ko"
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         response = urllib.request.urlopen(req, timeout=3)
         xml_data = response.read()
         root = ET.fromstring(xml_data)
         
+        # 🌟 찌라시 차단용 화이트리스트!
+        trusted_press = ['KBS', 'MBC', 'SBS', '네이버', 'YTN', '연합뉴스', 'JTBC']
+        
         count = 0
         for item in root.findall('.//item'):
             if count >= 5: break 
-            title = item.find('title').text
-            link = item.find('link').text
-            st.markdown(f"<a href='{link}' target='_blank' class='news-link'>🔹 {title}</a>", unsafe_allow_html=True)
-            count += 1
+            
+            source_elem = item.find('source')
+            source_name = source_elem.text if source_elem is not None else ""
+            
+            # 메이저 언론사인지 검사!
+            if any(trusted in source_name for trusted in trusted_press):
+                title = item.find('title').text
+                clean_title = title.rsplit(" - ", 1)[0] # "- 구글뉴스" 같은 꼬리표 제거
+                link = item.find('link').text
+                
+                # 기사 제목 앞에 [KBS] 처럼 파란색 마크 달아주기
+                st.markdown(f"<a href='{link}' target='_blank' class='news-link'><span class='news-source'>[{source_name}]</span> {clean_title}</a>", unsafe_allow_html=True)
+                count += 1
+                
+        if count == 0:
+            st.info("현재 메이저 언론사에서 보도된 새로운 뉴스가 없습니다.")
+            
     except Exception:
         st.info("실시간 뉴스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.")
 
