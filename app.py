@@ -8,7 +8,7 @@ import re
 st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon="🏢", layout="centered")
 
 # ==========================================
-# 💎 CSS 스타일링 (V8 오리지널 + 엑셀 병합)
+# 💎 CSS 스타일링 (양쪽 찢어짐 방지 완벽 적용)
 # ==========================================
 st.markdown("""
     <style>
@@ -18,8 +18,6 @@ st.markdown("""
         .block-container { padding-top: 1.5rem !important; padding-bottom: 0.5rem !important; padding-left: 6px !important; padding-right: 6px !important; max-width: 100% !important; }
         
         .premium-title { font-size: clamp(2.2em, 8vw, 3.0em); font-weight: 900; text-align: center; color: #2b6cb0; text-shadow: 0 2px 10px rgba(43, 108, 176, 0.3); margin-bottom: 5px; }
-        
-        /* 🚨 복구된 영업 배너 스타일! */
         .promo-title { font-size: 0.85em; text-align: center; color: #D4AF37; font-weight: 700; margin-top: 0px; margin-bottom: 3px; }
         .promo-subtitle { font-size: 0.75em; text-align: center; color: #aaa; font-weight: 400; margin-bottom: 10px; }
         .kakao-btn { display: inline-flex; justify-content: center; align-items: center; background-color: #FEE500; color: #191919 !important; font-weight: 800; font-size: 0.75em; padding: 6px 16px; border-radius: 8px; text-decoration: none !important; box-shadow: 0 2px 6px rgba(254, 229, 0, 0.2); margin-bottom: 12px; transition: all 0.2s ease; }
@@ -34,11 +32,11 @@ st.markdown("""
         .stat-left { flex: 0 0 33%; background-color: rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 10px 5px; border-right: 1px solid #333; font-size: 0.8em; color: #aaa; text-align: center; }
         .stat-left b { font-size: 1.1em; color: #d1d1d6; margin-bottom: 3px; }
         .stat-right { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 10px 12px; gap: 6px; }
-        .stat-row { font-size: 0.8em; color: #d1d1d6; display: flex; align-items: center; }
-        .stat-label { display: inline-block; width: 65px; font-weight: 600; color: #888;}
+        .stat-row { font-size: 0.85em; color: #d1d1d6; display: flex; align-items: center; justify-content: space-between; }
+        .stat-label { display: inline-block; font-weight: 600; color: #888;}
         
-        .hl-gold { color: #D4AF37; font-weight: 700; font-size: 1.05em; margin: 0 1px; }
-        .hl-green { color: #30D158; font-weight: 700; font-size: 1.05em; margin: 0 1px; }
+        .hl-gold { color: #D4AF37; font-weight: 700; font-size: 1.1em; margin: 0 1px; }
+        .hl-green { color: #30D158; font-weight: 700; font-size: 1.1em; margin: 0 1px; }
         
         /* 동 선택 라디오 버튼 */
         div[role="radiogroup"] { display: flex !important; flex-wrap: wrap !important; width: 100% !important; gap: 4px !important; justify-content: center !important; margin-bottom: 16px !important; }
@@ -48,7 +46,7 @@ st.markdown("""
         div[role="radiogroup"] > label p { font-size: 0.9em !important; color: #888 !important; text-align: center !important; width: 100% !important; margin: 0 !important; }
         div[role="radiogroup"] > label[data-checked="true"] p { color: #D4AF37 !important; font-weight: 800 !important; }
 
-        /* 뱃지 및 유닛 (에러 나던 부분 원상복구!) */
+        /* 뱃지 및 유닛 */
         .unit-num { font-size: 0.75em !important; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 1px; }
         .unit-nick { font-size: 0.6em !important; font-weight: 600; line-height: 1.1; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .status-badge { font-size: 0.45em !important; font-weight: 800; padding: 2px 4px; border-radius: 4px; margin-top: 2px; display: inline-block; letter-spacing: -0.5px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
@@ -58,7 +56,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 💡 구글 시트 링크 (아까 새로 따신 쉼표 링크 유지!)
+# 💡 구글 시트 링크 (쉼표 구분)
 # ==========================================
 SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQoR29bAcAP0KUBEvS3S6gn5Qz1MTKDJOxz-lW1UEyV_vOcISPxNW2uMuYMrz9HUw/pub?gid=1967078212&single=true&output=csv"
 LAYOUT_FILE = "디에트르 그랑루체 카페가입 현황.xlsx" 
@@ -67,12 +65,11 @@ LAYOUT_FILE = "디에트르 그랑루체 카페가입 현황.xlsx"
 def load_data():
     kakao_dict = {}
     cafe_set = set()
-    
     try:
         df_raw = pd.read_csv(SHEET_CSV_URL, dtype=str)
         df_raw.columns = df_raw.columns.str.strip()
         
-        # 1. 카톡 데이터 읽기 
+        # 1. 카톡 데이터 
         if set(['동', '호']).issubset(df_raw.columns):
             df_k = df_raw[['동', '호', '닉네임']].dropna(subset=['동', '호']).copy()
             df_k['동'] = df_k['동'].astype(str).str.extract(r'(\d+)')[0] + "동"
@@ -80,14 +77,14 @@ def load_data():
             df_k['닉네임'] = df_k['닉네임'].fillna('').str.strip()
             kakao_dict = df_k.groupby(['동', '호'])['닉네임'].apply(lambda x: '<br>'.join(sorted(set([n for n in x if n and str(n) != 'nan'])))).to_dict()
             
-        # 2. 카페 데이터 읽기
+        # 2. 카페 데이터
         if set(['카페동', '카페호']).issubset(df_raw.columns):
             df_c = df_raw[['카페동', '카페호']].dropna(subset=['카페동', '카페호']).copy()
             df_c['카페동'] = df_c['카페동'].astype(str).str.extract(r'(\d+)')[0] + "동"
             df_c['카페호'] = df_c['카페호'].astype(str).str.extract(r'(\d+)')[0].str.zfill(4)
             cafe_set = set(zip(df_c['카페동'], df_c['카페호']))
 
-        # 3. 아파트 도면 로드 (이게 망가졌던 걸 완벽 복구했습니다!)
+        # 3. 도면 로드
         df_layout = pd.read_excel(LAYOUT_FILE, sheet_name='동호 코드', skiprows=2, usecols="A:B", header=None, dtype=str)
         df_layout.columns = ['동', '호'] 
         df_layout = df_layout.dropna()
@@ -105,7 +102,7 @@ if df_layout.empty:
     st.stop()
 
 # ==========================================
-# 🚀 상단 타이틀 & 복구된 영업 배너!
+# 🚀 상단 타이틀 & 영업 배너
 # ==========================================
 st.markdown("<div class='premium-title'>Detre Granluce</div>", unsafe_allow_html=True)
 st.markdown("""
@@ -117,7 +114,7 @@ st.markdown("""
 
 stats_container = st.container()
 
-# 동 선택 버튼
+# 동 선택
 all_dongs_raw = df_layout['동'].unique().tolist()
 all_dongs = sorted(all_dongs_raw, key=lambda x: int(re.sub(r'[^0-9]', '', x)) if re.sub(r'[^0-9]', '', x).isdigit() else 0)
 selected_dong = st.radio("동 선택", all_dongs, horizontal=True, format_func=lambda x: x.replace("동", ""), label_visibility="collapsed")
@@ -138,7 +135,7 @@ dong_kakao_rate = (dong_kakao / dong_units) * 100 if dong_units > 0 else 0
 dong_cafe_rate = (dong_cafe / dong_units) * 100 if dong_units > 0 else 0
 
 # ==========================================
-# 🔥 1470세대 완벽 부착! (span 태그 적용)
+# 🔥 찢어짐 방지 수술 완료: <span> 보따리 추가!
 # ==========================================
 with stats_container:
     st.markdown(f"""
@@ -149,8 +146,14 @@ with stats_container:
                 <div><span class='hl-gold' style='font-size: 1.4em;'>{total_units}</span>세대</div>
             </div>
             <div class='stat-right'>
-                <div class='stat-row'><span class='stat-label'>카톡방입장</span> <span class='hl-gold'>{total_kakao}</span>명 &nbsp;|&nbsp; 가입률 <span class='hl-green'>{kakao_rate:.1f}%</span></div>
-                <div class='stat-row'><span class='stat-label'>카페위임</span> <span class='hl-gold'>{total_cafe}</span>명 &nbsp;|&nbsp; 위임률 <span class='hl-green'>{cafe_rate:.1f}%</span></div>
+                <div class='stat-row'>
+                    <span class='stat-label'>카톡방입장</span> 
+                    <span><span class='hl-gold'>{total_kakao}</span>명 &nbsp;|&nbsp; 가입률 <span class='hl-green'>{kakao_rate:.1f}%</span></span>
+                </div>
+                <div class='stat-row'>
+                    <span class='stat-label'>카페위임</span> 
+                    <span><span class='hl-gold'>{total_cafe}</span>명 &nbsp;|&nbsp; 위임률 <span class='hl-green'>{cafe_rate:.1f}%</span></span>
+                </div>
             </div>
         </div>
         
@@ -160,15 +163,21 @@ with stats_container:
                 <div><span class='hl-gold' style='font-size: 1.4em;'>{dong_units}</span>세대</div>
             </div>
             <div class='stat-right'>
-                <div class='stat-row'><span class='stat-label'>카톡방입장</span> <span class='hl-gold'>{dong_kakao}</span>명 &nbsp;|&nbsp; 가입률 <span class='hl-green'>{dong_kakao_rate:.1f}%</span></div>
-                <div class='stat-row'><span class='stat-label'>카페위임</span> <span class='hl-gold'>{dong_cafe}</span>명 &nbsp;|&nbsp; 위임률 <span class='hl-green'>{dong_cafe_rate:.1f}%</span></div>
+                <div class='stat-row'>
+                    <span class='stat-label'>카톡방입장</span> 
+                    <span><span class='hl-gold'>{dong_kakao}</span>명 &nbsp;|&nbsp; 가입률 <span class='hl-green'>{dong_kakao_rate:.1f}%</span></span>
+                </div>
+                <div class='stat-row'>
+                    <span class='stat-label'>카페위임</span> 
+                    <span><span class='hl-gold'>{dong_cafe}</span>명 &nbsp;|&nbsp; 위임률 <span class='hl-green'>{dong_cafe_rate:.1f}%</span></span>
+                </div>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
 # ==========================================
-# 🔥 완벽 복구된 V8 오리지널 도면 뱃지 로직
+# 🔥 아파트 도면 & 결손 뱃지 (단톡미입장 적용!)
 # ==========================================
 valid_ho_list = dong_layout['호'].dropna().tolist()
 max_floor = max([int(ho[:2]) for ho in valid_ho_list if len(ho)==4]) if valid_ho_list else 20
@@ -193,7 +202,8 @@ for floor in range(max_floor, 0, -1):
             
             badge_html = ""
             if dong_ho_key not in kakao_dict:
-                badge_html += "<div class='status-badge yellow-badge'>단톡방미가입</div>"
+                # 💡 워딩 수정: 단톡미입장
+                badge_html += "<div class='status-badge yellow-badge'>단톡미입장</div>"
             if dong_ho_key not in cafe_set:
                 badge_html += "<div class='status-badge red-badge'>카페미가입</div>"
                 
