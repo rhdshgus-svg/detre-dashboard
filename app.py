@@ -21,7 +21,7 @@ except Exception:
     st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon="🏢", layout="centered")
 
 # ==========================================
-# 2. CSS 스타일링 (🔥 VIP 리포트 폼 + 스크롤 고정)
+# 2. CSS 스타일링 (🔥 가독성 패치 및 VIP 폼)
 # ==========================================
 st.markdown("""
     <meta name="google" content="notranslate">
@@ -92,8 +92,8 @@ st.markdown("""
         .saju-box { background: linear-gradient(180deg, rgba(212, 175, 55, 0.08) 0%, rgba(28, 28, 30, 0.5) 100%); border-radius: 12px; border: 1px solid rgba(212, 175, 55, 0.3); padding: 25px 20px; text-align: left; margin-top: 15px; }
         .saju-title { color: #D4AF37; text-align: center; margin-top: 0; font-size: clamp(1.05em, 5vw, 1.25em); font-weight: 900; margin-bottom: 25px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); line-height: 1.4; letter-spacing: -0.8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .saju-section { margin-bottom: 22px; }
-        .saju-h5 { color: #e5e5ea; font-size: 1.05em; font-weight: 800; margin-bottom: 12px; border-left: 3px solid #D4AF37; padding-left: 10px; line-height: 1.3; }
-        .saju-p { color: #d1d1d6; font-size: 0.9em; line-height: 1.75; margin-top: 0; padding-left: 13px; text-align: justify; letter-spacing: -0.3px; word-break: keep-all; }
+        .saju-h5 { color: #D4AF37; font-size: 1.1em; font-weight: 900; margin-bottom: 12px; border-left: 3px solid #D4AF37; padding-left: 10px; line-height: 1.3; }
+        .saju-p { color: #FFFFFF; font-size: 0.95em; font-weight: 500; line-height: 1.75; margin-top: 0; padding-left: 13px; text-align: justify; letter-spacing: -0.3px; word-break: keep-all; }
         .saju-footer { color: #888; font-size: 0.75em; text-align: center; margin-top: 30px; border-top: 1px dashed #444; padding-top: 15px; line-height: 1.6; word-break: keep-all; }
         
         /* 🔥 경제 대시보드 리포트형 초압축 스타일 */
@@ -257,7 +257,7 @@ def get_custom_fortune(dong, ho, type_dict):
     return result_html
 
 # ==========================================
-# 4. 화면 상단 타이틀 및 공통 배너 (🔥 어플 외부 창 연결 target="_blank" 완벽 패치!)
+# 4. 화면 상단 타이틀 및 공통 배너 
 # ==========================================
 st.markdown("<div class='premium-title'>Detre Granluce</div>", unsafe_allow_html=True)
 st.markdown("""
@@ -276,7 +276,7 @@ st.markdown("""
 # ==========================================
 # 5. 종합 포털 탭(Tab) 메뉴
 # ==========================================
-tab1, tab2, tab3, tab4 = st.tabs(["🏢 입주현황", "🔮 오늘의 운세", "📰 관련뉴스", "📈 경제지표"])
+tab1, tab2, tab3, tab4 = st.tabs(["🏢 입주현황", "🔮 오늘의 운세", "📰 지역 핫이슈", "📈 경제지표"])
 
 # ------------------------------------------
 # [탭 1] 메인: 세대별 입주현황
@@ -358,11 +358,11 @@ with tab2:
                 st.markdown(get_custom_fortune(f_dong, f_ho, type_dict), unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 3] 지역 핫이슈 (🔥 target="_blank" 패치 완료)
+# [탭 3] 지역 핫이슈 (🔥 안내 문구 및 타이틀 패치 완료)
 # ------------------------------------------
 with tab3:
-    st.markdown("<h4 style='text-align:center; color:#d1d1d6; margin-top:10px;'>📰 그랑루체 실시간 참고뉴스</h4>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:#ff9f0a; font-size:0.75em; margin-bottom:15px;'>🚨 최근 30일 이내 기사만 노출되며 자동 삭제됩니다.</p>", unsafe_allow_html=True)
+    st.markdown("<h4 style='text-align:center; color:#FFFFFF; font-weight:900; margin-top:10px;'>📰 그랑루체 실시간 참고뉴스</h4>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#ff9f0a; font-size:0.75em; margin-bottom:15px;'>🚨 최근 30일이내 기사중 중복내용 제외 10건만 노출됩니다.</p>", unsafe_allow_html=True)
     try:
         query = urllib.parse.quote('에코델타시티 OR "디에트르 그랑루체" OR "명지국제신도시 부동산" OR "부산 강서구 개발" OR "부동산 정책" OR "취득세" OR "특례보금자리" OR "금리 인하" when:30d')
         url = f"https://news.google.com/rss/search?q={query}&hl=ko&gl=KR&ceid=KR:ko"
@@ -398,11 +398,11 @@ with tab3:
     except: st.info("실시간 뉴스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.")
 
 # ------------------------------------------
-# [탭 4] 실시간 경제지표 (🔥 VIP 리포트 폼)
+# [탭 4] 실시간 경제지표 (🔥 서브타이틀 텍스트 변경 완료)
 # ------------------------------------------
 with tab4:
     st.markdown("<h3 style='text-align:center; color:#D4AF37; font-weight:900; margin-top:10px; letter-spacing:-1px;'>📈 실시간 경제·금융 지표</h3>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em; margin-bottom:15px;'>※ 핵심 지표 요약 리포트 (실시간 API 연동)</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em; margin-bottom:15px;'>※ 핵심 지표 실시간 요약</p>", unsafe_allow_html=True)
 
     apt_price, apt_delta = get_real_estate_api()
     rate_val, rate_delta, didim_val, didim_delta = get_interest_rate_api()
