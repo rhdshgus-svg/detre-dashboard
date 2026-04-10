@@ -22,10 +22,17 @@ except Exception:
     st.set_page_config(page_title="그랑루체 입주민전용", page_icon="🏢", layout="centered")
 
 # ==========================================
-# 2. CSS 스타일링 & 🔥 번역 팝업 차단
+# 2. CSS 스타일링 & 🔥 번역/아이콘 강제 세뇌 부적
 # ==========================================
 st.markdown("""
     <meta name="google" content="notranslate">
+    
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135673.png">
+    <link rel="icon" sizes="192x192" href="https://cdn-icons-png.flaticon.com/512/3135/3135673.png">
+    <link rel="icon" sizes="512x512" href="https://cdn-icons-png.flaticon.com/512/3135/3135673.png">
+    
+    <style>
+    /* 아래부터는 기존 CSS 코드 그대로 둡니다 */
     
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
