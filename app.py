@@ -245,7 +245,7 @@ st.markdown("""
 # ==========================================
 # 5. 종합 포털 탭(Tab) 메뉴
 # ==========================================
-tab1, tab2, tab3, tab4 = st.tabs(["🏢 입주현황", "🔮 오늘의 운세", "📰 지역 핫이슈", "📈 경제지표"])
+tab1, tab2, tab3, tab4 = st.tabs(["🏢 입주현황", "🔮 오늘의 운세", "📰 관련뉴스", "📈 경제지표"])
 
 # ------------------------------------------
 # [탭 1] 메인: 세대별 입주현황
@@ -309,12 +309,12 @@ with tab1:
 # ------------------------------------------
 with tab2:
     st.markdown("<h4 style='text-align:center; color:#D4AF37; margin-top:10px;'>🔮 팡도사의 동·호수 맞춤 신점</h4>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em;'>개인정보 입력 없이, 귀하의 사주 명조를 심층 분석하여 점쳐드립니다.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em;'>개인정보 입력 없이,심층 분석하여 점쳐드립니다.</p>", unsafe_allow_html=True)
     col_d, col_h = st.columns(2)
     with col_d: f_dong = st.selectbox("입주 예정 동", all_dongs_raw, key="f_dong", label_visibility="collapsed")
     with col_h: f_ho = st.text_input("입주 예정 호수", placeholder="호수 입력 (예: 1201)", key="f_ho", label_visibility="collapsed")
     
-    if st.button("✨ 오늘 나의 신점 뽑기", use_container_width=True):
+    if st.button("✨ 오늘 나의 신점 뽑기(무료)", use_container_width=True):
         if f_ho.strip() == "": st.warning("호수를 정확히 입력해주세요! (예: 1201)")
         else:
             valid_combinations = set(zip(df_layout['동'], df_layout['호']))
