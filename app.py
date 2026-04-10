@@ -73,6 +73,11 @@ st.markdown("""
         .saju-h5 { color: #e5e5ea; font-size: 1.05em; font-weight: 800; margin-bottom: 12px; border-left: 3px solid #D4AF37; padding-left: 10px; line-height: 1.3; }
         .saju-p { color: #d1d1d6; font-size: 0.9em; line-height: 1.75; margin-top: 0; padding-left: 13px; text-align: justify; letter-spacing: -0.3px; word-break: keep-all; }
         .saju-footer { color: #888; font-size: 0.75em; text-align: center; margin-top: 30px; border-top: 1px dashed #444; padding-top: 15px; line-height: 1.6; word-break: keep-all; }
+        
+        /* 🔥 경제 대시보드 전용 스타일 */
+        .econ-box { background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 10px; padding: 15px; margin-bottom: 15px; }
+        .econ-title { color: #d1d1d6; font-size: 0.95em; font-weight: 800; margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 8px; }
+        div[data-testid="metric-container"] { background-color: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; border: 1px solid #222; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -182,18 +187,18 @@ def get_custom_fortune(dong, ho, type_dict):
 
     if "59" in unit_type: 
         fortune_pools = [
-            "이 호수와 인연을 맺으실 귀하는 상황 판단이 빠르고 위기 속에서도 반드시 해결책을 찾아내는 남다른 생존력과 직관의 사주를 지녔습니다. 겉보기엔 상황에 순응하는 듯 보여도, 내면에는 절대 꺾이지 않는 강한 승부욕을 품고 계시군요. 남들에게 크게 의지하기보다 스스로의 힘으로 길을 개척해 오느라 남몰래 겪은 고단함이 있었겠으나, 이 터의 맑은 기운이 귀하의 그 뚝심과 만나 마침내 폭발적인 보상으로 돌아오기 시작합니다. 귀하를 시기하는 얕은 구설수만 조용히 피하신다면, 이 공간에서 시작하는 새로운 챕터는 귀하의 인생에서 가장 가파르게 자산이 상승하는 도약기가 될 것입니다.",
-            "귀하는 타인의 화려한 겉치레에 휩쓸리지 않고, 자신만의 속도와 기준으로 내실을 단단하게 다질 줄 아는 현명한 명조를 타고났습니다. 때로는 주변에서 귀하의 깊은 뜻을 알아주지 않아 외로움을 느꼈을 수 있으나, 결국 최후에 웃는 것은 귀하입니다. 이 터는 그런 귀하의 실용적이고 단단한 기운을 완벽하게 품어주는 둥지 역할을 할 것입니다. 오늘 하루는 작은 지출이나 충동적인 감정 소모를 통제하십시오. 오늘 아낀 귀하의 에너지가 훗날 귀하의 일터에서 예상치 못한 큰 성과와 종잣돈으로 환전되어 돌아오게 될 것입니다."
+            "이 호수와 인연을 맺으실 귀하는 상황 판단이 빠르고 위기 속에서도 반드시 해결책을 찾아내는 남다른 생존력과 직관의 사주를 지녔습니다. 겉보기엔 상황에 순응하는 듯 보여도, 내면에는 절대 꺾이지 않는 강한 승부욕을 품고 계시군요. 남들에게 크게 의지하기보다 스스로의 힘으로 길을 개척해 오느라 남몰래 겪은 고단함이 있었겠으나, 이 터의 맑은 기운이 귀하의 그 뚝심과 만나 마침내 폭발적인 보상으로 돌아오기 시작합니다.",
+            "귀하는 타인의 화려한 겉치레에 휩쓸리지 않고, 자신만의 속도와 기준으로 내실을 단단하게 다질 줄 아는 현명한 명조를 타고났습니다. 때로는 주변에서 귀하의 깊은 뜻을 알아주지 않아 외로움을 느꼈을 수 있으나, 결국 최후에 웃는 것은 귀하입니다. 이 터는 그런 귀하의 실용적이고 단단한 기운을 완벽하게 품어주는 둥지 역할을 할 것입니다."
         ]
     elif "110" in unit_type or "114" in unit_type or "104" in unit_type: 
         fortune_pools = [
-            "이 터의 문을 열고 들어오실 귀하는 이미 인생의 거센 파도를 여러 번 묵묵히 넘어서며, 범접할 수 없는 혜안과 관록을 갖춘 대인(大人)의 명조를 지녔습니다. 타인의 얕은 수를 단번에 꿰뚫어 보는 예리함이 있어 쉽게 곁을 내어주지는 않으나, 한 번 내 사람이라 품은 이에게는 한없이 넓은 덕을 베푸는 사주입니다. 이 태산 같은 터의 기운이 귀하의 흔들림 없는 권위를 더욱 공고히 지켜줄 것입니다. 치열하게 아등바등하기보다, 지금 귀하가 가진 여유를 주변에 조금씩 베풀어 보십시오. 그 넉넉함이 귀하의 명예를 드높이고 상상치 못한 귀인들을 알아서 줄 서게 만들 것입니다.",
-            "귀하는 무리 속에서도 굳이 목소리를 높이지 않지만 자연스럽게 리더의 자리에 오르며, 한 번 쥔 주도권은 절대 놓지 않는 강한 장악력과 그릇을 타고났습니다. 평생을 바쳐 치열하게 이룩해 온 귀하의 자산과 성취가 이 터의 거대한 기운과 만나 완벽한 조화를 이룹니다. 오늘 하루는 자잘한 이해관계나 타인의 가벼운 언쟁에 휩쓸리지 마시고, 바다처럼 넓은 아량으로 묵묵히 상황을 관망하십시오. 지키는 것이 곧 크게 버는 시기이니, 현재의 안정감을 누리시는 것만으로도 흩어지려던 재물들이 귀하의 곁으로 단단히 묶이게 될 것입니다."
+            "이 터의 문을 열고 들어오실 귀하는 이미 인생의 거센 파도를 여러 번 묵묵히 넘어서며, 범접할 수 없는 혜안과 관록을 갖춘 대인(大人)의 명조를 지녔습니다. 타인의 얕은 수를 단번에 꿰뚫어 보는 예리함이 있어 쉽게 곁을 내어주지는 않으나, 한 번 내 사람이라 품은 이에게는 한없이 넓은 덕을 베푸는 사주입니다. 이 태산 같은 터의 기운이 귀하의 흔들림 없는 권위를 더욱 공고히 지켜줄 것입니다.",
+            "귀하는 무리 속에서도 굳이 목소리를 높이지 않지만 자연스럽게 리더의 자리에 오르며, 한 번 쥔 주도권은 절대 놓지 않는 강한 장악력과 그릇을 타고났습니다. 평생을 바쳐 치열하게 이룩해 온 귀하의 자산과 성취가 이 터의 거대한 기운과 만나 완벽한 조화를 이룹니다. 오늘 하루는 자잘한 이해관계나 타인의 가벼운 언쟁에 휩쓸리지 마시고, 바다처럼 넓은 아량으로 묵묵히 상황을 관망하십시오."
         ]
     else: 
         fortune_pools = [
-            "이 공간의 주인이 되신 귀하는 내 사람, 내 가족을 끝까지 책임지고 품어안는 넓은 대지(土)와 같은 든든한 뚝심의 사주를 지녔습니다. 평소 남을 배려하고 챙기느라 정작 자신의 몫은 뒷전으로 미루며 남몰래 속앓이를 한 적이 많으실 겁니다. 하지만 하늘은 귀하의 그 따뜻한 헌신을 다 알고 있습니다. 이 터의 묵직하고 따뜻한 기운이 귀하가 뿌린 인내의 씨앗들을 마침내 황금빛 결실로 바꾸어줄 변곡점에 서 있습니다. 이제는 남의 눈치를 보지 말고 귀하의 첫 번째 직감대로 과감하게 결정을 밀고 나가십시오. 운이 귀하의 편에 서 있습니다.",
-            "귀하는 타고난 성실함과 흔들림 없는 책임감으로 가정과 조직에서 늘 든든한 기둥 역할을 묵묵히 수행해 온 명조입니다. 인생의 크고 작은 굴곡 속에서도 불평 없이 자리를 지켜온 귀하의 고귀한 인내가, 이 명당의 안정적인 기운과 완벽한 합을 이루어 폭발적인 자산 증식으로 이어질 시기가 다가오고 있습니다. 오늘은 바깥에서 무리하게 일을 벌이기보다, 귀하의 가장 든든한 울타리인 가족이나 가까운 이들에게 먼저 따뜻한 칭찬을 건네보십시오. 그 화목한 기운이 나비효과가 되어 귀하의 일터에 뜻밖의 경제적 호재를 강하게 끌어당길 것입니다."
+            "이 공간의 주인이 되신 귀하는 내 사람, 내 가족을 끝까지 책임지고 품어안는 넓은 대지(土)와 같은 든든한 뚝심의 사주를 지녔습니다. 평소 남을 배려하고 챙기느라 정작 자신의 몫은 뒷전으로 미루며 남몰래 속앓이를 한 적이 많으실 겁니다. 하지만 하늘은 귀하의 그 따뜻한 헌신을 다 알고 있습니다. 이 터의 묵직하고 따뜻한 기운이 귀하가 뿌린 인내의 씨앗들을 마침내 황금빛 결실로 바꾸어줄 변곡점에 서 있습니다.",
+            "귀하는 타고난 성실함과 흔들림 없는 책임감으로 가정과 조직에서 늘 든든한 기둥 역할을 묵묵히 수행해 온 명조입니다. 인생의 크고 작은 굴곡 속에서도 불평 없이 자리를 지켜온 귀하의 고귀한 인내가, 이 명당의 안정적인 기운과 완벽한 합을 이루어 폭발적인 자산 증식으로 이어질 시기가 다가오고 있습니다. 오늘은 바깥에서 무리하게 일을 벌이기보다 가족들에게 먼저 따뜻한 칭찬을 건네보십시오."
         ]
     fortune_text = random.choice(fortune_pools)
 
@@ -314,15 +319,14 @@ with tab2:
                 st.markdown(fortune_html, unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 3] 지역 핫이슈 (🔥 10개 & 최신순 정렬 & 부동산 정책)
+# [탭 3] 지역 핫이슈 (🔥 최신순 정렬, 10개, 정책 포함)
 # ------------------------------------------
 with tab3:
     st.markdown("<h4 style='text-align:center; color:#d1d1d6; margin-top:10px;'>📰 그랑루체 실시간 참고뉴스</h4>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; color:#ff9f0a; font-size:0.75em; margin-bottom:15px;'>🚨 최근 30일 이내 기사만 노출되며 자동 삭제됩니다.</p>", unsafe_allow_html=True)
     
     try:
-        # 🔥 부동산 정책 키워드 대거 투입!
-        query = urllib.parse.quote('에코델타시티 OR "디에트르 그랑루체" OR "명지국제신도시 부동산" OR "부산 강서구 개발" OR "부산 강서구 예타" OR "부동산 정책" OR "취득세" OR "특례보금자리" OR "금리 인하" when:30d')
+        query = urllib.parse.quote('에코델타시티 OR "디에트르 그랑루체" OR "명지국제신도시 부동산" OR "부산 강서구 개발" OR "부동산 정책" OR "취득세" OR "특례보금자리" OR "금리 인하" when:30d')
         url = f"https://news.google.com/rss/search?q={query}&hl=ko&gl=KR&ceid=KR:ko"
         
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
@@ -335,7 +339,6 @@ with tab3:
         articles = []
         seen_titles = set()
         
-        # 1. 긁어온 기사들을 먼저 리스트에 담으면서 중복 제거
         for item in root.findall('.//item'):
             source_elem = item.find('source')
             source_name = source_elem.text if source_elem is not None else "뉴스"
@@ -344,7 +347,6 @@ with tab3:
                 title = item.find('title').text
                 clean_title = title.rsplit(" - ", 1)[0] 
                 
-                # 중복 제거 로직
                 dedup_key = re.sub(r'[^가-힣a-zA-Z0-9]', '', clean_title)[:15]
                 if dedup_key in seen_titles:
                     continue
@@ -361,17 +363,15 @@ with tab3:
                     'dt': dt
                 })
         
-        # 🔥 2. 파이썬이 날짜를 기준으로 가장 최신 기사부터 내림차순 정렬!
         articles.sort(key=lambda x: x['dt'], reverse=True)
         
-        # 3. 정렬된 최신 기사를 딱 10개만 뽑아서 화면에 뿌려줌!
         count = 0
         if articles:
-            now = datetime.now(articles[0]['dt'].tzinfo) # 타임존 에러 방지
+            now = datetime.now(articles[0]['dt'].tzinfo) 
         else:
             now = datetime.now()
             
-        for art in articles[:10]:
+        for art in articles[:10]: # 🔥 10개까지 출력
             diff = now - art['dt']
             days_passed = diff.days
             days_left = max(0, 30 - days_passed)
@@ -389,22 +389,38 @@ with tab3:
             count += 1
                 
         if count == 0:
-            st.info("🚨 최근 30일간 해당 키워드의 메이저 언론사 핫이슈가 없습니다.")
+            st.info("🚨 최근 30일간 해당 키워드의 메이저 언론사 뉴스가 없습니다.")
             
     except Exception as e:
         st.info("실시간 뉴스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.")
 
 # ------------------------------------------
-# [탭 4] 부동산 및 대출 정보
+# [탭 4] 부동산 및 경제 동향 (🔥 V46 신규 대시보드)
 # ------------------------------------------
 with tab4:
-    st.markdown("<h4 style='text-align:center; color:#d1d1d6; margin-top:10px;'>📈 부동산 및 금리 동향</h4>", unsafe_allow_html=True)
+    st.markdown("<h4 style='text-align:center; color:#D4AF37; margin-top:10px;'>📈 부동산 및 거시경제 동향</h4>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em; margin-bottom:15px;'>입주 전 필수 확인! 자산 관리를 위한 핵심 지표입니다.</p>", unsafe_allow_html=True)
+
+    # 1. 아파트 실거래가 섹션
+    st.markdown("<div class='econ-box'><div class='econ-title'>🏢 에코델타시티 대장주 실거래가 (가이드)</div>", unsafe_allow_html=True)
     col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("<p style='font-size:0.85em; color:#aaa; margin-bottom:2px; text-align:center;'>🏢 에코델타 대장주 실거래</p>", unsafe_allow_html=True)
-        st.metric(label="푸르지오센터파크 (84㎡)", value="6억 8,500만", delta="↑ 2,000만 (4/8)")
-    with col2:
-        st.markdown("<p style='font-size:0.85em; color:#aaa; margin-bottom:2px; text-align:center;'>🏦 주담대 평균 금리 (변동)</p>", unsafe_allow_html=True)
-        st.metric(label="시중 1금융권 평균", value="3.85%", delta="↓ 0.12% (전월대비)", delta_color="inverse")
-    
-    st.markdown("<div style='text-align:center; margin-top:20px;'><a href='https://m.land.naver.com/' target='_blank' class='kakao-btn' style='background-color:#03C75A; color:white !important;'>네이버 부동산 바로가기</a></div>", unsafe_allow_html=True)
+    col1.metric("푸르지오센터파크 84㎡", "6억 8,500만", "↑ 2,000만 (최근거래)")
+    col2.metric("호반써밋 84㎡", "6억 5,000만", "보합")
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # 2. 대출 금리 섹션
+    st.markdown("<div class='econ-box'><div class='econ-title'>🏦 주택담보대출 평균 금리 동향</div>", unsafe_allow_html=True)
+    col3, col4 = st.columns(2)
+    col3.metric("1금융권 (시중은행)", "3.85%", "↓ 0.05% (전월대비)", delta_color="inverse")
+    col4.metric("2금융권 (저축은행 등)", "4.72%", "↓ 0.12% (전월대비)", delta_color="inverse")
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # 3. 실물경제 섹션 (금, 유가)
+    st.markdown("<div class='econ-box'><div class='econ-title'>💰 실물경제 핵심 지표</div>", unsafe_allow_html=True)
+    col5, col6 = st.columns(2)
+    col5.metric("순금 1돈 (24K)", "425,000원", "↑ 3,500원 (전일대비)")
+    col6.metric("강서구 휘발유 (최저)", "1,645원/L", "↑ 12원 (전일대비)")
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    st.info("※ 위 지표는 시스템 연동 테스트용 가이드 데이터입니다. 추후 공공 API 연결을 통해 100% 실시간 갱신 모드로 전환 가능합니다.")
+    st.markdown("<div style='text-align:center; margin-top:10px;'><a href='https://m.land.naver.com/' target='_blank' class='kakao-btn' style='background-color:#03C75A; color:white !important;'>네이버 부동산 바로가기</a></div>", unsafe_allow_html=True)
