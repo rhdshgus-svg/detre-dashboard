@@ -14,7 +14,7 @@ from datetime import datetime
 st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon="🏢", layout="centered")
 
 # ==========================================
-# 2. CSS 스타일링 (프리미엄 여백 & 타이포그래피)
+# 2. CSS 스타일링 
 # ==========================================
 st.markdown("""
     <style>
@@ -60,7 +60,6 @@ st.markdown("""
         .news-link:hover { color: #D4AF37; }
         button[data-baseweb="tab"] { font-weight: 800 !important; font-size: 0.9em !important; }
         
-        /* 🔥 운세 박스 줄간격 및 제목 찢어짐 완벽 방어 */
         .saju-box { background: linear-gradient(180deg, rgba(212, 175, 55, 0.08) 0%, rgba(28, 28, 30, 0.5) 100%); border-radius: 12px; border: 1px solid rgba(212, 175, 55, 0.3); padding: 25px 20px; text-align: left; margin-top: 15px; }
         .saju-title { color: #D4AF37; text-align: center; margin-top: 0; font-size: clamp(1.05em, 5vw, 1.25em); font-weight: 900; margin-bottom: 25px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); line-height: 1.4; letter-spacing: -0.8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .saju-section { margin-bottom: 22px; }
@@ -71,7 +70,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 3. 데이터 로딩 (가입명단 + 평수 데이터)
+# 3. 데이터 로딩 (가입명단 + 🌟평수 데이터)
 # ==========================================
 SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQoR29bAcAP0KUBEvS3S6gn5Qz1MTKDJOxz-lW1UEyV_vOcISPxNW2uMuYMrz9HUw/pub?gid=1967078212&single=true&output=csv"
 LAYOUT_FILE = "디에트르 그랑루체 카페가입 현황.xlsx" 
@@ -146,7 +145,7 @@ def get_busan_weather():
         return "맑음" 
 
 # ==========================================
-# 🌟 [핵심] 심리 타겟팅(바넘 효과) 운세 생성기
+# 🌟 [핵심] 심리 타겟팅 운세 생성기
 # ==========================================
 def get_custom_fortune(dong, ho, type_dict):
     today_str = datetime.now().strftime("%Y%m%d")
@@ -157,9 +156,6 @@ def get_custom_fortune(dong, ho, type_dict):
     line_str = str(ho)[-1] if str(ho) else "1"
     unit_type = type_dict.get((dong, line_str), "84") 
     
-    # ----------------------------------------
-    # [블록 1] 입주 전 터의 기운 (날씨 연동)
-    # ----------------------------------------
     weather_pools = {
         "맑음": [
             f"오늘 외부의 청명한 양기(陽氣)가 <b>{dong} {ho}호</b> 터의 깊은 곳까지 강하게 쏟아져 들어오고 있습니다. 맑은 양광(빛)은 막힌 운을 뚫어주고 결실을 맺게 하는 최고의 에너지입니다. 아직 빈 공간임에도 힘찬 생기가 감싸고 있어, 훗날 귀하께서 입주하셨을 때 집안에 웃음이 마르지 않고 뜻밖의 귀인이 찾아들 대길(大吉)의 기운을 띠고 있습니다.",
@@ -175,10 +171,7 @@ def get_custom_fortune(dong, ho, type_dict):
     }
     site_energy = random.choice(weather_pools.get(weather, weather_pools["맑음"]))
 
-    # ----------------------------------------
-    # [블록 2] 사람 중심 심리 타겟팅 (바넘 효과)
-    # ----------------------------------------
-    vibe_title = "👤 터의 주인이 지닌 타고난 명조(命造)" # 타이틀을 통일하여 평수 유추 방지!
+    vibe_title = "👤 터의 주인이 지닌 타고난 명조(命造)" 
 
     if "59" in unit_type: 
         fortune_pools = [
@@ -197,22 +190,15 @@ def get_custom_fortune(dong, ho, type_dict):
         ]
     fortune_text = random.choice(fortune_pools)
 
-    # ----------------------------------------
-    # [블록 3] 보편적 이사운 / 변동운
-    # ----------------------------------------
     moving_pools = [
         "새로운 보금자리로 터를 옮길 준비를 하는 지금의 과정은, 귀하의 인생에서 커다란 대운이 뒤바뀌는 매우 중요한 변곡점입니다. 이사를 앞두고 신경 쓸 일이 많아 머리가 복잡하시겠지만, 이는 더 큰 복(福)을 온전히 담아내기 위해 내 그릇을 확장하는 '명현현상'과 같습니다. 마음의 조급함을 조금만 내려놓으시면 입주 과정이 물 흐르듯 순조롭게 풀려나갈 것입니다.",
         "터를 새롭게 옮긴다는 것은 귀하의 삶에 엉켜있던 과거의 낡은 실타래를 끊어내고, 맑고 새로운 도화지에 희망찬 밑그림을 다시 그리는 것과 같습니다. 이사 준비 과정에서 생기는 약간의 예상치 못한 지출이나 작은 마찰은, 입주 후 들어올 엄청난 액수의 액운을 미리 가볍게 털어내는 '액땜'으로 쿨하게 넘기시는 것이 귀하의 재물운을 지키는 비결입니다."
     ]
     moving_text = random.choice(moving_pools)
 
-    # ----------------------------------------
-    # [블록 4] 오늘의 개운템
-    # ----------------------------------------
     lucky_items = ["따뜻한 물 한 잔 천천히 마시기", "햇살 10분 맞으며 걷기", "지갑 속 필요 없는 영수증 당장 버리기", "새집 현관 청소하는 상상하기", "퇴근길 기분 좋게 로또 5천 원 구매하기", "오늘 하루 속으로 3초 세고 말하기"]
     selected_item = random.choice(lucky_items)
     
-    # 🔥 에러 방지용 한 줄 압축 HTML
     result_html = f"<div class='saju-box'><h4 class='saju-title'>📜 {dong} {ho}호 맞춤 신점</h4><div class='saju-section'><div class='saju-h5'>🏡 입주 전 터의 기운 분석</div><p class='saju-p'>{site_energy}</p></div><div class='saju-section'><div class='saju-h5'>{vibe_title}</div><p class='saju-p'>{fortune_text}</p></div><div class='saju-section'><div class='saju-h5'>🚚 이동과 변화의 기운 (이사운)</div><p class='saju-p'>{moving_text}</p></div><div class='saju-section' style='background:rgba(0,0,0,0.2); padding:15px; border-radius:8px; margin-top:25px;'><p style='color:#d1d1d6; font-size:0.9em; margin-bottom:0;'>🍀 <b>오늘 나의 기운을 트여줄 개운템:</b> <span style='color:#30D158; font-weight:800;'>{selected_item}</span></p></div><div class='saju-footer'>※ 본 신점은 명리학적 관점과 귀하의 사주 기운을 심층 분석하여 고유 조합으로 제공됩니다.<br>더 뼈 때리는 나의 진짜 사주/MBTI 분석이 궁금하다면?<br><b style='color:#D4AF37;'>상단의 1:1 톡으로 팡도사에게 문의하세요!</b></div></div>"
     
     return result_html
@@ -293,7 +279,7 @@ with tab1:
     st.markdown(html_grid, unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 2] 오늘의 운세 (🔥 3.5초 로딩 유지)
+# [탭 2] 오늘의 운세 
 # ------------------------------------------
 with tab2:
     st.markdown("<h4 style='text-align:center; color:#D4AF37; margin-top:10px;'>🔮 팡도사의 동·호수 맞춤 신점</h4>", unsafe_allow_html=True)
@@ -309,10 +295,17 @@ with tab2:
         if f_ho.strip() == "":
             st.warning("호수를 정확히 입력해주세요! (예: 1201)")
         else:
-            with st.spinner("🔮 팡도사가 고객님의 명조(命造)를 심층 분석 중입니다..."):
-                time.sleep(3.5) 
-            fortune_html = get_custom_fortune(f_dong, f_ho, type_dict)
-            st.markdown(fortune_html, unsafe_allow_html=True)
+            # 🔥 도면 데이터 교차 검증 (방어막)
+            valid_combinations = set(zip(df_layout['동'], df_layout['호']))
+            input_ho_formatted = f_ho.strip().zfill(4)
+            
+            if (f_dong, input_ho_formatted) not in valid_combinations:
+                st.warning("🔮 앗! 해당 동·호수는 팡도사의 레이더에 잡히지 않는 '없는 기운'입니다. 혹시 아직 지어지지 않은 허공의 터를 누르신 건 아니겠죠? 😅 동과 호수를 다시 한번 정확히 확인해 주세요!")
+            else:
+                with st.spinner("🔮 팡도사가 고객님의 명조(命造)를 심층 분석 중입니다..."):
+                    time.sleep(3.5) 
+                fortune_html = get_custom_fortune(f_dong, f_ho, type_dict)
+                st.markdown(fortune_html, unsafe_allow_html=True)
 
 # ------------------------------------------
 # [탭 3] 지역 핫이슈 
