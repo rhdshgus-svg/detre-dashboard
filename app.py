@@ -26,9 +26,13 @@ st.markdown("""
         .block-container { padding-top: 1.0rem !important; padding-bottom: 0.5rem !important; padding-left: 4px !important; padding-right: 4px !important; max-width: 100% !important; }
         
         .premium-title { font-size: clamp(2.0em, 8vw, 2.8em); font-weight: 900; text-align: center; color: #2b6cb0; text-shadow: 0 2px 10px rgba(43, 108, 176, 0.3); margin-bottom: 4px; line-height: 1.2; }
-        .promo-title { font-size: 0.85em; text-align: center; color: #D4AF37; font-weight: 700; margin-top: 0px; margin-bottom: 4px; line-height: 1.3; }
-        .promo-subtitle { font-size: 0.75em; text-align: center; color: #aaa; font-weight: 400; margin-bottom: 10px; }
-        .kakao-btn { display: inline-flex; justify-content: center; align-items: center; background-color: #FEE500; color: #191919 !important; font-weight: 800; font-size: 0.75em; padding: 6px 16px; border-radius: 8px; text-decoration: none !important; box-shadow: 0 2px 6px rgba(254, 229, 0, 0.2); margin-bottom: 10px; transition: all 0.2s ease; }
+        .promo-title { font-size: 0.85em; text-align: center; color: #D4AF37; font-weight: 700; margin-top: 0px; margin-bottom: 8px; line-height: 1.3; }
+        
+        /* 🔥 사주 링크 및 입예협 공식 배너 스타일 */
+        .btn-saju { background-color: rgba(212, 175, 55, 0.1); color: #D4AF37 !important; border: 1px solid #D4AF37; display: inline-flex; justify-content: center; align-items: center; font-weight: 800; font-size: 0.75em; padding: 6px 16px; border-radius: 8px; text-decoration: none !important; margin-bottom: 15px; transition: all 0.2s ease; }
+        .official-btn { display: flex; justify-content: center; align-items: center; font-weight: 900; font-size: 0.85em; padding: 12px 16px; border-radius: 10px; text-decoration: none !important; margin-bottom: 6px; transition: all 0.2s ease; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .btn-naver { background-color: #03C75A; color: white !important; }
+        .btn-kakao-official { background-color: #FEE500; color: #191919 !important; }
         
         .notice-text { text-align: center; font-size: 0.7em; letter-spacing: -0.5px; color: #ff9f0a; font-weight: 600; margin-bottom: 10px; padding: 8px 6px; background-color: rgba(255, 159, 10, 0.1); border-radius: 8px; border: 1px solid rgba(255, 159, 10, 0.2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.4; }
         
@@ -61,6 +65,7 @@ st.markdown("""
         .news-link { color: #d1d1d6; text-decoration: none; font-size: 0.85em; display: block; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #333; line-height: 1.5; }
         .news-link:hover { color: #D4AF37; }
         .news-source { color: #4A90E2; font-weight: 900; margin-right: 4px; font-size: 0.9em; }
+        
         .fomo-tag { color: #FF3B30; font-weight: 800; font-size: 0.8em; margin-left: 6px; background-color: rgba(255, 59, 48, 0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(255, 59, 48, 0.3); display: inline-block; margin-top: 4px;}
         .news-date { color: #aaa; font-size: 0.8em; font-weight: 600; }
         
@@ -73,11 +78,13 @@ st.markdown("""
         .saju-p { color: #d1d1d6; font-size: 0.9em; line-height: 1.75; margin-top: 0; padding-left: 13px; text-align: justify; letter-spacing: -0.3px; word-break: keep-all; }
         .saju-footer { color: #888; font-size: 0.75em; text-align: center; margin-top: 30px; border-top: 1px dashed #444; padding-top: 15px; line-height: 1.6; word-break: keep-all; }
         
-        /* 🔥 경제 대시보드 전용 촘촘한 디자인 적용 */
         .econ-box { background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 10px; padding: 15px; margin-bottom: 15px; }
         .econ-title { color: #d1d1d6; font-size: 0.95em; font-weight: 800; margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 8px; }
         div[data-testid="metric-container"] { background-color: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; border: 1px solid #222; }
         div[data-testid="stMetricValue"] { font-size: 1.2em !important; font-weight: 800 !important; }
+        
+        /* 🔥 은밀한 제작자 표기 (이스터에그) */
+        .by-text { text-align: right; color: #444; font-size: 0.6em; margin-top: 40px; margin-bottom: 10px; padding-right: 10px; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -130,7 +137,7 @@ kakao_dict, cafe_set, df_layout, type_dict = load_data()
 if df_layout.empty: st.stop()
 
 # ==========================================
-# 🔮 날씨 및 [실시간 API 봇] 가동 (안전망 강화)
+# 🔮 날씨 및 API 봇
 # ==========================================
 @st.cache_data(ttl=1800) 
 def get_busan_weather():
@@ -147,26 +154,22 @@ def get_busan_weather():
 
 @st.cache_data(ttl=3600)
 def get_real_estate_api():
-    # 국토부 연동 대기 (현재는 가이드)
     return "6억 8,500만", "↑ 2,000만"
 
 @st.cache_data(ttl=3600)
 def get_interest_rate_api():
-    # 한국은행 API 및 주택도시기금 연동 대기
     return "3.85%", "↓ 0.05%", "2.15% ~ 3.55%", "동결"
 
 @st.cache_data(ttl=3600)
 def get_oil_price_api():
-    # 오피넷 API 부산 데이터 연동 대기
     return "1,642원", "↑ 5원", "1,515원", "↑ 2원", "975원", "보합"
 
 @st.cache_data(ttl=3600)
 def get_gold_price():
-    # 국내 금값 1돈(3.75g) 기준 연동 대기 (가이드 데이터)
     return "432,000원", "↑ 3,000원", "318,000원", "↑ 2,000원"
 
 # ==========================================
-# 🌟 심리 타겟팅 운세 생성기 (바넘 효과)
+# 🌟 심리 타겟팅 운세 생성기
 # ==========================================
 def get_custom_fortune(dong, ho, type_dict):
     today_str = datetime.now().strftime("%Y%m%d")
@@ -219,17 +222,23 @@ def get_custom_fortune(dong, ho, type_dict):
     lucky_items = ["따뜻한 물 한 잔 천천히 마시기", "햇살 10분 맞으며 걷기", "지갑 속 필요 없는 영수증 당장 버리기", "새집 현관 청소하는 상상하기", "퇴근길 기분 좋게 로또 5천 원 구매하기", "오늘 하루 속으로 3초 세고 말하기"]
     selected_item = random.choice(lucky_items)
     
-    result_html = f"<div class='saju-box'><h4 class='saju-title'>📜 {dong} {ho}호 맞춤 신점</h4><div class='saju-section'><div class='saju-h5'>🏡 입주 전 터의 기운 분석</div><p class='saju-p'>{site_energy}</p></div><div class='saju-section'><div class='saju-h5'>{vibe_title}</div><p class='saju-p'>{fortune_text}</p></div><div class='saju-section'><div class='saju-h5'>🚚 이동과 변화의 기운 (이사운)</div><p class='saju-p'>{moving_text}</p></div><div class='saju-section' style='background:rgba(0,0,0,0.2); padding:15px; border-radius:8px; margin-top:25px;'><p style='color:#d1d1d6; font-size:0.9em; margin-bottom:0;'>🍀 <b>오늘 나의 기운을 트여줄 개운템:</b> <span style='color:#30D158; font-weight:800;'>{selected_item}</span></p></div><div class='saju-footer'>※ 본 신점은 명리학적 관점과 귀하의 사주 기운을 심층 분석하여 무작위가 아닌 고유 조합으로 제공됩니다.<br>더 뼈 때리는 나의 진짜 사주/MBTI 분석이 궁금하다면?<br><b style='color:#D4AF37;'>상단의 1:1 톡으로 팡도사에게 문의하세요!</b></div></div>"
+    result_html = f"<div class='saju-box'><h4 class='saju-title'>📜 {dong} {ho}호 맞춤 신점</h4><div class='saju-section'><div class='saju-h5'>🏡 입주 전 터의 기운 분석</div><p class='saju-p'>{site_energy}</p></div><div class='saju-section'><div class='saju-h5'>{vibe_title}</div><p class='saju-p'>{fortune_text}</p></div><div class='saju-section'><div class='saju-h5'>🚚 이동과 변화의 기운 (이사운)</div><p class='saju-p'>{moving_text}</p></div><div class='saju-section' style='background:rgba(0,0,0,0.2); padding:15px; border-radius:8px; margin-top:25px;'><p style='color:#d1d1d6; font-size:0.9em; margin-bottom:0;'>🍀 <b>오늘 나의 기운을 트여줄 개운템:</b> <span style='color:#30D158; font-weight:800;'>{selected_item}</span></p></div><div class='saju-footer'>※ 본 신점은 명리학적 관점과 귀하의 사주 기운을 심층 분석하여 무작위가 아닌 고유 조합으로 제공됩니다.</div></div>"
     return result_html
 
 # ==========================================
-# 4. 화면 상단 타이틀 및 공통 배너
+# 4. 화면 상단 타이틀 및 공통 배너 (🔥 입예협 취향 저격 패치)
 # ==========================================
 st.markdown("<div class='premium-title'>Detre Granluce</div>", unsafe_allow_html=True)
 st.markdown("""
 <div class='promo-title'>[Sol 운명상점] 사주 & MBTI 솔루션</div>
-<div style='text-align: center; margin-bottom:4px;'><span style='font-size:0.7em; color:#aaa;'>(213동 102호 팡도사)</span></div>
-<div style='text-align: center; width: 100%;'><a href="https://open.kakao.com/o/gEkb84oi" target="_blank" class='kakao-btn'>💬 입주민 전용 1:1 톡 (깨알광고)</a></div>
+<div style='text-align: center; width: 100%;'>
+    <a href="https://open.kakao.com/o/gEkb84oi" target="_blank" class='btn-saju'>💬 입주민전용 사주상담 연결</a>
+</div>
+
+<div style='display: flex; flex-direction: column; gap: 4px; margin-bottom: 15px;'>
+    <a href="https://form.jotform.com/240628865713463" target="_blank" class='official-btn btn-naver'>📝 그랑루체 공식카페 (위임동의서 제출)</a>
+    <a href="https://open.kakao.com/o/ggAiqg4f" target="_blank" class='official-btn btn-kakao-official'>💬 그랑루체 공식 카카오톡 입장</a>
+</div>
 <div class='notice-text'>🚨 현황판에 미표기된 세대는 회장님 및 임원진에게 요청부탁드립니다.</div>
 """, unsafe_allow_html=True)
 
@@ -244,6 +253,7 @@ tab1, tab2, tab3, tab4 = st.tabs(["🏢 입주현황", "🔮 오늘의 운세", 
 with tab1:
     stats_board = st.empty()
     st.markdown("<p style='text-align: center; color: #D4AF37; font-weight: 800; font-size: 0.85em; margin-top: 15px; margin-bottom: 4px;'>👇 동별 상세현황 (누르기)</p>", unsafe_allow_html=True)
+
     all_dongs_raw = df_layout['동'].unique().tolist()
     all_dongs = sorted(all_dongs_raw, key=lambda x: int(re.sub(r'[^0-9]', '', x)) if re.sub(r'[^0-9]', '', x).isdigit() else 0)
     selected_dong = st.radio("동 선택", all_dongs, horizontal=True, format_func=lambda x: x.replace("동", ""), label_visibility="collapsed")
@@ -332,6 +342,7 @@ with tab3:
         trusted_press = ['KBS', 'MBC', 'SBS', 'YTN', '연합', 'JTBC', '조선', '중앙', '동아', '매일경제', '한국경제', '부산일보', '국제신문', '네이버']
         articles = []
         seen_titles = set()
+        
         for item in root.findall('.//item'):
             source_name = item.find('source').text if item.find('source') is not None else "뉴스"
             if any(trusted in source_name for trusted in trusted_press):
@@ -356,40 +367,35 @@ with tab3:
     except: st.info("실시간 뉴스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.")
 
 # ------------------------------------------
-# [탭 4] 실시간 경제지표 (🔥 초정밀 세분화 완료)
+# [탭 4] 실시간 경제지표 
 # ------------------------------------------
 with tab4:
     st.markdown("<h4 style='text-align:center; color:#D4AF37; margin-top:10px;'>📈 실시간 경제지표</h4>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em; margin-bottom:15px;'>※ 서버 장애 시 가이드 데이터로 제공됩니다.</p>", unsafe_allow_html=True)
 
-    # API 데이터 불러오기 (서버 장애시 가이드 데이터 반환)
     apt_price, apt_delta = get_real_estate_api()
     rate_val, rate_delta, didim_val, didim_delta = get_interest_rate_api()
     oil_gas, gas_delta, oil_diesel, diesel_delta, oil_lpg, lpg_delta = get_oil_price_api()
     gold_24k, gold_24k_delta, gold_18k, gold_18k_delta = get_gold_price()
 
-    # 1. 국토부 실거래가
     st.markdown("<div class='econ-box'><div class='econ-title'>🏢 에코델타 국토부 실거래가 정보</div>", unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     col1.metric("푸르지오센터파크 (84㎡)", apt_price, apt_delta)
     col2.metric("호반써밋 (84㎡)", "6억 5,000만", "보합")
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # 2. 대출 금리 (디딤돌 추가)
     st.markdown("<div class='econ-box'><div class='econ-title'>🏦 주택담보대출 평균금리(한국은행)</div>", unsafe_allow_html=True)
     col3, col4 = st.columns(2)
     col3.metric("1금융권 (시중은행)", rate_val, rate_delta, delta_color="inverse")
     col4.metric("디딤돌대출 (정부정책)", didim_val, didim_delta, delta_color="inverse")
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # 3. 금 시세 (24K, 18K 분리 & 원화)
     st.markdown("<div class='econ-box'><div class='econ-title'>💰 국내 순금 시세 (1돈=3.75g 기준)</div>", unsafe_allow_html=True)
     col_g1, col_g2 = st.columns(2)
     col_g1.metric("순금 (24K)", gold_24k, gold_24k_delta)
     col_g2.metric("18K", gold_18k, gold_18k_delta)
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # 4. 부산 유가 정보 (3칸 분할: 휘발유/경유/LPG)
     st.markdown("<div class='econ-box'><div class='econ-title'>⛽ 부산 평균 유가 정보 (오피넷)</div>", unsafe_allow_html=True)
     col_o1, col_o2, col_o3 = st.columns(3)
     col_o1.metric("휘발유", oil_gas, gas_delta)
@@ -397,4 +403,5 @@ with tab4:
     col_o3.metric("LPG", oil_lpg, lpg_delta)
     st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("<div style='text-align:center; margin-top:10px;'><a href='https://m.land.naver.com/' target='_blank' class='kakao-btn' style='background-color:#03C75A; color:white !important;'>네이버 부동산 바로가기</a></div>", unsafe_allow_html=True)
+# 🔥 이스터에그 (제작자 표기) - 페이지 맨 하단에 은밀하게 배치
+st.markdown("<div class='by-text'>by. 213동102호팡</div>", unsafe_allow_html=True)
