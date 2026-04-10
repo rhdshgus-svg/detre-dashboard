@@ -14,7 +14,7 @@ from datetime import datetime
 st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon="🏢", layout="centered")
 
 # ==========================================
-# 2. CSS 스타일링 
+# 2. CSS 스타일링 (🔥 프리미엄 줄간격 및 여백 교정)
 # ==========================================
 st.markdown("""
     <style>
@@ -23,12 +23,12 @@ st.markdown("""
         #MainMenu {visibility: hidden;} footer {visibility: hidden;} header {visibility: hidden;}
         .block-container { padding-top: 1.0rem !important; padding-bottom: 0.5rem !important; padding-left: 4px !important; padding-right: 4px !important; max-width: 100% !important; }
         
-        .premium-title { font-size: clamp(2.0em, 8vw, 2.8em); font-weight: 900; text-align: center; color: #2b6cb0; text-shadow: 0 2px 10px rgba(43, 108, 176, 0.3); margin-bottom: 2px; }
-        .promo-title { font-size: 0.85em; text-align: center; color: #D4AF37; font-weight: 700; margin-top: 0px; margin-bottom: 2px; }
-        .promo-subtitle { font-size: 0.75em; text-align: center; color: #aaa; font-weight: 400; margin-bottom: 8px; }
-        .kakao-btn { display: inline-flex; justify-content: center; align-items: center; background-color: #FEE500; color: #191919 !important; font-weight: 800; font-size: 0.75em; padding: 6px 16px; border-radius: 8px; text-decoration: none !important; box-shadow: 0 2px 6px rgba(254, 229, 0, 0.2); margin-bottom: 8px; transition: all 0.2s ease; }
+        .premium-title { font-size: clamp(2.0em, 8vw, 2.8em); font-weight: 900; text-align: center; color: #2b6cb0; text-shadow: 0 2px 10px rgba(43, 108, 176, 0.3); margin-bottom: 4px; line-height: 1.2; }
+        .promo-title { font-size: 0.85em; text-align: center; color: #D4AF37; font-weight: 700; margin-top: 0px; margin-bottom: 4px; line-height: 1.3; }
+        .promo-subtitle { font-size: 0.75em; text-align: center; color: #aaa; font-weight: 400; margin-bottom: 10px; }
+        .kakao-btn { display: inline-flex; justify-content: center; align-items: center; background-color: #FEE500; color: #191919 !important; font-weight: 800; font-size: 0.75em; padding: 6px 16px; border-radius: 8px; text-decoration: none !important; box-shadow: 0 2px 6px rgba(254, 229, 0, 0.2); margin-bottom: 10px; transition: all 0.2s ease; }
         
-        .notice-text { text-align: center; font-size: 0.7em; letter-spacing: -0.5px; color: #ff9f0a; font-weight: 600; margin-bottom: 8px; padding: 6px 4px; background-color: rgba(255, 159, 10, 0.1); border-radius: 8px; border: 1px solid rgba(255, 159, 10, 0.2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .notice-text { text-align: center; font-size: 0.7em; letter-spacing: -0.5px; color: #ff9f0a; font-weight: 600; margin-bottom: 10px; padding: 8px 6px; background-color: rgba(255, 159, 10, 0.1); border-radius: 8px; border: 1px solid rgba(255, 159, 10, 0.2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.4; }
         
         .stat-container { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; width: 100%; }
         .stat-box-new { display: flex; background: linear-gradient(145deg, #1c1c1e, #121212); border-radius: 8px; border: 1px solid #333; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
@@ -56,22 +56,22 @@ st.markdown("""
         .red-badge { background-color: #FF3B30; color: white; border: 1px solid #c22820; }
         .yellow-badge { background-color: #4A90E2; color: white; border: 1px solid #2a6fb8; } 
         
-        .news-link { color: #d1d1d6; text-decoration: none; font-size: 0.85em; display: block; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #333; line-height: 1.4; }
+        .news-link { color: #d1d1d6; text-decoration: none; font-size: 0.85em; display: block; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #333; line-height: 1.5; }
         .news-link:hover { color: #D4AF37; }
         button[data-baseweb="tab"] { font-weight: 800 !important; font-size: 0.9em !important; }
         
-        /* 운세 박스 프리미엄 디자인 */
-        .saju-box { background: linear-gradient(180deg, rgba(212, 175, 55, 0.08) 0%, rgba(28, 28, 30, 0.5) 100%); border-radius: 12px; border: 1px solid rgba(212, 175, 55, 0.3); padding: 25px 20px; text-align: left; margin-top:15px; }
-        .saju-title { color: #D4AF37; text-align: center; margin-top: 0; font-size: 1.25em; font-weight: 900; margin-bottom: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-        .saju-section { margin-bottom: 18px; }
-        .saju-h5 { color: #e5e5ea; font-size: 1.0em; font-weight: 800; margin-bottom: 8px; border-left: 3px solid #D4AF37; padding-left: 10px; }
-        .saju-p { color: #d1d1d6; font-size: 0.85em; line-height: 1.6; margin-top: 0; padding-left: 13px; text-align:justify; letter-spacing: -0.2px; }
-        .saju-footer { color: #888; font-size: 0.75em; text-align: center; margin-top: 25px; border-top: 1px dashed #444; padding-top: 15px; }
+        /* 🔥 운세 박스 줄간격 및 패딩 프리미엄 교정 */
+        .saju-box { background: linear-gradient(180deg, rgba(212, 175, 55, 0.08) 0%, rgba(28, 28, 30, 0.5) 100%); border-radius: 12px; border: 1px solid rgba(212, 175, 55, 0.3); padding: 25px 20px; text-align: left; margin-top: 15px; }
+        .saju-title { color: #D4AF37; text-align: center; margin-top: 0; font-size: 1.3em; font-weight: 900; margin-bottom: 25px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); line-height: 1.4; letter-spacing: -0.5px; }
+        .saju-section { margin-bottom: 22px; }
+        .saju-h5 { color: #e5e5ea; font-size: 1.05em; font-weight: 800; margin-bottom: 12px; border-left: 3px solid #D4AF37; padding-left: 10px; line-height: 1.3; }
+        .saju-p { color: #d1d1d6; font-size: 0.9em; line-height: 1.75; margin-top: 0; padding-left: 13px; text-align: justify; letter-spacing: -0.3px; word-break: keep-all; }
+        .saju-footer { color: #888; font-size: 0.75em; text-align: center; margin-top: 30px; border-top: 1px dashed #444; padding-top: 15px; line-height: 1.6; word-break: keep-all; }
     </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 3. 데이터 로딩 (가입명단 + 🌟평수 데이터)
+# 3. 데이터 로딩 (가입명단 + 평수 데이터 완벽 추출)
 # ==========================================
 SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQoR29bAcAP0KUBEvS3S6gn5Qz1MTKDJOxz-lW1UEyV_vOcISPxNW2uMuYMrz9HUw/pub?gid=1967078212&single=true&output=csv"
 LAYOUT_FILE = "디에트르 그랑루체 카페가입 현황.xlsx" 
@@ -146,39 +146,78 @@ def get_busan_weather():
         return "맑음" 
 
 # ==========================================
-# 🌟 [핵심] 평수 타겟팅 운세 (🔥 HTML 엔터 제거 완벽 압축)
+# 🌟 [핵심] 초장문 딥러닝(?) 운세 생성기 (무한 조합)
 # ==========================================
 def get_custom_fortune(dong, ho, type_dict):
     today_str = datetime.now().strftime("%Y%m%d")
-    seed_val = f"{today_str}_{dong}_{ho}"
+    # 🔥 호수별로 완벽히 다른 결과를 내기 위한 고유 시드!
+    seed_val = f"{today_str}_{dong}_{ho}_secret"
     random.seed(seed_val)
 
     weather = get_busan_weather()
     line_str = str(ho)[-1] if str(ho) else "1"
     unit_type = type_dict.get((dong, line_str), "84") 
     
-    if weather == "맑음":
-        site_energy = f"오늘 외부의 청명한 양기(陽氣)가 <b>{dong} {ho}호</b> 터로 강하게 쏟아져 들어오고 있습니다. 풍수적으로 양광(빛)은 명예와 결실을 뜻합니다. 아직 빈 공간임에도 맑은 생기가 터를 감싸고 있어, 훗날 입주하셨을 때 집안에 웃음이 끊이지 않고 횡재수가 따를 대길(大吉)의 기운입니다."
-    elif weather == "흐림":
-        site_energy = f"하늘의 구름처럼 <b>{dong} {ho}호</b>의 터가 숨을 고르며 거대한 지운(地運)을 단단하게 응축하고 있습니다. 이럴 때는 무리하게 일을 벌이기보다 내실을 다지는 것이 좋습니다. 밖으로 샐 뻔한 돈이 완벽히 막히고 훗날 크게 쓰일 재물창고가 튼튼해지는 하루입니다."
-    else:
-        site_energy = f"수(水)의 기운이 <b>{dong} {ho}호</b> 터에 머물던 묵은 정체기를 시원하게 씻어내고 있습니다. 명리학에서 물은 곧 재물(財物)의 흐름을 의미합니다. 그동안 막혀있던 대출이나 금전적인 고민거리가 있었다면 씻겨 내려가듯 뜻밖의 해결책이 등장할 명당의 기운입니다."
+    # ----------------------------------------
+    # [블록 1] 터의 기본 기운 (날씨 연동)
+    # ----------------------------------------
+    weather_pools = {
+        "맑음": [
+            f"오늘 외부의 청명한 양기(陽氣)가 <b>{dong} {ho}호</b> 터의 가장 깊은 곳까지 강하게 쏟아져 들어오고 있습니다. 풍수적으로 맑은 양광(빛)은 막힌 운을 뚫어주고 명예와 결실을 맺게 하는 최고의 에너지입니다. 아직 빈 공간임에도 불구하고 맑고 힘찬 생기가 터를 온전히 감싸고 있어, 훗날 귀하께서 입주하셨을 때 집안에 웃음소리가 마르지 않고 뜻밖의 횡재수와 귀인이 끊임없이 찾아들 대길(大吉)의 기운을 머금고 있습니다.",
+            f"구름 한 점 없는 맑은 하늘의 순수한 기운이 <b>{dong} {ho}호</b> 터에 온전히 내리쬐며 자리를 잡고 있는 날입니다. 터가 품은 본연의 생명력이 극대화되는 매우 길한 시기입니다. 이처럼 맑은 기운이 터를 닦아놓으면, 훗날 이 공간에서 새롭게 시작하는 귀하의 모든 사업과 직장 일이 막힘없이 순조롭게 풀려나가며, 무엇보다 가족 구성원들의 건강운과 학업운이 크게 상승하게 되는 천혜의 명당으로 거듭나게 됩니다."
+        ],
+        "흐림": [
+            f"하늘에 드리운 묵직한 구름처럼, 현재 <b>{dong} {ho}호</b>의 터는 들뜬 기운을 가라앉히고 숨을 깊게 고르며 거대한 지운(地運)을 단단하게 응축하고 있는 중입니다. 풍수에서는 이렇게 기운이 갈무리되는 터를 재물이 흩어지지 않는 '금고'의 형상으로 봅니다. 따라서 훗날 이곳에 입주하시게 되면 밖으로 허무하게 샐 뻔했던 자금들이 완벽히 차단되고, 재물이 차곡차곡 쌓여 훗날 크게 쓰일 튼튼한 재물창고가 되어줄 것입니다.",
+            f"햇빛이 잠시 가려지고 대지가 차분해진 오늘, <b>{dong} {ho}호</b>의 터는 바깥의 소란스러운 에너지를 차단하고 스스로 에너지를 모으는 '저장과 잉태'의 시기를 맞이했습니다. 이러한 터의 기운은 거주자에게 심리적인 안정감과 깊은 통찰력을 선사합니다. 이 터가 품고 있는 묵직한 지운은 훗날 예기치 못한 금전적 보상이나 큰 계약을 성사시킬 수 있는 단단하고 흔들림 없는 기반이 되어줄 것입니다."
+        ],
+        "비": [
+            f"하늘에서 내리는 수(水)의 기운이 <b>{dong} {ho}호</b> 터 주변에 혹여나 맴돌고 있을지 모를 묵은 액운과 정체된 기운을 시원하게 씻어내리고 있습니다. 명리학과 풍수지리에서 맑은 물은 곧 재물(財物)이 흘러들어오는 통로를 의미합니다. 입주를 앞두고 터가 맑은 물로 깨끗하게 정화되고 있으니, 이사 후에는 그동안 꽉 막혀 답답했던 대출이나 자금 문제, 혹은 인간관계의 꼬임들이 마치 씻겨 내려가듯 뜻밖의 귀인을 만나 시원하게 뚫리게 될 훌륭한 명당의 기운입니다."
+        ]
+    }
+    site_energy = random.choice(weather_pools.get(weather, weather_pools["맑음"]))
 
+    # ----------------------------------------
+    # [블록 2] 평수 기반 타겟팅 (성향 및 재물운)
+    # ----------------------------------------
     if "59" in unit_type: 
         vibe_title = "🌱 실속과 새로운 도약의 기운"
-        fortune_text = "이 터는 새싹이 땅을 뚫고 오르는 '생동(生動)'의 기운을 품고 있어, 실속을 챙기고 새로운 시작을 준비하는 분들에게 최고의 명당입니다. 오늘은 작은 지출을 꼼꼼히 아낀 것이 훗날 큰 종잣돈으로 돌아오는 형국입니다. 투자나 계약은 돌다리도 두들겨 보듯 신중히 하시고, 오늘 저녁 배우자나 가족, 연인에게 따뜻한 식사 한 끼를 대접하십시오. 가정의 끈끈한 화합이 엉뚱하게 돈이 새는 것을 완벽히 막아줄 것입니다."
+        fortune_pools = [
+            "이 터는 단단한 흙을 뚫고 힘차게 돋아나는 새싹과 같은 '생동(生動)'의 기운을 품고 있습니다. 겉치레보다는 실속을 단단히 챙기고, 인생의 새로운 챕터를 향해 도약하고자 하는 분들에게 그야말로 최고의 명당입니다. 오늘 하루는 작고 사소해 보이는 지출이라도 꼼꼼히 통제하고 아끼는 것이 필수입니다. 오늘 아낀 그 작은 돈이 터의 기운을 받아 훗날 몇 배로 불어난 큰 종잣돈으로 귀하에게 돌아올 형국입니다. 누군가 건네는 솔깃한 투자나 계약 이야기는 돌다리도 두들겨 보듯 신중히 검토하십시오.",
+            "이 터는 작지만 그 속이 아주 알차게 여문 '단단한 결실'의 기운이 강하게 서려 있습니다. 남들의 화려한 행보나 소비에 흔들리지 않고, 귀하만의 뚝심 있는 페이스대로 밀고 나갈 때 비로소 묵직한 재물이 터에 고이게 됩니다. 특히 오늘은 충동구매나 불필요한 감정 소모의 유혹이 강하게 들어오는 날이니, 장바구니를 과감히 비우고 하루를 고요하게 관망하시는 것이 운을 트는 비결입니다. 오늘 아낀 재물 에너지는 내일 귀하의 직장이나 사업에서 두 배의 가치를 지닌 귀한 소식으로 돌아오게 될 것입니다."
+        ]
     elif "110" in unit_type or "114" in unit_type or "104" in unit_type: 
         vibe_title = "⛰️ 성취와 대인(大人)의 기운"
-        fortune_text = "이 터는 세상을 굽어보는 '태산(泰山)'의 기운을 가졌습니다. 이미 어느 정도 경제적 여유와 성취를 이룬 분들의 품위와 권위를 굳건히 지켜주는 자리입니다. 오늘은 얕은 수나 자잘한 지출에 너무 연연하지 마십시오. 큰 물에서 노는 사주이니, 주변 지인들에게 여유롭게 밥을 한 번 사며 덕을 베푸는 것이 좋습니다. 그들이 훗날 더 큰 명예와 기가 막힌 투자 호재를 물어다 주는 '대인의 하루'가 될 것입니다."
+        fortune_pools = [
+            "이 터는 높은 곳에서 세상을 여유롭게 굽어보는 장엄한 '태산(泰山)'의 기운을 품고 있습니다. 이미 인생에서 어느 정도의 경제적 여유와 사회적 성취를 이룩하신 분들의 높은 품위와 권위를 굳건히 지켜주고 확장해 주는 귀한 자리입니다. 이런 대인의 터에 입주하실 분이라면, 오늘은 얕은 수나 자잘한 푼돈 지출에 너무 연연하며 에너지를 낭비하지 마십시오. 귀하는 더 큰 물에서 노는 웅장한 사주를 지녔으니, 오히려 주변 지인들이나 후배들에게 여유롭게 식사를 한 번 대접하며 덕(德)을 넉넉히 베푸는 것이 낫습니다. 그 베풂이 훗날 더 큰 명예와 기가 막힌 투자 호재를 물어다 줄 것입니다.",
+            "수많은 배들이 평화롭게 정박할 수 있는 드넓고 고요한 '심해(深海)'의 묵직한 기운을 품은 터입니다. 귀하가 지닌 자산과 명예를 외부의 풍파로부터 안전하게 지켜내는 힘이 매우 탁월합니다. 오늘 하루는 사소한 오해나 주변 사람들의 가벼운 언쟁에 휘말리지 마시고, 바다처럼 넓은 아량으로 묵묵히 품어주십시오. 그러한 귀하의 여유로운 태도가 곧 귀하의 큰 그릇을 세상에 증명하는 길이며, 머지않아 귀하의 명예를 더욱 높여주고 사업적 아이디어를 제공할 든든한 귀인들을 끌어모으는 강력한 자석이 될 것입니다."
+        ]
     else: 
         vibe_title = "🌳 안정과 가정 화목의 기운"
-        fortune_text = "이 터는 만물을 품고 기르는 '대지(土)'의 기운으로, 가정의 중추를 책임지고 화목함을 이끌어가는 데 최적화된 명당입니다. 오늘은 자녀의 평안과 가족 간의 화합이 곧 나의 재물운을 끌어올리는 마스터키입니다. 무리하고 공격적인 투자보다는 자산의 내실을 단단히 다지는 것이 좋으며, 오지랖 부리며 남의 일에 관여하기보다는 오직 '내 가족'을 위해 베푸는 작은 지출이 뜻밖의 호재로 돌아올 것입니다."
+        fortune_pools = [
+            "이 터는 세상의 모든 만물을 따뜻하게 품고 길러내는 어머니 같은 '대지(土)'의 기운으로 가득 차 있습니다. 무엇보다 가정의 중추를 든든하게 책임지고, 가족 구성원 간의 화목함을 이끌어가는 데 최적화된 편안한 명당입니다. 오늘 귀하의 운세를 여는 가장 중요한 마스터키는 바로 '가족 간의 화합과 대화'입니다. 바깥에서 무리하고 공격적인 투자를 모색하기보다는 현재 지니고 있는 자산의 내실을 단단히 다지는 것이 좋습니다. 오지랖 부리며 남의 일에 에너지를 쏟기보다는, 오직 내 가족을 위해 베푸는 따뜻한 식사나 작은 지출이 결국 터의 기운과 맞물려 뜻밖의 경제적 호재로 돌아올 것입니다.",
+            "이 공간은 땅속 깊은 곳까지 굵고 단단한 뿌리를 내린 거대한 '거목(巨木)'의 든든한 기운이 서려 있는 터입니다. 훗날 외부의 거센 경제적, 심리적 풍파가 닥치더라도 귀하의 집안과 재산을 안전하게 방어해 줄 훌륭한 방패막이 되어줍니다. 오늘은 늦게까지 이어지는 외부의 술자리나 약속보다는 일찍 귀가하여 가족들과 소박하고 깊은 대화를 나누는 것이 귀하의 운을 크게 트이게 하는 지름길입니다. 집안에서 가족들의 웃음소리가 커질수록 터에 남아있던 음기(陰氣)가 물러가고 양기가 가득 차올라, 거주자의 건강과 재물운이 함께 큰 폭으로 상승하게 됩니다."
+        ]
+    fortune_text = random.choice(fortune_pools)
 
-    lucky_items = ["따뜻한 차 한 잔", "햇살 10분 맞으며 걷기", "지갑 속 영수증 버리기", "현관 청소 상상하기", "퇴근길 로또 5천 원"]
+    # ----------------------------------------
+    # [블록 3] 보편적 이사운 / 변동운
+    # ----------------------------------------
+    moving_pools = [
+        "또한, 새로운 보금자리로 터를 옮길 준비를 하는 과정은 인생의 커다란 기운이 뒤바뀌는 중요한 변곡점입니다. 현재 이사를 앞두고 신경 쓸 일이 많아 머리가 복잡하시겠지만, 이는 더 큰 복(福)을 담기 위해 내 그릇을 넓히는 '명현현상(좋아지기 전의 진통)'과 같습니다. 마음의 조급함을 내려놓으시면 입주 과정이 물 흐르듯 순조롭게 풀릴 것입니다.",
+        "터를 옮긴다는 것은 귀하의 삶에 엉켜있던 과거의 실타래를 끊어내고, 맑고 새로운 도화지에 밑그림을 그리는 것과 같습니다. 새집을 단장하고 입주를 준비하는 모든 과정에 긍정적인 에너지를 불어넣으십시오. 이사 준비 과정에서 생기는 약간의 지출이나 마찰은, 입주 후 들어올 엄청난 액수의 액운을 미리 액땜하는 좋은 현상으로 쿨하게 넘기시는 것이 좋습니다.",
+        "다가올 새로운 터전으로의 이동은 귀하의 운명에 긍정적인 '환기(換氣)'를 가져다줍니다. 새 집의 문을 열고 들어갈 때의 설렘이 곧 이 터가 귀하에게 줄 재물과 건강의 시작점입니다. 남은 입주 준비 기간 동안 너무 스트레스 받지 마시고, 새로운 공간에 어떤 행운의 가구를 배치할지 즐거운 상상에 빠져보는 것이 현재의 금전운을 단단하게 지키는 비결입니다."
+    ]
+    moving_text = random.choice(moving_pools)
+
+    # ----------------------------------------
+    # [블록 4] 오늘의 개운템
+    # ----------------------------------------
+    lucky_items = ["따뜻한 차 한 잔 마시며 여유 갖기", "햇살 10분 맞으며 걷기", "지갑 속 필요 없는 영수증 당장 버리기", "새집 현관 청소하는 상상하기", "퇴근길 기분 좋게 로또 5천 원 구매하기", "오늘 하루 불평불만 3번 참아내기"]
     selected_item = random.choice(lucky_items)
     
-    # 🔥 에러 방지: 줄바꿈(엔터) 싹 지운 한 줄짜리 HTML 
-    result_html = f"<div class='saju-box'><h4 class='saju-title'>📜 {dong} {ho}호 오늘의 맞춤 운세</h4><div class='saju-section'><div class='saju-h5'>🏡 터의 기운 분석</div><p class='saju-p'>{site_energy}</p></div><div class='saju-section'><div class='saju-h5'>{vibe_title}</div><p class='saju-p'>{fortune_text}</p></div><div class='saju-section' style='background:rgba(0,0,0,0.2); padding:12px; border-radius:8px;'><p style='color:#d1d1d6; font-size:0.9em; margin-bottom:4px;'>🍀 <b>오늘의 개운템 (운을 트는 행동):</b> <span style='color:#30D158; font-weight:800;'>{selected_item}</span></p></div><div class='saju-footer'>※ 본 운세는 명리학적 관점과 해당 공간의 풍수적 터 기운을 심층 분석하여 제공됩니다.<br>더 뼈 때리는 나의 진짜 사주/MBTI 분석이 궁금하다면?<br><b style='color:#D4AF37;'>상단의 1:1 톡으로 팡도사에게 문의하세요!</b></div></div>"
+    # 🔥 에러 방지용 한 줄 압축 HTML (프리미엄 줄간격 적용)
+    result_html = f"<div class='saju-box'><h4 class='saju-title'>📜 {dong} {ho}호 오늘의 맞춤 운세</h4><div class='saju-section'><div class='saju-h5'>🏡 입주 전 터의 기운 분석</div><p class='saju-p'>{site_energy}</p></div><div class='saju-section'><div class='saju-h5'>{vibe_title}</div><p class='saju-p'>{fortune_text}</p></div><div class='saju-section'><div class='saju-h5'>🚚 이동과 변화의 기운 (이사운)</div><p class='saju-p'>{moving_text}</p></div><div class='saju-section' style='background:rgba(0,0,0,0.2); padding:15px; border-radius:8px; margin-top:25px;'><p style='color:#d1d1d6; font-size:0.9em; margin-bottom:0;'>🍀 <b>오늘 나의 기운을 트여줄 개운템:</b> <span style='color:#30D158; font-weight:800;'>{selected_item}</span></p></div><div class='saju-footer'>※ 본 운세는 명리학적 관점과 해당 공간의 풍수적 터 기운을 심층 분석하여 무작위가 아닌 고유 조합으로 제공됩니다.<br>더 뼈 때리는 나의 진짜 사주/MBTI 분석이 궁금하다면?<br><b style='color:#D4AF37;'>상단의 1:1 톡으로 팡도사에게 문의하세요!</b></div></div>"
+    
     return result_html
 
 # ==========================================
@@ -257,10 +296,10 @@ with tab1:
     st.markdown(html_grid, unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 2] 오늘의 운세 
+# [탭 2] 오늘의 운세 (🔥 무한 조합 초장문 로직)
 # ------------------------------------------
 with tab2:
-    st.markdown("<h4 style='text-align:center; color:#D4AF37; margin-top:10px;'>🔮 팡도사의 동·호수 맞춤 운세</h4>", unsafe_allow_html=True)
+    st.markdown("<h4 style='text-align:center; color:#D4AF37; margin-top:10px;'>🔮 팡도사의 동·호수 맞춤 신점</h4>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em;'>개인정보 입력 없이, 거주하실 공간의 터 기운을 심층 분석하여 점쳐드립니다.</p>", unsafe_allow_html=True)
     
     col_d, col_h = st.columns(2)
