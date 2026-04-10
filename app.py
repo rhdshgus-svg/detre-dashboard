@@ -9,17 +9,35 @@ import time
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 from email.utils import parsedate_to_datetime
+from PIL import Image
 
 # ==========================================
 # 1. 기본 화면 설정
 # ==========================================
-st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon="🏢", layout="centered")
+try:
+    logo_img = Image.open("logo.png")
+    st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon=logo_img, layout="centered")
+except Exception:
+    st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon="🏢", layout="centered")
 
 # ==========================================
-# 2. CSS 스타일링 (🔥 경제지표 VIP 리포트 폼 압축 패치)
+# 2. CSS 스타일링 (🔥 VIP 리포트 폼 + 스크롤 고정)
 # ==========================================
 st.markdown("""
+    <meta name="google" content="notranslate">
+    
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135673.png">
+    <link rel="icon" sizes="192x192" href="https://cdn-icons-png.flaticon.com/512/3135/3135673.png">
+    <link rel="icon" sizes="512x512" href="https://cdn-icons-png.flaticon.com/512/3135/3135673.png">
+    
     <style>
+        /* 🔥 안드로이드 앱 당겨서 새로고침 완벽 차단! */
+        html, body, #root, .stApp, .main, [data-testid="stAppViewContainer"], section {
+            overscroll-behavior: none !important;
+            overscroll-behavior-y: none !important;
+            overscroll-behavior-x: none !important;
+        }
+        
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         * { font-family: 'Pretendard', sans-serif; }
         #MainMenu {visibility: hidden;} footer {visibility: hidden;} header {visibility: hidden;}
@@ -92,7 +110,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 3. 데이터 로딩 
+# 3. 데이터 로딩 (구글 시트 연동)
 # ==========================================
 SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQoR29bAcAP0KUBEvS3S6gn5Qz1MTKDJOxz-lW1UEyV_vOcISPxNW2uMuYMrz9HUw/pub?gid=1967078212&single=true&output=csv"
 LAYOUT_FILE = "디에트르 그랑루체 카페가입 현황.xlsx" 
@@ -173,7 +191,6 @@ def get_gold_price():
 
 @st.cache_data(ttl=3600)
 def get_global_stocks_api():
-    # 🔥 아버님이 요청하신 폼나는 글로벌 주요 증시 데이터 (가이드라인 셋업)
     return [
         ("코스피 (KOSPI)", "2,750.86", "↑ 12.30", "#FF3B30"),
         ("나스닥 (NASDAQ)", "16,300.50", "↑ 85.20", "#FF3B30"),
@@ -240,18 +257,18 @@ def get_custom_fortune(dong, ho, type_dict):
     return result_html
 
 # ==========================================
-# 4. 화면 상단 타이틀 및 공통 배너 
+# 4. 화면 상단 타이틀 및 공통 배너 (🔥 어플 점프 target="_top" 적용 완료!)
 # ==========================================
 st.markdown("<div class='premium-title'>Detre Granluce</div>", unsafe_allow_html=True)
 st.markdown("""
 <div class='promo-title'>[Sol 운명상점] 사주 & MBTI 솔루션</div>
 <div style='text-align: center; width: 100%;'>
-    <a href="https://open.kakao.com/o/gEkb84oi" target="_blank" class='btn-saju'>💬 입주민전용 사주상담 연결</a>
+    <a href="https://open.kakao.com/o/gEkb84oi" target="_top" class='btn-saju'>💬 입주민전용 사주상담 연결</a>
 </div>
 
 <div style='display: flex; flex-direction: column; gap: 4px; margin-bottom: 15px;'>
-    <a href="https://form.jotform.com/240628865713463" target="_blank" class='official-btn btn-naver'>📝 그랑루체 공식카페 (위임동의서 제출)</a>
-    <a href="https://open.kakao.com/o/ggAiqg4f" target="_blank" class='official-btn btn-kakao-official'>💬 그랑루체 공식 카카오톡 입장</a>
+    <a href="https://form.jotform.com/240628865713463" target="_top" class='official-btn btn-naver'>📝 그랑루체 공식카페 (위임동의서 제출)</a>
+    <a href="https://open.kakao.com/o/ggAiqg4f" target="_top" class='official-btn btn-kakao-official'>💬 그랑루체 공식 카카오톡 입장</a>
 </div>
 <div class='notice-text'>🚨 현황판에 미표기된 세대는 회장님 및 임원진에게 요청부탁드립니다.</div>
 """, unsafe_allow_html=True)
@@ -374,7 +391,7 @@ with tab3:
             
         for art in articles[:10]:
             days_left = max(0, 30 - (now - art['dt']).days)
-            st.markdown(f"<a href='{art['link']}' target='_blank' class='news-link'><span class='news-source'>[{art['source']}]</span> {art['title']}<br><span class='news-date' style='display:inline-block; margin-top:4px;'>{art['dt'].strftime('%Y.%m.%d')} 기사</span><span class='fomo-tag'>⏳ {days_left}일 후 삭제</span></a>", unsafe_allow_html=True)
+            st.markdown(f"<a href='{art['link']}' target='_top' class='news-link'><span class='news-source'>[{art['source']}]</span> {art['title']}<br><span class='news-date' style='display:inline-block; margin-top:4px;'>{art['dt'].strftime('%Y.%m.%d')} 기사</span><span class='fomo-tag'>⏳ {days_left}일 후 삭제</span></a>", unsafe_allow_html=True)
             count += 1
                 
         if count == 0: st.info("🚨 최근 30일간 해당 키워드의 메이저 언론사 뉴스가 없습니다.")
@@ -384,7 +401,6 @@ with tab3:
 # [탭 4] 실시간 경제지표 (🔥 VIP 리포트 폼)
 # ------------------------------------------
 with tab4:
-    # 제목 폰트를 h3로 키우고 굵기(900)를 최대로 올려 압도적인 시인성을 줍니다.
     st.markdown("<h3 style='text-align:center; color:#D4AF37; font-weight:900; margin-top:10px; letter-spacing:-1px;'>📈 실시간 경제·금융 지표</h3>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em; margin-bottom:15px;'>※ 핵심 지표 요약 리포트 (실시간 API 연동)</p>", unsafe_allow_html=True)
 
@@ -394,7 +410,6 @@ with tab4:
     gold_24k, gold_24k_delta, gold_18k, gold_18k_delta = get_gold_price()
     stocks = get_global_stocks_api()
 
-    # 스트림릿 기본 컬럼의 쓸데없는 여백을 날리고, 고급스러운 HTML 테이블로 재구성했습니다.
     html_econ = f"""
     <div class='econ-box'>
         <div class='econ-title'>🏢 에코델타 실거래가 현황 (84㎡ 기준)</div>
@@ -434,7 +449,6 @@ with tab4:
         <table class='econ-table'>
     """
     
-    # 글로벌 증시 테이블 줄 생성기
     for name, price, delta, color in stocks:
         html_econ += f"<tr><th>{name}</th><td>{price} <span style='color:{color}; font-size:0.85em; margin-left:4px; font-weight:800;'>{delta}</span></td></tr>"
 
