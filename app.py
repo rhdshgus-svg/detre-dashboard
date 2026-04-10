@@ -89,12 +89,13 @@ st.markdown("""
         
         button[data-baseweb="tab"] { font-weight: 800 !important; font-size: 0.9em !important; }
         
-        .saju-box { background: linear-gradient(180deg, rgba(212, 175, 55, 0.08) 0%, rgba(28, 28, 30, 0.5) 100%); border-radius: 12px; border: 1px solid rgba(212, 175, 55, 0.3); padding: 25px 20px; text-align: left; margin-top: 15px; }
-        .saju-title { color: #D4AF37; text-align: center; margin-top: 0; font-size: clamp(1.05em, 5vw, 1.25em); font-weight: 900; margin-bottom: 25px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); line-height: 1.4; letter-spacing: -0.8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        /* 🔥 사주(신점) 박스 프리미엄 가독성 패치 (밝은 배경 + 진한 글씨 + 버건디 제목) */
+        .saju-box { background: linear-gradient(180deg, #FFFDF8 0%, #F4EFE6 100%); border-radius: 12px; border: 1px solid #D4AF37; padding: 25px 20px; text-align: left; margin-top: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .saju-title { color: #800020; text-align: center; margin-top: 0; font-size: clamp(1.05em, 5vw, 1.25em); font-weight: 900; margin-bottom: 25px; line-height: 1.4; letter-spacing: -0.8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .saju-section { margin-bottom: 22px; }
-        .saju-h5 { color: #D4AF37; font-size: 1.1em; font-weight: 900; margin-bottom: 12px; border-left: 3px solid #D4AF37; padding-left: 10px; line-height: 1.3; }
-        .saju-p { color: #FFFFFF; font-size: 0.95em; font-weight: 500; line-height: 1.75; margin-top: 0; padding-left: 13px; text-align: justify; letter-spacing: -0.3px; word-break: keep-all; }
-        .saju-footer { color: #888; font-size: 0.75em; text-align: center; margin-top: 30px; border-top: 1px dashed #444; padding-top: 15px; line-height: 1.6; word-break: keep-all; }
+        .saju-h5 { color: #800020; font-size: 1.1em; font-weight: 900; margin-bottom: 12px; border-left: 3px solid #800020; padding-left: 10px; line-height: 1.3; }
+        .saju-p { color: #111111; font-size: 0.95em; font-weight: 700; line-height: 1.75; margin-top: 0; padding-left: 13px; text-align: justify; letter-spacing: -0.3px; word-break: keep-all; }
+        .saju-footer { color: #555555; font-size: 0.75em; text-align: center; margin-top: 30px; border-top: 1px dashed #BDBDBD; padding-top: 15px; line-height: 1.6; word-break: keep-all; }
         
         /* 🔥 경제 대시보드 리포트형 초압축 스타일 */
         .econ-box { background: linear-gradient(145deg, #1c1c1e, #121212); border: 1px solid #333; border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
@@ -253,7 +254,7 @@ def get_custom_fortune(dong, ho, type_dict):
     lucky_items = ["따뜻한 물 한 잔 천천히 마시기", "햇살 10분 맞으며 걷기", "지갑 속 필요 없는 영수증 당장 버리기", "새집 현관 청소하는 상상하기", "퇴근길 기분 좋게 로또 5천 원 구매하기", "오늘 하루 속으로 3초 세고 말하기"]
     selected_item = random.choice(lucky_items)
     
-    result_html = f"<div class='saju-box'><h4 class='saju-title'>📜 {dong} {ho}호 맞춤 신점</h4><div class='saju-section'><div class='saju-h5'>🏡 입주 전 터의 기운 분석</div><p class='saju-p'>{site_energy}</p></div><div class='saju-section'><div class='saju-h5'>{vibe_title}</div><p class='saju-p'>{fortune_text}</p></div><div class='saju-section'><div class='saju-h5'>🚚 이동과 변화의 기운 (이사운)</div><p class='saju-p'>{moving_text}</p></div><div class='saju-section' style='background:rgba(0,0,0,0.2); padding:15px; border-radius:8px; margin-top:25px;'><p style='color:#d1d1d6; font-size:0.9em; margin-bottom:0;'>🍀 <b>오늘 나의 기운을 트여줄 개운템:</b> <span style='color:#30D158; font-weight:800;'>{selected_item}</span></p></div><div class='saju-footer'>※ 본 신점은 명리학적 관점과 귀하의 사주 기운을 심층 분석하여 무작위가 아닌 고유 조합으로 제공됩니다.</div></div>"
+    result_html = f"<div class='saju-box'><h4 class='saju-title'>📜 {dong} {ho}호 맞춤 신점</h4><div class='saju-section'><div class='saju-h5'>🏡 입주 전 터의 기운 분석</div><p class='saju-p'>{site_energy}</p></div><div class='saju-section'><div class='saju-h5'>{vibe_title}</div><p class='saju-p'>{fortune_text}</p></div><div class='saju-section'><div class='saju-h5'>🚚 이동과 변화의 기운 (이사운)</div><p class='saju-p'>{moving_text}</p></div><div class='saju-section' style='background:rgba(0,0,0,0.05); padding:15px; border-radius:8px; margin-top:25px; border:1px solid #D4AF37;'><p style='color:#111111; font-size:0.9em; margin-bottom:0; font-weight:800;'>🍀 오늘 나의 기운을 트여줄 개운템: <span style='color:#03C75A;'>{selected_item}</span></p></div><div class='saju-footer'>※ 본 신점은 명리학적 관점과 귀하의 사주 기운을 심층 분석하여 무작위가 아닌 고유 조합으로 무료 제공됩니다.</div></div>"
     return result_html
 
 # ==========================================
@@ -274,9 +275,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 5. 종합 포털 탭(Tab) 메뉴
+# 5. 종합 포털 탭(Tab) 메뉴 (🔥 탭 이름 변경)
 # ==========================================
-tab1, tab2, tab3, tab4 = st.tabs(["🏢 입주현황", "🔮 오늘의 운세", "📰 지역 핫이슈", "📈 경제지표"])
+tab1, tab2, tab3, tab4 = st.tabs(["🏢 입주현황", "🔮 오늘의 운세", "📰 관련뉴스", "📈 경제지표"])
 
 # ------------------------------------------
 # [탭 1] 메인: 세대별 입주현황
@@ -336,7 +337,7 @@ with tab1:
     st.markdown(html_grid, unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 2] 오늘의 운세 
+# [탭 2] 오늘의 운세 (🔥 무료 강조 패치)
 # ------------------------------------------
 with tab2:
     st.markdown("<h4 style='text-align:center; color:#D4AF37; margin-top:10px;'>🔮 팡도사의 동·호수 맞춤 신점</h4>", unsafe_allow_html=True)
@@ -345,7 +346,7 @@ with tab2:
     with col_d: f_dong = st.selectbox("입주 예정 동", all_dongs_raw, key="f_dong", label_visibility="collapsed")
     with col_h: f_ho = st.text_input("입주 예정 호수", placeholder="호수 입력 (예: 1201)", key="f_ho", label_visibility="collapsed")
     
-    if st.button("✨ 오늘 나의 신점 뽑기", use_container_width=True):
+    if st.button("✨ 오늘 나의 무료신점 뽑기", use_container_width=True):
         if f_ho.strip() == "": st.warning("호수를 정확히 입력해주세요! (예: 1201)")
         else:
             valid_combinations = set(zip(df_layout['동'], df_layout['호']))
@@ -358,10 +359,10 @@ with tab2:
                 st.markdown(get_custom_fortune(f_dong, f_ho, type_dict), unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 3] 지역 핫이슈 (🔥 안내 문구 및 타이틀 패치 완료)
+# [탭 3] 관련뉴스 (🔥 제목 네이비/블랙 강조 패치)
 # ------------------------------------------
 with tab3:
-    st.markdown("<h4 style='text-align:center; color:#FFFFFF; font-weight:900; margin-top:10px;'>📰 그랑루체 실시간 참고뉴스</h4>", unsafe_allow_html=True)
+    st.markdown("<div style='background: linear-gradient(90deg, #F0F4F8, #D9E2EC); padding: 12px; border-radius: 8px; margin-top: 10px; margin-bottom: 15px;'><h4 style='text-align:center; color:#0B1E36; font-weight:900; margin:0; letter-spacing:-0.5px;'>📰 우리단지 관련뉴스</h4></div>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; color:#ff9f0a; font-size:0.75em; margin-bottom:15px;'>🚨 최근 30일이내 기사중 중복내용 제외 10건만 노출됩니다.</p>", unsafe_allow_html=True)
     try:
         query = urllib.parse.quote('에코델타시티 OR "디에트르 그랑루체" OR "명지국제신도시 부동산" OR "부산 강서구 개발" OR "부동산 정책" OR "취득세" OR "특례보금자리" OR "금리 인하" when:30d')
@@ -398,7 +399,7 @@ with tab3:
     except: st.info("실시간 뉴스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.")
 
 # ------------------------------------------
-# [탭 4] 실시간 경제지표 (🔥 서브타이틀 텍스트 변경 완료)
+# [탭 4] 실시간 경제지표 
 # ------------------------------------------
 with tab4:
     st.markdown("<h3 style='text-align:center; color:#D4AF37; font-weight:900; margin-top:10px; letter-spacing:-1px;'>📈 실시간 경제·금융 지표</h3>", unsafe_allow_html=True)
