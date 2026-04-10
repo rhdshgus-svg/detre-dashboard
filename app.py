@@ -152,7 +152,7 @@ def get_busan_weather():
         return "맑음" 
 
 # ==========================================
-# 🌟 심리 타겟팅(바넘 효과) 운세 생성기
+# 🌟 심리 타겟팅 운세 생성기
 # ==========================================
 def get_custom_fortune(dong, ho, type_dict):
     today_str = datetime.now().strftime("%Y%m%d")
@@ -206,7 +206,7 @@ def get_custom_fortune(dong, ho, type_dict):
     lucky_items = ["따뜻한 물 한 잔 천천히 마시기", "햇살 10분 맞으며 걷기", "지갑 속 필요 없는 영수증 당장 버리기", "새집 현관 청소하는 상상하기", "퇴근길 기분 좋게 로또 5천 원 구매하기", "오늘 하루 속으로 3초 세고 말하기"]
     selected_item = random.choice(lucky_items)
     
-    result_html = f"<div class='saju-box'><h4 class='saju-title'>📜 {dong} {ho}호 맞춤 신점</h4><div class='saju-section'><div class='saju-h5'>🏡 입주 전 터의 기운 분석</div><p class='saju-p'>{site_energy}</p></div><div class='saju-section'><div class='saju-h5'>{vibe_title}</div><p class='saju-p'>{fortune_text}</p></div><div class='saju-section'><div class='saju-h5'>🚚 이동과 변화의 기운 (이사운)</div><p class='saju-p'>{moving_text}</p></div><div class='saju-section' style='background:rgba(0,0,0,0.2); padding:15px; border-radius:8px; margin-top:25px;'><p style='color:#d1d1d6; font-size:0.9em; margin-bottom:0;'>🍀 <b>오늘 나의 기운을 트여줄 개운템:</b> <span style='color:#30D158; font-weight:800;'>{selected_item}</span></p></div><div class='saju-footer'>※ 본 신점은 명리학적 관점과 귀하의 사주 기운을 심층 분석하여 고유 조합으로 제공됩니다.<br>더 뼈 때리는 나의 진짜 사주/MBTI 분석이 궁금하다면?<br><b style='color:#D4AF37;'>상단의 1:1 톡으로 팡도사에게 문의하세요!</b></div></div>"
+    result_html = f"<div class='saju-box'><h4 class='saju-title'>📜 {dong} {ho}호 맞춤 신점</h4><div class='saju-section'><div class='saju-h5'>🏡 입주 전 터의 기운 분석</div><p class='saju-p'>{site_energy}</p></div><div class='saju-section'><div class='saju-h5'>{vibe_title}</div><p class='saju-p'>{fortune_text}</p></div><div class='saju-section'><div class='saju-h5'>🚚 이동과 변화의 기운 (이사운)</div><p class='saju-p'>{moving_text}</p></div><div class='saju-section' style='background:rgba(0,0,0,0.2); padding:15px; border-radius:8px; margin-top:25px;'><p style='color:#d1d1d6; font-size:0.9em; margin-bottom:0;'>🍀 <b>오늘 나의 기운을 트여줄 개운템:</b> <span style='color:#30D158; font-weight:800;'>{selected_item}</span></p></div><div class='saju-footer'>※ 본 신점은 명리학적 관점과 귀하의 사주 기운을 심층 분석하여 무작위가 아닌 고유 조합으로 제공됩니다.<br>더 뼈 때리는 나의 진짜 사주/MBTI 분석이 궁금하다면?<br><b style='color:#D4AF37;'>상단의 1:1 톡으로 팡도사에게 문의하세요!</b></div></div>"
     
     return result_html
 
@@ -314,15 +314,14 @@ with tab2:
                 st.markdown(fortune_html, unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 3] 지역 핫이슈 (🔥 돈 되는 키워드 정밀 타겟팅)
+# [탭 3] 지역 핫이슈 (🔥 모든 언론사 허용 + 중복제거)
 # ------------------------------------------
 with tab3:
     st.markdown("<h4 style='text-align:center; color:#d1d1d6; margin-top:10px;'>📰 그랑루체 입주민 참고 실시간 뉴스</h4>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:#ff9f0a; font-size:0.75em; margin-bottom:15px;'>🚨 최근 30일 이내</b> 메이저 언론 기사만 노출되며 자동 삭제됩니다.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#ff9f0a; font-size:0.75em; margin-bottom:15px;'>🚨 정보 선점을 위해 <b>최근 30일 이내</b> 기사만 노출되며 자동 삭제됩니다.</p>", unsafe_allow_html=True)
     
     try:
-        # 🔥 건설, 개발, 예타 통과 등 아파트값 오르는 키워드만 초정밀 타겟팅!
-        query = urllib.parse.quote('에코델타시티 OR "디에트르 그랑루체" OR "명지국제신도시 부동산" OR "부산 강서구 개발" OR "부산 강서구 예타" OR "부산 강서구 착공" OR "부산 강서구 유치" when:7d')
+        query = urllib.parse.quote('에코델타시티 OR "디에트르 그랑루체" OR "명지국제신도시 부동산" OR "부산 강서구 개발" OR "부산 강서구 예타" OR "부산 강서구 착공" OR "부산 강서구 유치" when:30d')
         url = f"https://news.google.com/rss/search?q={query}&hl=ko&gl=KR&ceid=KR:ko"
         
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
@@ -330,42 +329,50 @@ with tab3:
         xml_data = response.read()
         root = ET.fromstring(xml_data)
         
-        trusted_press = ['KBS', 'MBC', 'SBS', 'YTN', '연합', 'JTBC', '조선', '중앙', '동아', '매일경제', '한국경제', '부산일보', '국제신문']
-        
+        # 🔥 중복 제거(Deduplication)를 위한 세트(Set) 준비!
+        seen_titles = set()
         count = 0
+        
         for item in root.findall('.//item'):
             if count >= 5: break 
             
-            source_elem = item.find('source')
-            source_name = source_elem.text if source_elem is not None else ""
+            title = item.find('title').text
+            clean_title = title.rsplit(" - ", 1)[0] 
             
-            if any(trusted in source_name for trusted in trusted_press):
-                title = item.find('title').text
-                clean_title = title.rsplit(" - ", 1)[0] 
-                link = item.find('link').text
-                
-                pubDate = item.find('pubDate').text 
-                dt = parsedate_to_datetime(pubDate)
-                article_date = dt.strftime("%Y.%m.%d")
-                
-                now = datetime.now(dt.tzinfo)
-                diff = now - dt
-                days_passed = diff.days
-                days_left = max(0, 30 - days_passed)
-                
-                date_str = f"⏳ {days_left}일 후 삭제"
-                
-                st.markdown(f"""
-                <a href='{link}' target='_blank' class='news-link'>
-                    <span class='news-source'>[{source_name}]</span> {clean_title}<br>
-                    <span class='news-date' style='display:inline-block; margin-top:4px;'>{article_date} 기사</span>
-                    <span class='fomo-tag'>{date_str}</span>
-                </a>
-                """, unsafe_allow_html=True)
-                count += 1
+            # 🔥 중복 검사: 띄어쓰기, 특수문자 다 지우고 앞 15글자만 뽑아서 비교!
+            # (베껴 쓴 기사나 제목이 비슷한 기사는 여기서 다 걸러집니다)
+            dedup_key = re.sub(r'[^가-힣a-zA-Z0-9]', '', clean_title)[:15]
+            
+            if dedup_key in seen_titles:
+                continue # 이미 본 기사면 스킵(버림)!
+            seen_titles.add(dedup_key) # 처음 보는 기사면 저장!
+            
+            source_elem = item.find('source')
+            source_name = source_elem.text if source_elem is not None else "뉴스"
+            link = item.find('link').text
+            
+            pubDate = item.find('pubDate').text 
+            dt = parsedate_to_datetime(pubDate)
+            article_date = dt.strftime("%Y.%m.%d")
+            
+            now = datetime.now(dt.tzinfo)
+            diff = now - dt
+            days_passed = diff.days
+            days_left = max(0, 30 - days_passed)
+            
+            date_str = f"⏳ {days_left}일 후 삭제"
+            
+            st.markdown(f"""
+            <a href='{link}' target='_blank' class='news-link'>
+                <span class='news-source'>[{source_name}]</span> {clean_title}<br>
+                <span class='news-date' style='display:inline-block; margin-top:4px;'>{article_date} 기사</span>
+                <span class='fomo-tag'>{date_str}</span>
+            </a>
+            """, unsafe_allow_html=True)
+            count += 1
                 
         if count == 0:
-            st.info("🚨 최근 30일간 해당 키워드의 메이저 언론사 핫이슈가 없습니다.")
+            st.info("🚨 최근 30일간 해당 키워드의 새로운 핫이슈가 없습니다.")
             
     except Exception as e:
         st.info("실시간 뉴스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.")
