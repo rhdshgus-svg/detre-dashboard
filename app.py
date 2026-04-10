@@ -257,18 +257,18 @@ def get_custom_fortune(dong, ho, type_dict):
     return result_html
 
 # ==========================================
-# 4. 화면 상단 타이틀 및 공통 배너 (🔥 어플 점프 target="_top" 적용 완료!)
+# 4. 화면 상단 타이틀 및 공통 배너 (🔥 어플 외부 창 연결 target="_blank" 완벽 패치!)
 # ==========================================
 st.markdown("<div class='premium-title'>Detre Granluce</div>", unsafe_allow_html=True)
 st.markdown("""
 <div class='promo-title'>[Sol 운명상점] 사주 & MBTI 솔루션</div>
 <div style='text-align: center; width: 100%;'>
-    <a href="https://open.kakao.com/o/gEkb84oi" target="_top" class='btn-saju'>💬 입주민전용 사주상담 연결</a>
+    <a href="https://open.kakao.com/o/gEkb84oi" target="_blank" class='btn-saju'>💬 입주민전용 사주상담 연결</a>
 </div>
 
 <div style='display: flex; flex-direction: column; gap: 4px; margin-bottom: 15px;'>
-    <a href="https://form.jotform.com/240628865713463" target="_top" class='official-btn btn-naver'>📝 그랑루체 공식카페 (위임동의서 제출)</a>
-    <a href="https://open.kakao.com/o/ggAiqg4f" target="_top" class='official-btn btn-kakao-official'>💬 그랑루체 공식 카카오톡 입장</a>
+    <a href="https://form.jotform.com/240628865713463" target="_blank" class='official-btn btn-naver'>📝 그랑루체 공식카페 (위임동의서 제출)</a>
+    <a href="https://open.kakao.com/o/ggAiqg4f" target="_blank" class='official-btn btn-kakao-official'>💬 그랑루체 공식 카카오톡 입장</a>
 </div>
 <div class='notice-text'>🚨 현황판에 미표기된 세대는 회장님 및 임원진에게 요청부탁드립니다.</div>
 """, unsafe_allow_html=True)
@@ -358,7 +358,7 @@ with tab2:
                 st.markdown(get_custom_fortune(f_dong, f_ho, type_dict), unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 3] 지역 핫이슈 (🔥 타겟 탑 추가 완료)
+# [탭 3] 지역 핫이슈 (🔥 target="_blank" 패치 완료)
 # ------------------------------------------
 with tab3:
     st.markdown("<h4 style='text-align:center; color:#d1d1d6; margin-top:10px;'>📰 그랑루체 실시간 참고뉴스</h4>", unsafe_allow_html=True)
@@ -391,7 +391,7 @@ with tab3:
             
         for art in articles[:10]:
             days_left = max(0, 30 - (now - art['dt']).days)
-            st.markdown(f"<a href='{art['link']}' target='_top' class='news-link'><span class='news-source'>[{art['source']}]</span> {art['title']}<br><span class='news-date' style='display:inline-block; margin-top:4px;'>{art['dt'].strftime('%Y.%m.%d')} 기사</span><span class='fomo-tag'>⏳ {days_left}일 후 삭제</span></a>", unsafe_allow_html=True)
+            st.markdown(f"<a href='{art['link']}' target='_blank' class='news-link'><span class='news-source'>[{art['source']}]</span> {art['title']}<br><span class='news-date' style='display:inline-block; margin-top:4px;'>{art['dt'].strftime('%Y.%m.%d')} 기사</span><span class='fomo-tag'>⏳ {days_left}일 후 삭제</span></a>", unsafe_allow_html=True)
             count += 1
                 
         if count == 0: st.info("🚨 최근 30일간 해당 키워드의 메이저 언론사 뉴스가 없습니다.")
