@@ -314,14 +314,15 @@ with tab2:
                 st.markdown(fortune_html, unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 3] 지역 핫이슈 (🔥 모든 언론사 허용 + 중복제거)
+# [탭 3] 지역 핫이슈 (🔥 10개 & 최신순 정렬 & 부동산 정책)
 # ------------------------------------------
 with tab3:
-    st.markdown("<h4 style='text-align:center; color:#d1d1d6; margin-top:10px;'>📰 그랑루체 입주민 참고 실시간 뉴스</h4>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:#ff9f0a; font-size:0.75em; margin-bottom:15px;'>🚨 정보 선점을 위해 <b>최근 30일 이내</b> 기사만 노출되며 자동 삭제됩니다.</p>", unsafe_allow_html=True)
+    st.markdown("<h4 style='text-align:center; color:#d1d1d6; margin-top:10px;'>📰 그랑루체 실시간 참고뉴스</h4>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#ff9f0a; font-size:0.75em; margin-bottom:15px;'>🚨 최근 30일 이내 기사만 노출되며 자동 삭제됩니다.</p>", unsafe_allow_html=True)
     
     try:
-        query = urllib.parse.quote('에코델타시티 OR "디에트르 그랑루체" OR "명지국제신도시 부동산" OR "부산 강서구 개발" OR "부산 강서구 예타" OR "부산 강서구 착공" OR "부산 강서구 유치" when:30d')
+        # 🔥 부동산 정책 키워드 대거 투입!
+        query = urllib.parse.quote('에코델타시티 OR "디에트르 그랑루체" OR "명지국제신도시 부동산" OR "부산 강서구 개발" OR "부산 강서구 예타" OR "부동산 정책" OR "취득세" OR "특례보금자리" OR "금리 인하" when:30d')
         url = f"https://news.google.com/rss/search?q={query}&hl=ko&gl=KR&ceid=KR:ko"
         
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
@@ -329,42 +330,58 @@ with tab3:
         xml_data = response.read()
         root = ET.fromstring(xml_data)
         
-        # 🔥 중복 제거(Deduplication)를 위한 세트(Set) 준비!
-        seen_titles = set()
-        count = 0
+        trusted_press = ['KBS', 'MBC', 'SBS', 'YTN', '연합', 'JTBC', '조선', '중앙', '동아', '매일경제', '한국경제', '부산일보', '국제신문', '네이버']
         
+        articles = []
+        seen_titles = set()
+        
+        # 1. 긁어온 기사들을 먼저 리스트에 담으면서 중복 제거
         for item in root.findall('.//item'):
-            if count >= 5: break 
-            
-            title = item.find('title').text
-            clean_title = title.rsplit(" - ", 1)[0] 
-            
-            # 🔥 중복 검사: 띄어쓰기, 특수문자 다 지우고 앞 15글자만 뽑아서 비교!
-            # (베껴 쓴 기사나 제목이 비슷한 기사는 여기서 다 걸러집니다)
-            dedup_key = re.sub(r'[^가-힣a-zA-Z0-9]', '', clean_title)[:15]
-            
-            if dedup_key in seen_titles:
-                continue # 이미 본 기사면 스킵(버림)!
-            seen_titles.add(dedup_key) # 처음 보는 기사면 저장!
-            
             source_elem = item.find('source')
             source_name = source_elem.text if source_elem is not None else "뉴스"
-            link = item.find('link').text
             
-            pubDate = item.find('pubDate').text 
-            dt = parsedate_to_datetime(pubDate)
-            article_date = dt.strftime("%Y.%m.%d")
+            if any(trusted in source_name for trusted in trusted_press):
+                title = item.find('title').text
+                clean_title = title.rsplit(" - ", 1)[0] 
+                
+                # 중복 제거 로직
+                dedup_key = re.sub(r'[^가-힣a-zA-Z0-9]', '', clean_title)[:15]
+                if dedup_key in seen_titles:
+                    continue
+                seen_titles.add(dedup_key)
+                
+                link = item.find('link').text
+                pubDate = item.find('pubDate').text 
+                dt = parsedate_to_datetime(pubDate)
+                
+                articles.append({
+                    'title': clean_title,
+                    'link': link,
+                    'source': source_name,
+                    'dt': dt
+                })
+        
+        # 🔥 2. 파이썬이 날짜를 기준으로 가장 최신 기사부터 내림차순 정렬!
+        articles.sort(key=lambda x: x['dt'], reverse=True)
+        
+        # 3. 정렬된 최신 기사를 딱 10개만 뽑아서 화면에 뿌려줌!
+        count = 0
+        if articles:
+            now = datetime.now(articles[0]['dt'].tzinfo) # 타임존 에러 방지
+        else:
+            now = datetime.now()
             
-            now = datetime.now(dt.tzinfo)
-            diff = now - dt
+        for art in articles[:10]:
+            diff = now - art['dt']
             days_passed = diff.days
             days_left = max(0, 30 - days_passed)
             
             date_str = f"⏳ {days_left}일 후 삭제"
+            article_date = art['dt'].strftime("%Y.%m.%d")
             
             st.markdown(f"""
-            <a href='{link}' target='_blank' class='news-link'>
-                <span class='news-source'>[{source_name}]</span> {clean_title}<br>
+            <a href='{art["link"]}' target='_blank' class='news-link'>
+                <span class='news-source'>[{art["source"]}]</span> {art["title"]}<br>
                 <span class='news-date' style='display:inline-block; margin-top:4px;'>{article_date} 기사</span>
                 <span class='fomo-tag'>{date_str}</span>
             </a>
@@ -372,7 +389,7 @@ with tab3:
             count += 1
                 
         if count == 0:
-            st.info("🚨 최근 30일간 해당 키워드의 새로운 핫이슈가 없습니다.")
+            st.info("🚨 최근 30일간 해당 키워드의 메이저 언론사 핫이슈가 없습니다.")
             
     except Exception as e:
         st.info("실시간 뉴스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.")
