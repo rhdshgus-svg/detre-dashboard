@@ -358,7 +358,7 @@ with tab2:
                 st.markdown(get_custom_fortune(f_dong, f_ho, type_dict), unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 3] 지역 핫이슈 
+# [탭 3] 지역 핫이슈 (🔥 타겟 탑 추가 완료)
 # ------------------------------------------
 with tab3:
     st.markdown("<h4 style='text-align:center; color:#d1d1d6; margin-top:10px;'>📰 그랑루체 실시간 참고뉴스</h4>", unsafe_allow_html=True)
