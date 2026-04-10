@@ -8,7 +8,7 @@ import re
 st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon="🏢", layout="centered")
 
 # ==========================================
-# 💎 CSS 스타일링 (미입장/미위임 빨간색 강조 추가)
+# 💎 CSS 스타일링 (강철 레이아웃 적용!)
 # ==========================================
 st.markdown("""
     <style>
@@ -25,19 +25,25 @@ st.markdown("""
         .kakao-container { text-align: center; width: 100%; }
         .notice-text { text-align: center; font-size: 0.75em; color: #ff9f0a; font-weight: 600; margin-bottom: 12px; padding: 8px 10px; background-color: rgba(255, 159, 10, 0.1); border-radius: 8px; border: 1px solid rgba(255, 159, 10, 0.2); }
         
-        /* 🔥 엑셀 병합 스타일 통계 박스 */
+        /* 🔥 엑셀 병합 스타일 통계 박스 (비율 조정 & 줄바꿈 방지) */
         .stat-container { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; width: 100%; }
         .stat-box-new { display: flex; background: linear-gradient(145deg, #1c1c1e, #121212); border-radius: 8px; border: 1px solid #333; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         .stat-box-new.dong-box { border: 1px solid #D4AF37; }
-        .stat-left { flex: 0 0 33%; background-color: rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 10px 5px; border-right: 1px solid #333; font-size: 0.8em; color: #aaa; text-align: center; }
-        .stat-left b { font-size: 1.1em; color: #d1d1d6; margin-bottom: 3px; }
-        .stat-right { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 10px 12px; gap: 6px; }
-        .stat-row { font-size: 0.85em; color: #d1d1d6; display: flex; align-items: center; justify-content: space-between; }
-        .stat-label { display: inline-block; font-weight: 600; color: #888;}
         
-        .hl-gold { color: #D4AF37; font-weight: 700; font-size: 1.1em; margin: 0 1px; }
-        .hl-green { color: #30D158; font-weight: 700; font-size: 1.1em; margin: 0 1px; }
-        .hl-red { color: #FF3B30; font-weight: 700; font-size: 1.1em; margin: 0 1px; } /* 남은 세대 강조용 빨간색! */
+        /* 왼쪽 박스 사이즈를 줄여서 오른쪽 공간 확보 */
+        .stat-left { flex: 0 0 28%; background-color: rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 10px 2px; border-right: 1px solid #333; font-size: 0.75em; color: #aaa; text-align: center; }
+        .stat-left b { font-size: 1.1em; color: #d1d1d6; margin-bottom: 3px; white-space: nowrap; }
+        
+        .stat-right { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 10px 10px; gap: 6px; overflow: hidden; }
+        
+        /* 글자 쪼개짐 절대 방지 (white-space: nowrap) */
+        .stat-row { font-size: 0.8em; color: #d1d1d6; display: flex; align-items: center; justify-content: space-between; white-space: nowrap; width: 100%; }
+        .stat-label { font-weight: 600; color: #888; margin-right: auto; }
+        .stat-value { text-align: right; }
+        
+        .hl-gold { color: #D4AF37; font-weight: 800; font-size: 1.1em; margin: 0 1px; }
+        .hl-red { color: #FF3B30; font-weight: 800; font-size: 1.1em; margin: 0 1px; }
+        .divider { color: #555; margin: 0 3px; font-size: 0.9em; }
         
         /* 동 선택 라디오 버튼 */
         div[role="radiogroup"] { display: flex !important; flex-wrap: wrap !important; width: 100% !important; gap: 4px !important; justify-content: center !important; margin-bottom: 16px !important; }
@@ -57,7 +63,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 💡 구글 시트 링크 (쉼표 구분)
+# 💡 구글 시트 링크
 # ==========================================
 SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQoR29bAcAP0KUBEvS3S6gn5Qz1MTKDJOxz-lW1UEyV_vOcISPxNW2uMuYMrz9HUw/pub?gid=1967078212&single=true&output=csv"
 LAYOUT_FILE = "디에트르 그랑루체 카페가입 현황.xlsx" 
@@ -112,29 +118,28 @@ st.markdown("""
 
 stats_container = st.container()
 
-# 동 선택
 all_dongs_raw = df_layout['동'].unique().tolist()
 all_dongs = sorted(all_dongs_raw, key=lambda x: int(re.sub(r'[^0-9]', '', x)) if re.sub(r'[^0-9]', '', x).isdigit() else 0)
 selected_dong = st.radio("동 선택", all_dongs, horizontal=True, format_func=lambda x: x.replace("동", ""), label_visibility="collapsed")
 
 # ==========================================
-# 🎯 타겟 관리 (앞으로 받아야 할 인원수 계산!)
+# 🎯 타겟 관리 계산
 # ==========================================
 total_units = len(df_layout) 
 total_kakao = len(kakao_dict)
 total_cafe = len(cafe_set)
-total_kakao_remain = total_units - total_kakao # 카톡 미입장 타겟 수
-total_cafe_remain = total_units - total_cafe   # 카페 미위임 타겟 수
+total_kakao_remain = total_units - total_kakao
+total_cafe_remain = total_units - total_cafe
 
 dong_layout = df_layout[df_layout['동'] == selected_dong]
 dong_units = len(dong_layout['호'].dropna().tolist())
 dong_kakao = len([k for k in kakao_dict.keys() if k[0] == selected_dong])
 dong_cafe = len([k for k in cafe_set if k[0] == selected_dong])
-dong_kakao_remain = dong_units - dong_kakao    # 동별 카톡 타겟 수
-dong_cafe_remain = dong_units - dong_cafe      # 동별 카페 타겟 수
+dong_kakao_remain = dong_units - dong_kakao
+dong_cafe_remain = dong_units - dong_cafe
 
 # ==========================================
-# 🔥 띄어쓰기 함정 제거! HTML 코드를 왼쪽 벽에 딱 붙였습니다!
+# 🔥 강철 레이아웃: 줄바꿈 완벽 방지!
 # ==========================================
 with stats_container:
     st.markdown(f"""
@@ -146,12 +151,12 @@ with stats_container:
         </div>
         <div class='stat-right'>
             <div class='stat-row'>
-                <span class='stat-label'>카톡방입장</span> 
-                <span><span class='hl-gold'>{total_kakao}</span>명 &nbsp;|&nbsp; 미입장 <span class='hl-red'>{total_kakao_remain}</span>세대</span>
+                <span class='stat-label'>카톡입장</span> 
+                <span class='stat-value'><span class='hl-gold'>{total_kakao}</span>명 <span class='divider'>|</span> 미입장 <span class='hl-red'>{total_kakao_remain}</span>세대</span>
             </div>
             <div class='stat-row'>
                 <span class='stat-label'>카페위임</span> 
-                <span><span class='hl-gold'>{total_cafe}</span>명 &nbsp;|&nbsp; 미위임 <span class='hl-red'>{total_cafe_remain}</span>세대</span>
+                <span class='stat-value'><span class='hl-gold'>{total_cafe}</span>명 <span class='divider'>|</span> 미위임 <span class='hl-red'>{total_cafe_remain}</span>세대</span>
             </div>
         </div>
     </div>
@@ -163,12 +168,12 @@ with stats_container:
         </div>
         <div class='stat-right'>
             <div class='stat-row'>
-                <span class='stat-label'>카톡방입장</span> 
-                <span><span class='hl-gold'>{dong_kakao}</span>명 &nbsp;|&nbsp; 미입장 <span class='hl-red'>{dong_kakao_remain}</span>세대</span>
+                <span class='stat-label'>카톡입장</span> 
+                <span class='stat-value'><span class='hl-gold'>{dong_kakao}</span>명 <span class='divider'>|</span> 미입장 <span class='hl-red'>{dong_kakao_remain}</span>세대</span>
             </div>
             <div class='stat-row'>
                 <span class='stat-label'>카페위임</span> 
-                <span><span class='hl-gold'>{dong_cafe}</span>명 &nbsp;|&nbsp; 미위임 <span class='hl-red'>{dong_cafe_remain}</span>세대</span>
+                <span class='stat-value'><span class='hl-gold'>{dong_cafe}</span>명 <span class='divider'>|</span> 미위임 <span class='hl-red'>{dong_cafe_remain}</span>세대</span>
             </div>
         </div>
     </div>
@@ -176,7 +181,7 @@ with stats_container:
 """, unsafe_allow_html=True)
     
 # ==========================================
-# 🔥 아파트 도면 & 결손 뱃지 (단톡미입장 적용!)
+# 🔥 도면 뱃지
 # ==========================================
 valid_ho_list = dong_layout['호'].dropna().tolist()
 max_floor = max([int(ho[:2]) for ho in valid_ho_list if len(ho)==4]) if valid_ho_list else 20
