@@ -21,25 +21,27 @@ st.markdown("""
         .promo-title { font-size: 0.85em; text-align: center; color: #D4AF37; font-weight: 700; margin-top: 0px; margin-bottom: 3px; }
         .promo-subtitle { font-size: 0.75em; text-align: center; color: #aaa; font-weight: 400; margin-bottom: 10px; }
         .kakao-btn { display: inline-flex; justify-content: center; align-items: center; background-color: #FEE500; color: #191919 !important; font-weight: 800; font-size: 0.75em; padding: 6px 16px; border-radius: 8px; text-decoration: none !important; box-shadow: 0 2px 6px rgba(254, 229, 0, 0.2); margin-bottom: 12px; transition: all 0.2s ease; }
-        .notice-text { text-align: center; font-size: 0.75em; color: #ff9f0a; font-weight: 600; margin-bottom: 12px; padding: 8px 10px; background-color: rgba(255, 159, 10, 0.1); border-radius: 8px; border: 1px solid rgba(255, 159, 10, 0.2); }
+        .notice-text { text-align: center; font-size: 0.75em; color: #ff9f0a; font-weight: 600; margin-bottom: 12px; padding: 8px 10px; background-color: rgba(255, 159, 10, 0.1); border-radius: 8px; border: 1px solid rgba(255, 159, 10, 0.2); word-break: keep-all; }
         
-        /* 🔥 엑셀 병합 스타일 통계 박스 & 모바일 찢어짐 방지(nowrap) */
+        /* 🔥 엑셀 병합 스타일 통계 박스 & 공간 재배치 */
         .stat-container { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; width: 100%; }
         .stat-box-new { display: flex; background: linear-gradient(145deg, #1c1c1e, #121212); border-radius: 8px; border: 1px solid #333; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         .stat-box-new.dong-box { border: 1px solid #D4AF37; }
         
-        .stat-left { flex: 0 0 28%; background-color: rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 10px 2px; border-right: 1px solid #333; font-size: 0.75em; color: #aaa; text-align: center; }
+        /* 🔥 왼쪽 공간 축소 (28% -> 22%) */
+        .stat-left { flex: 0 0 22%; background-color: rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 10px 2px; border-right: 1px solid #333; font-size: 0.75em; color: #aaa; text-align: center; }
         .stat-left b { font-size: 1.1em; color: #d1d1d6; margin-bottom: 3px; white-space: nowrap; }
         
-        .stat-right { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 10px 10px; gap: 6px; overflow: hidden; }
+        /* 🔥 오른쪽 공간 확대 */
+        .stat-right { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 10px 8px; gap: 6px; overflow: hidden; }
         .stat-row { font-size: 0.8em; color: #d1d1d6; display: flex; align-items: center; justify-content: space-between; white-space: nowrap; width: 100%; }
         .stat-label { font-weight: 600; color: #888; margin-right: auto; }
         
         /* 강조 색상 */
         .hl-gold { color: #D4AF37; font-weight: 800; font-size: 1.1em; margin: 0 1px; }
         .hl-red { color: #FF3B30; font-weight: 800; font-size: 1.1em; margin: 0 1px; }
-        .hl-green { color: #30D158; font-weight: 800; font-size: 1.0em; margin: 0 2px; } /* 퍼센트 초록색 강조 */
-        .divider { color: #555; margin: 0 4px; font-size: 0.9em; }
+        .hl-green { color: #30D158; font-weight: 800; font-size: 1.0em; margin: 0 1px; }
+        .divider { color: #555; margin: 0 2px; font-size: 0.9em; }
         
         /* 동 선택 라디오 버튼 */
         div[role="radiogroup"] { display: flex !important; flex-wrap: wrap !important; width: 100% !important; gap: 4px !important; justify-content: center !important; margin-bottom: 16px !important; }
@@ -102,18 +104,18 @@ if df_layout.empty:
     st.stop()
 
 # ==========================================
-# 4. 화면 상단 타이틀 및 배너
+# 4. 화면 상단 타이틀 및 배너 (수정 완료!)
 # ==========================================
 st.markdown("<div class='premium-title'>Detre Granluce</div>", unsafe_allow_html=True)
 st.markdown("""
 <div class='promo-title'>[Sol 운명상점] 사주 & MBTI 솔루션</div>
 <div class='promo-subtitle'>당신의 운명을 낱낱이 파헤쳐드립니다 🔮 <span style='font-size:0.9em;'>(213동 102호 팡도사)</span></div>
 <div style='text-align: center; width: 100%;'><a href="https://open.kakao.com/o/gEkb84oi" target="_blank" class='kakao-btn'>💬 카카오톡 문의하기(깨알광고)</a></div>
-<div class='notice-text'>🚨 미입력 또는 신규가입하신 분께서는 꼭 회장님 및 임원진에게 업데이트 요청해주세요!</div>
+<div class='notice-text'>🚨 현황판에 미표기된 세대는 회장님 및 임원진에게 요청부탁드립니다.</div>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 5. 동 선택 및 통계 계산 로직 (퍼센트 추가!)
+# 5. 동 선택 및 통계 계산 로직
 # ==========================================
 stats_container = st.container()
 
@@ -121,7 +123,6 @@ all_dongs_raw = df_layout['동'].unique().tolist()
 all_dongs = sorted(all_dongs_raw, key=lambda x: int(re.sub(r'[^0-9]', '', x)) if re.sub(r'[^0-9]', '', x).isdigit() else 0)
 selected_dong = st.radio("동 선택", all_dongs, horizontal=True, format_func=lambda x: x.replace("동", ""), label_visibility="collapsed")
 
-# 🎯 전체 단지 통계
 total_units = len(df_layout) 
 total_kakao = len(kakao_dict)
 total_cafe = len(cafe_set)
@@ -130,7 +131,6 @@ total_cafe_remain = total_units - total_cafe
 kakao_rate = (total_kakao / total_units) * 100 if total_units > 0 else 0
 cafe_rate = (total_cafe / total_units) * 100 if total_units > 0 else 0
 
-# 🎯 선택된 동 통계
 dong_layout = df_layout[df_layout['동'] == selected_dong]
 dong_units = len(dong_layout['호'].dropna().tolist())
 dong_kakao = len([k for k in kakao_dict.keys() if k[0] == selected_dong])
@@ -141,17 +141,15 @@ dong_kakao_rate = (dong_kakao / dong_units) * 100 if dong_units > 0 else 0
 dong_cafe_rate = (dong_cafe / dong_units) * 100 if dong_units > 0 else 0
 
 # ==========================================
-# 6. 통계 박스 UI (명 -> 세대 변경, % 부착 완료!)
+# 6. 통계 박스 UI
 # ==========================================
 with stats_container:
-    # 🚨 빈 줄(엔터) 제거 완벽 대응
     html_stats = f"""<div class='stat-container'><div class='stat-box-new'><div class='stat-left'><b>전체 단지</b><div><span class='hl-gold' style='font-size: 1.4em;'>{total_units}</span>세대</div></div><div class='stat-right'><div class='stat-row'><span class='stat-label'>카톡입장</span><span class='stat-value'><span class='hl-gold'>{total_kakao}</span>세대 (<span class='hl-green'>{kakao_rate:.1f}%</span>) <span class='divider'>|</span> 미입장 <span class='hl-red'>{total_kakao_remain}</span>세대</span></div><div class='stat-row'><span class='stat-label'>카페위임</span><span class='stat-value'><span class='hl-gold'>{total_cafe}</span>세대 (<span class='hl-green'>{cafe_rate:.1f}%</span>) <span class='divider'>|</span> 미위임 <span class='hl-red'>{total_cafe_remain}</span>세대</span></div></div></div><div class='stat-box-new dong-box'><div class='stat-left'><b>{selected_dong}</b><div><span class='hl-gold' style='font-size: 1.4em;'>{dong_units}</span>세대</div></div><div class='stat-right'><div class='stat-row'><span class='stat-label'>카톡입장</span><span class='stat-value'><span class='hl-gold'>{dong_kakao}</span>세대 (<span class='hl-green'>{dong_kakao_rate:.1f}%</span>) <span class='divider'>|</span> 미입장 <span class='hl-red'>{dong_kakao_remain}</span>세대</span></div><div class='stat-row'><span class='stat-label'>카페위임</span><span class='stat-value'><span class='hl-gold'>{dong_cafe}</span>세대 (<span class='hl-green'>{dong_cafe_rate:.1f}%</span>) <span class='divider'>|</span> 미위임 <span class='hl-red'>{dong_cafe_remain}</span>세대</span></div></div></div></div>"""
-    
     clean_html_stats = html_stats.replace('\n', '')
     st.markdown(clean_html_stats, unsafe_allow_html=True)
     
 # ==========================================
-# 7. 아파트 도면 및 뱃지
+# 7. 아파트 도면 및 뱃지 (뱃지 문구 수정 완료!)
 # ==========================================
 valid_ho_list = dong_layout['호'].dropna().tolist()
 max_floor = max([int(ho[:2]) for ho in valid_ho_list if len(ho)==4]) if valid_ho_list else 20
@@ -170,19 +168,22 @@ for floor in range(max_floor, 0, -1):
         
         if ho_str not in valid_ho_list:
             html_grid += f"<div style='{base_style} background-color: transparent; border: none;'></div>"
-        
-        elif dong_ho_key in kakao_dict or dong_ho_key in cafe_set:
+            
+        else:
             nicknames = kakao_dict.get(dong_ho_key, "") 
             
             badge_html = ""
             if dong_ho_key not in kakao_dict:
-                badge_html += "<div class='status-badge yellow-badge'>단톡미입장</div>"
+                # 💡 워딩 수정: 카톡미입장
+                badge_html += "<div class='status-badge yellow-badge'>카톡미입장</div>"
             if dong_ho_key not in cafe_set:
-                badge_html += "<div class='status-badge red-badge'>카페미가입</div>"
+                # 💡 워딩 수정: 위임미진행
+                badge_html += "<div class='status-badge red-badge'>위임미진행</div>"
                 
-            html_grid += f"<div style='{base_style} background: linear-gradient(135deg, #E6C27A, #D4AF37); border-radius: 4px; box-shadow: 0 2px 5px rgba(212, 175, 55, 0.2); border: 1px solid #FFECA1;'><div class='unit-num' style='color:#1C1C1E;'>{ho_str}</div><div class='unit-nick' style='color:#3A3A3C;'>{nicknames}</div>{badge_html}</div>"
-        else:
-            html_grid += f"<div style='{base_style} background-color: #1C1C1E; border-radius: 4px; border: 1px solid #333;'><div class='unit-num' style='color:#555;'>{ho_str}</div></div>"
+            if dong_ho_key in kakao_dict or dong_ho_key in cafe_set:
+                html_grid += f"<div style='{base_style} background: linear-gradient(135deg, #E6C27A, #D4AF37); border-radius: 4px; box-shadow: 0 2px 5px rgba(212, 175, 55, 0.2); border: 1px solid #FFECA1;'><div class='unit-num' style='color:#1C1C1E;'>{ho_str}</div><div class='unit-nick' style='color:#3A3A3C;'>{nicknames}</div>{badge_html}</div>"
+            else:
+                html_grid += f"<div style='{base_style} background-color: #1C1C1E; border-radius: 4px; border: 1px solid #333;'><div class='unit-num' style='color:#aaa;'>{ho_str}</div>{badge_html}</div>"
             
     html_grid += "</div>"
 html_grid += "</div>"
