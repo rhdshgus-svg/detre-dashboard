@@ -8,7 +8,7 @@ import re
 st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon="🏢", layout="centered")
 
 # ==========================================
-# 💎 CSS 스타일링 (양쪽 찢어짐 방지 완벽 적용)
+# 💎 CSS 스타일링 (미입장/미위임 빨간색 강조 추가)
 # ==========================================
 st.markdown("""
     <style>
@@ -37,6 +37,7 @@ st.markdown("""
         
         .hl-gold { color: #D4AF37; font-weight: 700; font-size: 1.1em; margin: 0 1px; }
         .hl-green { color: #30D158; font-weight: 700; font-size: 1.1em; margin: 0 1px; }
+        .hl-red { color: #FF3B30; font-weight: 700; font-size: 1.1em; margin: 0 1px; } /* 남은 세대 강조용 빨간색! */
         
         /* 동 선택 라디오 버튼 */
         div[role="radiogroup"] { display: flex !important; flex-wrap: wrap !important; width: 100% !important; gap: 4px !important; justify-content: center !important; margin-bottom: 16px !important; }
@@ -69,7 +70,6 @@ def load_data():
         df_raw = pd.read_csv(SHEET_CSV_URL, dtype=str)
         df_raw.columns = df_raw.columns.str.strip()
         
-        # 1. 카톡 데이터 
         if set(['동', '호']).issubset(df_raw.columns):
             df_k = df_raw[['동', '호', '닉네임']].dropna(subset=['동', '호']).copy()
             df_k['동'] = df_k['동'].astype(str).str.extract(r'(\d+)')[0] + "동"
@@ -77,14 +77,12 @@ def load_data():
             df_k['닉네임'] = df_k['닉네임'].fillna('').str.strip()
             kakao_dict = df_k.groupby(['동', '호'])['닉네임'].apply(lambda x: '<br>'.join(sorted(set([n for n in x if n and str(n) != 'nan'])))).to_dict()
             
-        # 2. 카페 데이터
         if set(['카페동', '카페호']).issubset(df_raw.columns):
             df_c = df_raw[['카페동', '카페호']].dropna(subset=['카페동', '카페호']).copy()
             df_c['카페동'] = df_c['카페동'].astype(str).str.extract(r'(\d+)')[0] + "동"
             df_c['카페호'] = df_c['카페호'].astype(str).str.extract(r'(\d+)')[0].str.zfill(4)
             cafe_set = set(zip(df_c['카페동'], df_c['카페호']))
 
-        # 3. 도면 로드
         df_layout = pd.read_excel(LAYOUT_FILE, sheet_name='동호 코드', skiprows=2, usecols="A:B", header=None, dtype=str)
         df_layout.columns = ['동', '호'] 
         df_layout = df_layout.dropna()
@@ -119,62 +117,63 @@ all_dongs_raw = df_layout['동'].unique().tolist()
 all_dongs = sorted(all_dongs_raw, key=lambda x: int(re.sub(r'[^0-9]', '', x)) if re.sub(r'[^0-9]', '', x).isdigit() else 0)
 selected_dong = st.radio("동 선택", all_dongs, horizontal=True, format_func=lambda x: x.replace("동", ""), label_visibility="collapsed")
 
-# 통계 계산
+# ==========================================
+# 🎯 타겟 관리 (앞으로 받아야 할 인원수 계산!)
+# ==========================================
 total_units = len(df_layout) 
 total_kakao = len(kakao_dict)
 total_cafe = len(cafe_set)
-kakao_rate = (total_kakao / total_units) * 100 if total_units > 0 else 0
-cafe_rate = (total_cafe / total_units) * 100 if total_units > 0 else 0
+total_kakao_remain = total_units - total_kakao # 카톡 미입장 타겟 수
+total_cafe_remain = total_units - total_cafe   # 카페 미위임 타겟 수
 
 dong_layout = df_layout[df_layout['동'] == selected_dong]
 dong_units = len(dong_layout['호'].dropna().tolist())
-
 dong_kakao = len([k for k in kakao_dict.keys() if k[0] == selected_dong])
 dong_cafe = len([k for k in cafe_set if k[0] == selected_dong])
-dong_kakao_rate = (dong_kakao / dong_units) * 100 if dong_units > 0 else 0
-dong_cafe_rate = (dong_cafe / dong_units) * 100 if dong_units > 0 else 0
+dong_kakao_remain = dong_units - dong_kakao    # 동별 카톡 타겟 수
+dong_cafe_remain = dong_units - dong_cafe      # 동별 카페 타겟 수
 
 # ==========================================
-# 🔥 찢어짐 방지 수술 완료: <span> 보따리 추가!
+# 🔥 띄어쓰기 함정 제거! HTML 코드를 왼쪽 벽에 딱 붙였습니다!
 # ==========================================
 with stats_container:
     st.markdown(f"""
-    <div class='stat-container'>
-        <div class='stat-box-new'>
-            <div class='stat-left'>
-                <b>전체 단지</b>
-                <div><span class='hl-gold' style='font-size: 1.4em;'>{total_units}</span>세대</div>
-            </div>
-            <div class='stat-right'>
-                <div class='stat-row'>
-                    <span class='stat-label'>카톡방입장</span> 
-                    <span><span class='hl-gold'>{total_kakao}</span>명 &nbsp;|&nbsp; 가입률 <span class='hl-green'>{kakao_rate:.1f}%</span></span>
-                </div>
-                <div class='stat-row'>
-                    <span class='stat-label'>카페위임</span> 
-                    <span><span class='hl-gold'>{total_cafe}</span>명 &nbsp;|&nbsp; 위임률 <span class='hl-green'>{cafe_rate:.1f}%</span></span>
-                </div>
-            </div>
+<div class='stat-container'>
+    <div class='stat-box-new'>
+        <div class='stat-left'>
+            <b>전체 단지</b>
+            <div><span class='hl-gold' style='font-size: 1.4em;'>{total_units}</span>세대</div>
         </div>
-        
-        <div class='stat-box-new dong-box'>
-            <div class='stat-left'>
-                <b>{selected_dong}</b>
-                <div><span class='hl-gold' style='font-size: 1.4em;'>{dong_units}</span>세대</div>
+        <div class='stat-right'>
+            <div class='stat-row'>
+                <span class='stat-label'>카톡방입장</span> 
+                <span><span class='hl-gold'>{total_kakao}</span>명 &nbsp;|&nbsp; 미입장 <span class='hl-red'>{total_kakao_remain}</span>세대</span>
             </div>
-            <div class='stat-right'>
-                <div class='stat-row'>
-                    <span class='stat-label'>카톡방입장</span> 
-                    <span><span class='hl-gold'>{dong_kakao}</span>명 &nbsp;|&nbsp; 가입률 <span class='hl-green'>{dong_kakao_rate:.1f}%</span></span>
-                </div>
-                <div class='stat-row'>
-                    <span class='stat-label'>카페위임</span> 
-                    <span><span class='hl-gold'>{dong_cafe}</span>명 &nbsp;|&nbsp; 위임률 <span class='hl-green'>{dong_cafe_rate:.1f}%</span></span>
-                </div>
+            <div class='stat-row'>
+                <span class='stat-label'>카페위임</span> 
+                <span><span class='hl-gold'>{total_cafe}</span>명 &nbsp;|&nbsp; 미위임 <span class='hl-red'>{total_cafe_remain}</span>세대</span>
             </div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    
+    <div class='stat-box-new dong-box'>
+        <div class='stat-left'>
+            <b>{selected_dong}</b>
+            <div><span class='hl-gold' style='font-size: 1.4em;'>{dong_units}</span>세대</div>
+        </div>
+        <div class='stat-right'>
+            <div class='stat-row'>
+                <span class='stat-label'>카톡방입장</span> 
+                <span><span class='hl-gold'>{dong_kakao}</span>명 &nbsp;|&nbsp; 미입장 <span class='hl-red'>{dong_kakao_remain}</span>세대</span>
+            </div>
+            <div class='stat-row'>
+                <span class='stat-label'>카페위임</span> 
+                <span><span class='hl-gold'>{dong_cafe}</span>명 &nbsp;|&nbsp; 미위임 <span class='hl-red'>{dong_cafe_remain}</span>세대</span>
+            </div>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
     
 # ==========================================
 # 🔥 아파트 도면 & 결손 뱃지 (단톡미입장 적용!)
@@ -202,7 +201,6 @@ for floor in range(max_floor, 0, -1):
             
             badge_html = ""
             if dong_ho_key not in kakao_dict:
-                # 💡 워딩 수정: 단톡미입장
                 badge_html += "<div class='status-badge yellow-badge'>단톡미입장</div>"
             if dong_ho_key not in cafe_set:
                 badge_html += "<div class='status-badge red-badge'>카페미가입</div>"
