@@ -9,7 +9,7 @@ import time
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 from email.utils import parsedate_to_datetime
-from PIL import Image  # 🔥 이미지 불러오기용 모듈 추가!
+from PIL import Image
 
 # ==========================================
 # 1. 기본 화면 설정 (🔥 로고 이미지 및 어플 이름 세팅)
@@ -22,7 +22,7 @@ except Exception:
     st.set_page_config(page_title="그랑루체 입주민전용", page_icon="🏢", layout="centered")
 
 # ==========================================
-# 2. CSS 스타일링 & 🔥 번역/아이콘 강제 세뇌 부적
+# 2. CSS 스타일링 & 🔥 번역 팝업 차단 및 스크롤 고정
 # ==========================================
 st.markdown("""
     <meta name="google" content="notranslate">
@@ -32,9 +32,11 @@ st.markdown("""
     <link rel="icon" sizes="512x512" href="https://cdn-icons-png.flaticon.com/512/3135/3135673.png">
     
     <style>
-    /* 아래부터는 기존 CSS 코드 그대로 둡니다 */
-    
-    <style>
+        /* 🔥 앱에서 위로 스크롤 시 휙! 새로고침되는 현상 완벽 차단 부적! */
+        html, body, [data-testid="stAppViewContainer"] {
+            overscroll-behavior-y: none !important;
+        }
+        
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         * { font-family: 'Pretendard', sans-serif; }
         #MainMenu {visibility: hidden;} footer {visibility: hidden;} header {visibility: hidden;}
@@ -388,7 +390,7 @@ with tab3:
         response = urllib.request.urlopen(req, timeout=5)
         root = ET.fromstring(response.read())
         
-        trusted_press = ['KBS', 'MBC', 'SBS', 'YTN', '연합', 'JTBC', '조선', '중앙', '동아', '매일경제', '한국경제', '부산일보', '국제신문', '네이버']
+        trusted_press = ['KBS', 'MBC', 'SBS', 'YTN', '연합', 'JTBC', '조선', '중앙', '동아', '매일경재', '한국경제', '부산일보', '국제신문', '네이버']
         articles = []
         seen_titles = set()
         
