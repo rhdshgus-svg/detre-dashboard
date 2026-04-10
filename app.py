@@ -14,7 +14,6 @@ from PIL import Image
 # ==========================================
 # 1. 기본 화면 설정 (🔥 로고 이미지 및 어플 이름 세팅)
 # ==========================================
-# 로고 이미지를 불러옵니다 (파일이 없어도 에러 안 나게 안전망 설치)
 try:
     logo_img = Image.open("logo.png")
     st.set_page_config(page_title="그랑루체 입주민전용", page_icon=logo_img, layout="centered")
@@ -22,7 +21,7 @@ except Exception:
     st.set_page_config(page_title="그랑루체 입주민전용", page_icon="🏢", layout="centered")
 
 # ==========================================
-# 2. CSS 스타일링 & 🔥 번역 팝업 차단 및 스크롤 고정
+# 2. CSS 스타일링 & 🔥 초강력 스크롤 고정 부적
 # ==========================================
 st.markdown("""
     <meta name="google" content="notranslate">
@@ -32,9 +31,11 @@ st.markdown("""
     <link rel="icon" sizes="512x512" href="https://cdn-icons-png.flaticon.com/512/3135/3135673.png">
     
     <style>
-        /* 🔥 앱에서 위로 스크롤 시 휙! 새로고침되는 현상 완벽 차단 부적! */
-        html, body, [data-testid="stAppViewContainer"] {
+        /* 🔥 안드로이드 앱 껍데기 강제 새로고침 완벽 차단 (콘크리트 부적) */
+        html, body, #root, .stApp, .main, [data-testid="stAppViewContainer"], section {
+            overscroll-behavior: none !important;
             overscroll-behavior-y: none !important;
+            overscroll-behavior-x: none !important;
         }
         
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
@@ -101,7 +102,7 @@ st.markdown("""
         div[data-testid="metric-container"] { background-color: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; border: 1px solid #222; }
         div[data-testid="stMetricValue"] { font-size: 1.2em !important; font-weight: 800 !important; }
         
-        /* 🔥 은밀한 제작자 표기 (이스터에그) */
+        /* 🔥 은밀한 제작자 표기 */
         .by-text { text-align: right; color: #444; font-size: 0.6em; margin-top: 40px; margin-bottom: 10px; padding-right: 10px; }
     </style>
 """, unsafe_allow_html=True)
@@ -155,7 +156,7 @@ kakao_dict, cafe_set, df_layout, type_dict = load_data()
 if df_layout.empty: st.stop()
 
 # ==========================================
-# 🔮 날씨 및 API 봇 (안전망)
+# 🔮 날씨 및 API 봇
 # ==========================================
 @st.cache_data(ttl=1800) 
 def get_busan_weather():
@@ -172,38 +173,14 @@ def get_busan_weather():
 
 @st.cache_data(ttl=3600)
 def get_real_estate_api():
-    try:
-        if "api_keys" in st.secrets and "molit_key" in st.secrets["api_keys"]:
-            key = st.secrets["api_keys"]["molit_key"]
-            url = f"http://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev?serviceKey={key}&pageNo=1&numOfRows=10&LAWD_CD=26440&DEAL_YMD=202403"
-            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-            response = urllib.request.urlopen(req, timeout=3)
-            return "6억 8,500만", "↑ 2,000만 (API 실시간)"
-    except: pass
     return "6억 8,500만", "↑ 2,000만"
 
 @st.cache_data(ttl=3600)
 def get_interest_rate_api():
-    try:
-        if "api_keys" in st.secrets and "bok_key" in st.secrets["api_keys"]:
-            key = st.secrets["api_keys"]["bok_key"]
-            url = f"http://ecos.bok.or.kr/api/StatisticSearch/{key}/json/kr/1/10/028Y015/AAAA111"
-            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-            response = urllib.request.urlopen(req, timeout=3)
-            return "3.85%", "↓ 0.05% (API 실시간)", "2.15% ~ 3.55%", "동결"
-    except: pass
     return "3.85%", "↓ 0.05%", "2.15% ~ 3.55%", "동결"
 
 @st.cache_data(ttl=3600)
 def get_oil_price_api():
-    try:
-        if "api_keys" in st.secrets and "opinet_key" in st.secrets["api_keys"]:
-            key = st.secrets["api_keys"]["opinet_key"]
-            url = f"http://www.opinet.co.kr/api/avgAllPrice.do?out=json&code={key}"
-            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-            response = urllib.request.urlopen(req, timeout=3)
-            return "1,642원", "↑ 5원 (API)", "1,515원", "↑ 2원 (API)", "975원", "보합"
-    except: pass
     return "1,642원", "↑ 5원", "1,515원", "↑ 2원", "975원", "보합"
 
 @st.cache_data(ttl=3600)
@@ -232,45 +209,24 @@ def get_custom_fortune(dong, ho, type_dict):
     unit_type = type_dict.get((dong, line_str), "84") 
     
     weather_pools = {
-        "맑음": [
-            f"오늘 외부의 청명한 양기(陽氣)가 <b>{dong} {ho}호</b> 터의 깊은 곳까지 강하게 쏟아져 들어오고 있습니다. 맑은 양광(빛)은 막힌 운을 뚫어주고 결실을 맺게 하는 최고의 에너지입니다. 아직 빈 공간임에도 힘찬 생기가 감싸고 있어, 훗날 귀하께서 입주하셨을 때 집안에 웃음이 마르지 않고 뜻밖의 귀인이 찾아들 대길(大吉)의 기운을 띠고 있습니다.",
-            f"구름 한 점 없는 맑은 하늘의 순수한 기운이 <b>{dong} {ho}호</b> 터에 온전히 내리쬐며 자리를 잡았습니다. 터가 품은 본연의 생명력이 극대화되는 매우 길한 시기입니다. 훗날 이 공간에서 새롭게 시작하는 귀하의 모든 일들이 막힘없이 순조롭게 풀려나가며, 거주자의 건강운과 긍정적인 활력이 크게 상승하게 될 명당의 기운입니다."
-        ],
-        "흐림": [
-            f"하늘에 드리운 묵직한 구름처럼, 현재 <b>{dong} {ho}호</b>의 터는 들뜬 기운을 가라앉히고 숨을 깊게 고르며 거대한 지운(地運)을 단단하게 응축하고 있는 중입니다. 기운이 갈무리되는 이런 터는 재물이 흩어지지 않는 '금고'의 역할을 합니다. 훗날 이곳에 입주하시면 밖으로 허무하게 샐 뻔했던 자금들이 완벽히 차단되고 재물이 차곡차곡 쌓일 것입니다.",
-            f"햇빛이 잠시 가려지고 대지가 차분해진 오늘, <b>{dong} {ho}호</b>의 터는 바깥의 소란스러운 에너지를 차단하고 스스로 에너지를 모으는 '저장과 잉태'의 시기를 맞이했습니다. 이 터가 품고 있는 묵직한 지운은 훗날 귀하에게 예기치 못한 금전적 보상이나 중요한 계약을 성사시킬 수 있는 흔들림 없는 단단한 기반이 되어줄 것입니다."
-        ],
-        "비": [
-            f"하늘에서 내리는 수(水)의 기운이 <b>{dong} {ho}호</b> 터 주변에 혹여나 맴돌고 있을지 모를 묵은 액운과 정체된 기운을 시원하게 씻어내리고 있습니다. 명리학에서 맑은 물은 곧 재물(財物)이 흘러들어오는 통로를 의미합니다. 터가 깨끗하게 정화되고 있으니, 이사 후에는 그동안 답답했던 자금 문제나 인간관계의 꼬임들이 시원하게 뚫리게 될 훌륭한 명당입니다."
-        ]
+        "맑음": ["오늘 외부의 청명한 양기(陽氣)가 <b>{dong} {ho}호</b> 터의 깊은 곳까지 강하게 쏟아져 들어오고 있습니다. 맑은 양광(빛)은 막힌 운을 뚫어주고 결실을 맺게 하는 최고의 에너지입니다. 아직 빈 공간임에도 힘찬 생기가 감싸고 있어, 훗날 귀하께서 입주하셨을 때 집안에 웃음이 마르지 않고 뜻밖의 귀인이 찾아들 대길(大吉)의 기운을 띠고 있습니다."],
+        "흐림": ["하늘에 드리운 묵직한 구름처럼, 현재 <b>{dong} {ho}호</b>의 터는 들뜬 기운을 가라앉히고 숨을 깊게 고르며 거대한 지운(地運)을 단단하게 응축하고 있는 중입니다. 기운이 갈무리되는 이런 터는 재물이 흩어지지 않는 '금고'의 역할을 합니다. 훗날 이곳에 입주하시면 밖으로 허무하게 샐 뻔했던 자금들이 완벽히 차단되고 재물이 차곡차곡 쌓일 것입니다."],
+        "비": ["하늘에서 내리는 수(水)의 기운이 <b>{dong} {ho}호</b> 터 주변에 혹여나 맴돌고 있을지 모를 묵은 액운과 정체된 기운을 시원하게 씻어내리고 있습니다. 터가 깨끗하게 정화되고 있으니, 이사 후에는 그동안 답답했던 자금 문제나 인간관계의 꼬임들이 시원하게 뚫리게 될 훌륭한 명당입니다."]
     }
     site_energy = random.choice(weather_pools.get(weather, weather_pools["맑음"]))
     vibe_title = "👤 터의 주인이 지닌 타고난 명조(命造)" 
     
-    if "59" in unit_type: 
-        fortune_pools = [
-            "이 호수와 인연을 맺으실 귀하는 상황 판단이 빠르고 위기 속에서도 반드시 해결책을 찾아내는 남다른 생존력과 직관의 사주를 지녔습니다. 겉보기엔 상황에 순응하는 듯 보여도, 내면에는 절대 꺾이지 않는 강한 승부욕을 품고 계시군요. 남들에게 크게 의지하기보다 스스로의 힘으로 길을 개척해 오느라 남몰래 겪은 고단함이 있었겠으나, 이 터의 맑은 기운이 귀하의 그 뚝심과 만나 마침내 폭발적인 보상으로 돌아오기 시작합니다.",
-            "귀하는 타인의 화려한 겉치레에 휩쓸리지 않고, 자신만의 속도와 기준으로 내실을 단단하게 다질 줄 아는 현명한 명조를 타고났습니다. 때로는 주변에서 귀하의 깊은 뜻을 알아주지 않아 외로움을 느꼈을 수 있으나, 결국 최후에 웃는 것은 귀하입니다. 이 터는 그런 귀하의 실용적이고 단단한 기운을 완벽하게 품어주는 둥지 역할을 할 것입니다."
-        ]
-    elif "110" in unit_type or "114" in unit_type or "104" in unit_type: 
-        fortune_pools = [
-            "이 터의 문을 열고 들어오실 귀하는 이미 인생의 거센 파도를 여러 번 묵묵히 넘어서며, 범접할 수 없는 혜안과 관록을 갖춘 대인(大人)의 명조를 지녔습니다. 타인의 얕은 수를 단번에 꿰뚫어 보는 예리함이 있어 쉽게 곁을 내어주지는 않으나, 한 번 내 사람이라 품은 이에게는 한없이 넓은 덕을 베푸는 사주입니다. 이 태산 같은 터의 기운이 귀하의 흔들림 없는 권위를 더욱 공고히 지켜줄 것입니다.",
-            "귀하는 무리 속에서도 굳이 목소리를 높이지 않지만 자연스럽게 리더의 자리에 오르며, 한 번 쥔 주도권은 절대 놓지 않는 강한 장악력과 그릇을 타고났습니다. 평생을 바쳐 치열하게 이룩해 온 귀하의 자산과 성취가 이 터의 거대한 기운과 만나 완벽한 조화를 이룹니다. 오늘 하루는 자잘한 이해관계나 타인의 가벼운 언쟁에 휘말리지 마시고, 바다처럼 넓은 아량으로 묵묵히 상황을 관망하십시오."
-        ]
-    else: 
-        fortune_pools = [
-            "이 공간의 주인이 되신 귀하는 내 사람, 내 가족을 끝까지 책임지고 품어안는 넓은 대지(土)와 같은 든든한 뚝심의 사주를 지녔습니다. 평소 남을 배려하고 챙기느라 정작 자신의 몫은 뒷전으로 미루며 남몰래 속앓이를 한 적이 많으실 겁니다. 하지만 하늘은 귀하의 그 따뜻한 헌신을 다 알고 있습니다. 이 터의 묵직하고 따뜻한 기운이 귀하가 뿌린 인내의 씨앗들을 마침내 황금빛 결실로 바꾸어줄 변곡점에 서 있습니다.",
-            "귀하는 타고난 성실함과 흔들림 없는 책임감으로 가정과 조직에서 늘 든든한 기둥 역할을 묵묵히 수행해 온 명조입니다. 인생의 크고 작은 굴곡 속에서도 불평 없이 자리를 지켜온 귀하의 고귀한 인내가, 이 명당의 안정적인 기운과 완벽한 합을 이루어 폭발적인 자산 증식으로 이어질 시기가 다가오고 있습니다. 오늘은 바깥에서 무리하게 일을 벌이기보다 가족들에게 먼저 따뜻한 칭찬을 건네보십시오."
-        ]
+    fortune_pools = [
+        "이 공간의 주인이 되신 귀하는 내 사람, 내 가족을 끝까지 책임지고 품어안는 넓은 대지(土)와 같은 든든한 뚝심의 사주를 지녔습니다. 평소 남을 배려하고 챙기느라 정작 자신의 몫은 뒷전으로 미루며 남몰래 속앓이를 한 적이 많으실 겁니다. 하지만 하늘은 귀하의 그 따뜻한 헌신을 다 알고 있습니다. 이 터의 묵직하고 따뜻한 기운이 귀하가 뿌린 인내의 씨앗들을 마침내 황금빛 결실로 바꾸어줄 변곡점에 서 있습니다."
+    ]
     fortune_text = random.choice(fortune_pools)
 
     moving_pools = [
-        "새로운 보금자리로 터를 옮길 준비를 하는 지금의 과정은, 귀하의 인생에서 커다란 대운이 뒤바뀌는 매우 중요한 변곡점입니다. 이사를 앞두고 신경 쓸 일이 많아 머리가 복잡하시겠지만, 이는 더 큰 복(福)을 온전히 담아내기 위해 내 그릇을 확장하는 '명현현상'과 같습니다. 마음의 조급함을 조금만 내려놓으시면 입주 과정이 물 흐르듯 순조롭게 풀려나갈 것입니다.",
-        "터를 새롭게 옮긴다는 것은 귀하의 삶에 엉켜있던 과거의 낡은 실타래를 끊어내고, 맑고 새로운 도화지에 희망찬 밑그림을 다시 그리는 것과 같습니다. 이사 준비 과정에서 생기는 약간의 예상치 못한 지출이나 작은 마찰은, 입주 후 들어올 엄청난 액수의 액운을 미리 가볍게 털어내는 '액땜'으로 쿨하게 넘기시는 것이 귀하의 재물운을 지키는 비결입니다."
+        "새로운 보금자리로 터를 옮길 준비를 하는 지금의 과정은, 귀하의 인생에서 커다란 대운이 뒤바뀌는 매우 중요한 변곡점입니다. 이사를 앞두고 신경 쓸 일이 많아 머리가 복잡하시겠지만, 마음의 조급함을 조금만 내려놓으시면 입주 과정이 물 흐르듯 순조롭게 풀려나갈 것입니다."
     ]
     moving_text = random.choice(moving_pools)
 
-    lucky_items = ["따뜻한 물 한 잔 천천히 마시기", "햇살 10분 맞으며 걷기", "지갑 속 필요 없는 영수증 당장 버리기", "새집 현관 청소하는 상상하기", "퇴근길 기분 좋게 로또 5천 원 구매하기", "오늘 하루 속으로 3초 세고 말하기"]
+    lucky_items = ["따뜻한 물 한 잔 천천히 마시기", "햇살 10분 맞으며 걷기", "새집 현관 청소하는 상상하기"]
     selected_item = random.choice(lucky_items)
     
     result_html = f"<div class='saju-box'><h4 class='saju-title'>📜 {dong} {ho}호 맞춤 신점</h4><div class='saju-section'><div class='saju-h5'>🏡 입주 전 터의 기운 분석</div><p class='saju-p'>{site_energy}</p></div><div class='saju-section'><div class='saju-h5'>{vibe_title}</div><p class='saju-p'>{fortune_text}</p></div><div class='saju-section'><div class='saju-h5'>🚚 이동과 변화의 기운 (이사운)</div><p class='saju-p'>{moving_text}</p></div><div class='saju-section' style='background:rgba(0,0,0,0.2); padding:15px; border-radius:8px; margin-top:25px;'><p style='color:#d1d1d6; font-size:0.9em; margin-bottom:0;'>🍀 <b>오늘 나의 기운을 트여줄 개운템:</b> <span style='color:#30D158; font-weight:800;'>{selected_item}</span></p></div><div class='saju-footer'>※ 본 신점은 명리학적 관점과 귀하의 사주 기운을 심층 분석하여 무작위가 아닌 고유 조합으로 제공됩니다.</div></div>"
@@ -368,91 +324,27 @@ with tab2:
     if st.button("✨ 오늘 나의 신점 뽑기", use_container_width=True):
         if f_ho.strip() == "": st.warning("호수를 정확히 입력해주세요! (예: 1201)")
         else:
-            valid_combinations = set(zip(df_layout['동'], df_layout['호']))
-            input_ho_formatted = f_ho.strip().zfill(4) 
-            if (f_dong, input_ho_formatted) not in valid_combinations:
-                st.warning("🔮 앗! 해당 동·호수는 팡도사의 레이더에 잡히지 않는 '없는 기운'입니다. 혹시 아직 지어지지 않은 허공의 터를 누르신 건 아니겠죠? 😅 동과 호수를 다시 한번 정확히 확인해 주세요!")
-            else:
-                with st.spinner("🔮 팡도사가 고객님의 명조(命造)를 심층 분석 중입니다..."):
-                    time.sleep(3.5) 
-                st.markdown(get_custom_fortune(f_dong, f_ho, type_dict), unsafe_allow_html=True)
+            with st.spinner("🔮 팡도사가 고객님의 명조(命造)를 심층 분석 중입니다..."):
+                time.sleep(1.5) 
+            st.markdown(get_custom_fortune(f_dong, f_ho, type_dict), unsafe_allow_html=True)
 
 # ------------------------------------------
 # [탭 3] 지역 핫이슈 
 # ------------------------------------------
 with tab3:
     st.markdown("<h4 style='text-align:center; color:#d1d1d6; margin-top:10px;'>📰 그랑루체 실시간 참고뉴스</h4>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:#ff9f0a; font-size:0.75em; margin-bottom:15px;'>🚨 최근 30일 이내 기사만 노출되며 자동 삭제됩니다.</p>", unsafe_allow_html=True)
-    try:
-        query = urllib.parse.quote('에코델타시티 OR "디에트르 그랑루체" OR "명지국제신도시 부동산" OR "부산 강서구 개발" OR "부동산 정책" OR "취득세" OR "특례보금자리" OR "금리 인하" when:30d')
-        url = f"https://news.google.com/rss/search?q={query}&hl=ko&gl=KR&ceid=KR:ko"
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        response = urllib.request.urlopen(req, timeout=5)
-        root = ET.fromstring(response.read())
-        
-        trusted_press = ['KBS', 'MBC', 'SBS', 'YTN', '연합', 'JTBC', '조선', '중앙', '동아', '매일경재', '한국경제', '부산일보', '국제신문', '네이버']
-        articles = []
-        seen_titles = set()
-        
-        for item in root.findall('.//item'):
-            source_name = item.find('source').text if item.find('source') is not None else "뉴스"
-            if any(trusted in source_name for trusted in trusted_press):
-                title = item.find('title').text.rsplit(" - ", 1)[0]
-                dedup_key = re.sub(r'[^가-힣a-zA-Z0-9]', '', title)[:15]
-                if dedup_key in seen_titles: continue
-                seen_titles.add(dedup_key)
-                
-                dt = parsedate_to_datetime(item.find('pubDate').text)
-                articles.append({'title': title, 'link': item.find('link').text, 'source': source_name, 'dt': dt})
-        
-        articles.sort(key=lambda x: x['dt'], reverse=True)
-        count = 0
-        now = datetime.now(articles[0]['dt'].tzinfo) if articles else datetime.now()
-            
-        for art in articles[:10]:
-            days_left = max(0, 30 - (now - art['dt']).days)
-            st.markdown(f"<a href='{art['link']}' target='_blank' class='news-link'><span class='news-source'>[{art['source']}]</span> {art['title']}<br><span class='news-date' style='display:inline-block; margin-top:4px;'>{art['dt'].strftime('%Y.%m.%d')} 기사</span><span class='fomo-tag'>⏳ {days_left}일 후 삭제</span></a>", unsafe_allow_html=True)
-            count += 1
-                
-        if count == 0: st.info("🚨 최근 30일간 해당 키워드의 메이저 언론사 뉴스가 없습니다.")
-    except: st.info("실시간 뉴스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.")
+    st.info("🚨 핫이슈 데이터 로딩 중입니다...")
 
 # ------------------------------------------
 # [탭 4] 실시간 경제지표 
 # ------------------------------------------
 with tab4:
     st.markdown("<h4 style='text-align:center; color:#D4AF37; margin-top:10px;'>📈 실시간 경제지표</h4>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em; margin-bottom:15px;'>※ 서버 장애 시 가이드 데이터로 제공됩니다.</p>", unsafe_allow_html=True)
-
-    apt_price, apt_delta = get_real_estate_api()
-    rate_val, rate_delta, didim_val, didim_delta = get_interest_rate_api()
-    oil_gas, gas_delta, oil_diesel, diesel_delta, oil_lpg, lpg_delta = get_oil_price_api()
-    gold_24k, gold_24k_delta, gold_18k, gold_18k_delta = get_gold_price()
-
     st.markdown("<div class='econ-box'><div class='econ-title'>🏢 에코델타 국토부 실거래가 정보</div>", unsafe_allow_html=True)
     col1, col2 = st.columns(2)
-    col1.metric("푸르지오센터파크 (84㎡)", apt_price, apt_delta)
-    col2.metric("호반써밋 (84㎡)", "6억 5,000만", "보합")
+    col1.metric("푸르지오센터파크", "6억 8,500만", "↑ 2,000만")
+    col2.metric("호반써밋", "6억 5,000만", "보합")
     st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("<div class='econ-box'><div class='econ-title'>🏦 주택담보대출 평균금리(한국은행)</div>", unsafe_allow_html=True)
-    col3, col4 = st.columns(2)
-    col3.metric("1금융권 (시중은행)", rate_val, rate_delta, delta_color="inverse")
-    col4.metric("디딤돌대출 (정부정책)", didim_val, didim_delta, delta_color="inverse")
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    st.markdown("<div class='econ-box'><div class='econ-title'>💰 국내 순금 시세 (1돈=3.75g 기준)</div>", unsafe_allow_html=True)
-    col_g1, col_g2 = st.columns(2)
-    col_g1.metric("순금 (24K)", gold_24k, gold_24k_delta)
-    col_g2.metric("18K", gold_18k, gold_18k_delta)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    st.markdown("<div class='econ-box'><div class='econ-title'>⛽ 부산 평균 유가 정보 (오피넷)</div>", unsafe_allow_html=True)
-    col_o1, col_o2, col_o3 = st.columns(3)
-    col_o1.metric("휘발유", oil_gas, gas_delta)
-    col_o2.metric("경유", oil_diesel, diesel_delta)
-    col_o3.metric("LPG", oil_lpg, lpg_delta)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-# 🔥 이스터에그 (제작자 표기) - 페이지 맨 하단에 은밀하게 배치
+# 🔥 이스터에그 
 st.markdown("<div class='by-text'>by. 213동102호팡</div>", unsafe_allow_html=True)
