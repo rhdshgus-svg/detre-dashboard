@@ -61,7 +61,7 @@ st.markdown("""
         button[data-baseweb="tab"] { font-weight: 800 !important; font-size: 0.9em !important; }
         
         /* 운세 박스 프리미엄 디자인 */
-        .saju-box { background: linear-gradient(180deg, rgba(212, 175, 55, 0.08) 0%, rgba(28, 28, 30, 0.5) 100%); border-radius: 12px; border: 1px solid rgba(212, 175, 55, 0.3); padding: 25px 20px; text-align: left; }
+        .saju-box { background: linear-gradient(180deg, rgba(212, 175, 55, 0.08) 0%, rgba(28, 28, 30, 0.5) 100%); border-radius: 12px; border: 1px solid rgba(212, 175, 55, 0.3); padding: 25px 20px; text-align: left; margin-top:15px; }
         .saju-title { color: #D4AF37; text-align: center; margin-top: 0; font-size: 1.25em; font-weight: 900; margin-bottom: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
         .saju-section { margin-bottom: 18px; }
         .saju-h5 { color: #e5e5ea; font-size: 1.0em; font-weight: 800; margin-bottom: 8px; border-left: 3px solid #D4AF37; padding-left: 10px; }
@@ -71,7 +71,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 3. 데이터 로딩 (가입명단 + 🌟평수 데이터 완벽 추출)
+# 3. 데이터 로딩 (가입명단 + 🌟평수 데이터)
 # ==========================================
 SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQoR29bAcAP0KUBEvS3S6gn5Qz1MTKDJOxz-lW1UEyV_vOcISPxNW2uMuYMrz9HUw/pub?gid=1967078212&single=true&output=csv"
 LAYOUT_FILE = "디에트르 그랑루체 카페가입 현황.xlsx" 
@@ -105,7 +105,6 @@ def load_data():
         df_layout['호'] = df_layout['호'].astype(str).str.extract(r'(\d+)')[0].str.zfill(4) 
         df_layout = df_layout.dropna().drop_duplicates()
         
-        # 🌟 평수 데이터 몰래 로딩 (J:O 열)
         try:
             df_type = pd.read_excel(LAYOUT_FILE, sheet_name='동호 코드', skiprows=2, usecols="J:O", header=None, dtype=str)
             df_type.columns = ['동', '1', '2', '3', '4', '5']
@@ -130,7 +129,7 @@ if df_layout.empty:
     st.stop()
 
 # ==========================================
-# 🔮 날씨 정보 가로채기 (에러 완벽 방어막 구축)
+# 🔮 날씨 정보 가로채기
 # ==========================================
 @st.cache_data(ttl=1800) 
 def get_busan_weather():
@@ -144,11 +143,10 @@ def get_busan_weather():
         elif code <= 48: return "흐림"
         else: return "비"
     except Exception:
-        # 에러 발생 시 절대 멈추지 않고 '맑음'으로 무조건 우회
         return "맑음" 
 
 # ==========================================
-# 🌟 [핵심] 평수 타겟팅 + 날씨 기반 딥러닝(?) 관상 운세
+# 🌟 [핵심] 평수 타겟팅 운세 (🔥 HTML 엔터 제거 완벽 압축)
 # ==========================================
 def get_custom_fortune(dong, ho, type_dict):
     today_str = datetime.now().strftime("%Y%m%d")
@@ -156,12 +154,9 @@ def get_custom_fortune(dong, ho, type_dict):
     random.seed(seed_val)
 
     weather = get_busan_weather()
-    
-    # 입력한 호수에서 '라인(끝자리)' 추출 (예: 401호 -> '1')
     line_str = str(ho)[-1] if str(ho) else "1"
-    unit_type = type_dict.get((dong, line_str), "84") # 매칭 안 되면 기본 84타입으로
+    unit_type = type_dict.get((dong, line_str), "84") 
     
-    # 1. 터의 기운 (날씨 기반 - 영업 비밀)
     if weather == "맑음":
         site_energy = f"오늘 외부의 청명한 양기(陽氣)가 <b>{dong} {ho}호</b> 터로 강하게 쏟아져 들어오고 있습니다. 풍수적으로 양광(빛)은 명예와 결실을 뜻합니다. 아직 빈 공간임에도 맑은 생기가 터를 감싸고 있어, 훗날 입주하셨을 때 집안에 웃음이 끊이지 않고 횡재수가 따를 대길(大吉)의 기운입니다."
     elif weather == "흐림":
@@ -169,7 +164,6 @@ def get_custom_fortune(dong, ho, type_dict):
     else:
         site_energy = f"수(水)의 기운이 <b>{dong} {ho}호</b> 터에 머물던 묵은 정체기를 시원하게 씻어내고 있습니다. 명리학에서 물은 곧 재물(財物)의 흐름을 의미합니다. 그동안 막혀있던 대출이나 금전적인 고민거리가 있었다면 씻겨 내려가듯 뜻밖의 해결책이 등장할 명당의 기운입니다."
 
-    # 🌟 2. 평수(타입) 기반 심리 타겟팅 멘트 (디테일 압권!)
     if "59" in unit_type: 
         vibe_title = "🌱 실속과 새로운 도약의 기운"
         fortune_text = "이 터는 새싹이 땅을 뚫고 오르는 '생동(生動)'의 기운을 품고 있어, 실속을 챙기고 새로운 시작을 준비하는 분들에게 최고의 명당입니다. 오늘은 작은 지출을 꼼꼼히 아낀 것이 훗날 큰 종잣돈으로 돌아오는 형국입니다. 투자나 계약은 돌다리도 두들겨 보듯 신중히 하시고, 오늘 저녁 배우자나 가족, 연인에게 따뜻한 식사 한 끼를 대접하십시오. 가정의 끈끈한 화합이 엉뚱하게 돈이 새는 것을 완벽히 막아줄 것입니다."
@@ -180,33 +174,11 @@ def get_custom_fortune(dong, ho, type_dict):
         vibe_title = "🌳 안정과 가정 화목의 기운"
         fortune_text = "이 터는 만물을 품고 기르는 '대지(土)'의 기운으로, 가정의 중추를 책임지고 화목함을 이끌어가는 데 최적화된 명당입니다. 오늘은 자녀의 평안과 가족 간의 화합이 곧 나의 재물운을 끌어올리는 마스터키입니다. 무리하고 공격적인 투자보다는 자산의 내실을 단단히 다지는 것이 좋으며, 오지랖 부리며 남의 일에 관여하기보다는 오직 '내 가족'을 위해 베푸는 작은 지출이 뜻밖의 호재로 돌아올 것입니다."
 
-    # 3. 개운템
     lucky_items = ["따뜻한 차 한 잔", "햇살 10분 맞으며 걷기", "지갑 속 영수증 버리기", "현관 청소 상상하기", "퇴근길 로또 5천 원"]
     selected_item = random.choice(lucky_items)
     
-    result_html = f"""
-    <div class='saju-box'>
-        <h4 class='saju-title'>📜 {dong} {ho}호 오늘의 맞춤 운세</h4>
-        
-        <div class='saju-section'>
-            <div class='saju-h5'>🏡 터의 기운 분석</div>
-            <p class='saju-p'>{site_energy}</p>
-        </div>
-        
-        <div class='saju-section'>
-            <div class='saju-h5'>{vibe_title}</div>
-            <p class='saju-p'>{fortune_text}</p>
-        </div>
-        
-        <div class='saju-section' style='background:rgba(0,0,0,0.2); padding:12px; border-radius:8px;'>
-            <p style='color:#d1d1d6; font-size:0.9em; margin-bottom:4px;'>🍀 <b>오늘의 개운템 (운을 트는 행동):</b> <span style='color:#30D158; font-weight:800;'>{selected_item}</span></p>
-        </div>
-        
-        <div class='saju-footer'>
-            ※ 본 운세는 명리학적 관점과 해당 공간의 풍수적 터 기운을 심층 분석하여 제공됩니다.<br>더 뼈 때리는 나의 진짜 사주/MBTI 분석이 궁금하다면?<br><b style='color:#D4AF37;'>상단의 1:1 톡으로 팡도사에게 문의하세요!</b>
-        </div>
-    </div>
-    """
+    # 🔥 에러 방지: 줄바꿈(엔터) 싹 지운 한 줄짜리 HTML 
+    result_html = f"<div class='saju-box'><h4 class='saju-title'>📜 {dong} {ho}호 오늘의 맞춤 운세</h4><div class='saju-section'><div class='saju-h5'>🏡 터의 기운 분석</div><p class='saju-p'>{site_energy}</p></div><div class='saju-section'><div class='saju-h5'>{vibe_title}</div><p class='saju-p'>{fortune_text}</p></div><div class='saju-section' style='background:rgba(0,0,0,0.2); padding:12px; border-radius:8px;'><p style='color:#d1d1d6; font-size:0.9em; margin-bottom:4px;'>🍀 <b>오늘의 개운템 (운을 트는 행동):</b> <span style='color:#30D158; font-weight:800;'>{selected_item}</span></p></div><div class='saju-footer'>※ 본 운세는 명리학적 관점과 해당 공간의 풍수적 터 기운을 심층 분석하여 제공됩니다.<br>더 뼈 때리는 나의 진짜 사주/MBTI 분석이 궁금하다면?<br><b style='color:#D4AF37;'>상단의 1:1 톡으로 팡도사에게 문의하세요!</b></div></div>"
     return result_html
 
 # ==========================================
@@ -285,7 +257,7 @@ with tab1:
     st.markdown(html_grid, unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 2] 오늘의 운세 (🔥 3.5초 로딩 + 평수 타겟팅)
+# [탭 2] 오늘의 운세 
 # ------------------------------------------
 with tab2:
     st.markdown("<h4 style='text-align:center; color:#D4AF37; margin-top:10px;'>🔮 팡도사의 동·호수 맞춤 운세</h4>", unsafe_allow_html=True)
@@ -301,10 +273,8 @@ with tab2:
         if f_ho.strip() == "":
             st.warning("호수를 정확히 입력해주세요! (예: 102)")
         else:
-            # 🔥 노동 착각(Labor Illusion) 심리 마케팅 로딩창 적용
             with st.spinner("🔮 팡도사가 고객님의 터 기운을 심층 분석 중입니다..."):
-                time.sleep(3.5) # 3.5초 동안 일부러 뜸 들이기!
-                
+                time.sleep(3.5) 
             fortune_html = get_custom_fortune(f_dong, f_ho, type_dict)
             st.markdown(fortune_html, unsafe_allow_html=True)
 
