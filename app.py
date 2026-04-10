@@ -2,10 +2,11 @@ import streamlit as st
 import pandas as pd
 import re
 import urllib.request
-import xml.etree.ElementTree as ET
-import random
-from datetime import datetime
 import json
+import random
+import time
+import xml.etree.ElementTree as ET
+from datetime import datetime
 
 # ==========================================
 # 1. 기본 화면 설정
@@ -59,18 +60,18 @@ st.markdown("""
         .news-link:hover { color: #D4AF37; }
         button[data-baseweb="tab"] { font-weight: 800 !important; font-size: 0.9em !important; }
         
-        /* 운세 전용 스타일 */
-        .saju-box { background: rgba(212, 175, 55, 0.05); border-radius: 12px; border: 1px solid rgba(212, 175, 55, 0.3); padding: 20px; text-align: left; }
-        .saju-title { color: #D4AF37; text-align: center; margin-top: 0; font-size: 1.2em; font-weight: 800; margin-bottom: 15px; }
-        .saju-section { margin-bottom: 15px; }
-        .saju-h5 { color: #d1d1d6; font-size: 0.95em; font-weight: 800; margin-bottom: 5px; border-left: 3px solid #D4AF37; padding-left: 8px; }
-        .saju-p { color: #e5e5ea; font-size: 0.85em; line-height: 1.6; margin-top: 0; padding-left: 10px; }
-        .saju-footer { color: #aaa; font-size: 0.7em; text-align: center; margin-top: 20px; border-top: 1px dashed #555; padding-top: 15px; }
+        /* 운세 박스 프리미엄 디자인 */
+        .saju-box { background: linear-gradient(180deg, rgba(212, 175, 55, 0.08) 0%, rgba(28, 28, 30, 0.5) 100%); border-radius: 12px; border: 1px solid rgba(212, 175, 55, 0.3); padding: 25px 20px; text-align: left; }
+        .saju-title { color: #D4AF37; text-align: center; margin-top: 0; font-size: 1.25em; font-weight: 900; margin-bottom: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .saju-section { margin-bottom: 18px; }
+        .saju-h5 { color: #e5e5ea; font-size: 1.0em; font-weight: 800; margin-bottom: 8px; border-left: 3px solid #D4AF37; padding-left: 10px; }
+        .saju-p { color: #d1d1d6; font-size: 0.85em; line-height: 1.6; margin-top: 0; padding-left: 13px; text-align:justify; letter-spacing: -0.2px; }
+        .saju-footer { color: #888; font-size: 0.75em; text-align: center; margin-top: 25px; border-top: 1px dashed #444; padding-top: 15px; }
     </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 3. 데이터 로딩 (구글 시트 & 엑셀)
+# 3. 데이터 로딩 (가입명단 + 🌟평수 데이터 완벽 추출)
 # ==========================================
 SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQoR29bAcAP0KUBEvS3S6gn5Qz1MTKDJOxz-lW1UEyV_vOcISPxNW2uMuYMrz9HUw/pub?gid=1967078212&single=true&output=csv"
 LAYOUT_FILE = "디에트르 그랑루체 카페가입 현황.xlsx" 
@@ -79,6 +80,8 @@ LAYOUT_FILE = "디에트르 그랑루체 카페가입 현황.xlsx"
 def load_data():
     kakao_dict = {}
     cafe_set = set()
+    type_dict = {} 
+    
     try:
         df_raw = pd.read_csv(SHEET_CSV_URL, dtype=str)
         df_raw.columns = df_raw.columns.str.strip() 
@@ -101,64 +104,84 @@ def load_data():
         df_layout['동'] = df_layout['동'].astype(str).str.extract(r'(\d+)')[0] + "동"
         df_layout['호'] = df_layout['호'].astype(str).str.extract(r'(\d+)')[0].str.zfill(4) 
         df_layout = df_layout.dropna().drop_duplicates()
-        return kakao_dict, cafe_set, df_layout
-    except Exception as e:
-        return {}, set(), pd.DataFrame()
+        
+        # 🌟 평수 데이터 몰래 로딩 (J:O 열)
+        try:
+            df_type = pd.read_excel(LAYOUT_FILE, sheet_name='동호 코드', skiprows=2, usecols="J:O", header=None, dtype=str)
+            df_type.columns = ['동', '1', '2', '3', '4', '5']
+            df_type = df_type.dropna(subset=['동'])
+            df_type['동'] = df_type['동'].astype(str).str.extract(r'(\d+)')[0] + "동"
+            
+            for _, row in df_type.iterrows():
+                d_val = row['동']
+                for line in ['1', '2', '3', '4', '5']:
+                    val = str(row[line]).strip()
+                    if val and val.lower() != 'nan':
+                        type_dict[(d_val, line)] = val
+        except Exception:
+            pass 
 
-kakao_dict, cafe_set, df_layout = load_data()
+        return kakao_dict, cafe_set, df_layout, type_dict
+    except Exception:
+        return {}, set(), pd.DataFrame(), {}
+
+kakao_dict, cafe_set, df_layout, type_dict = load_data()
 if df_layout.empty:
     st.stop()
 
 # ==========================================
-# 🔮 [신규] 실시간 부산 날씨 조회 API
+# 🔮 날씨 정보 가로채기 (에러 완벽 방어막 구축)
 # ==========================================
-@st.cache_data(ttl=1800) # 30분마다 갱신
+@st.cache_data(ttl=1800) 
 def get_busan_weather():
     try:
-        # 부산 강서구 에코델타시티 인근 좌표
         url = "https://api.open-meteo.com/v1/forecast?latitude=35.1796&longitude=129.0756&current_weather=true"
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        response = urllib.request.urlopen(req)
+        response = urllib.request.urlopen(req, timeout=3)
         data = json.loads(response.read())
         code = data['current_weather']['weathercode']
-        
         if code <= 3: return "맑음"
         elif code <= 48: return "흐림"
-        else: return "비/눈"
-    except:
-        return "맑음" # 에러 시 기본값
+        else: return "비"
+    except Exception:
+        # 에러 발생 시 절대 멈추지 않고 '맑음'으로 무조건 우회
+        return "맑음" 
 
 # ==========================================
-# 🔮 [신규] 입주 전 맞춤 롱폼 운세 생성기
+# 🌟 [핵심] 평수 타겟팅 + 날씨 기반 딥러닝(?) 관상 운세
 # ==========================================
-def get_custom_fortune(dong, ho):
-    # 💡 동동 중복 에러 해결: {dong}에는 이미 '213동'이 들어있으므로 바로 붙여 씀
+def get_custom_fortune(dong, ho, type_dict):
     today_str = datetime.now().strftime("%Y%m%d")
     seed_val = f"{today_str}_{dong}_{ho}"
     random.seed(seed_val)
 
     weather = get_busan_weather()
-    current_hour = datetime.now().hour
-    time_str = "오전" if current_hour < 12 else ("오후" if current_hour < 18 else "저녁")
-
-    # 1. 날씨 기반 터의 기운 (입주 전 컨텍스트)
+    
+    # 입력한 호수에서 '라인(끝자리)' 추출 (예: 401호 -> '1')
+    line_str = str(ho)[-1] if str(ho) else "1"
+    unit_type = type_dict.get((dong, line_str), "84") # 매칭 안 되면 기본 84타입으로
+    
+    # 1. 터의 기운 (날씨 기반 - 영업 비밀)
     if weather == "맑음":
-        site_energy = f"오늘 부산의 하늘은 티 없이 맑고 청명합니다. 이 눈부신 햇살의 양기(陽氣)가 훗날 입주하실 <b>{dong} {ho}호</b>의 터에 가득 차오르고 있습니다. 아직 빈 공간이지만 터의 생기가 돌기 시작했으니, 이곳에 입주하시면 밝은 에너지로 인해 집안에 웃음꽃이 피고 횡재수가 따를 대길(大吉)의 기운입니다."
+        site_energy = f"오늘 외부의 청명한 양기(陽氣)가 <b>{dong} {ho}호</b> 터로 강하게 쏟아져 들어오고 있습니다. 풍수적으로 양광(빛)은 명예와 결실을 뜻합니다. 아직 빈 공간임에도 맑은 생기가 터를 감싸고 있어, 훗날 입주하셨을 때 집안에 웃음이 끊이지 않고 횡재수가 따를 대길(大吉)의 기운입니다."
     elif weather == "흐림":
-        site_energy = f"오늘 부산 하늘에 드리운 구름처럼, <b>{dong} {ho}호</b>의 터는 잠시 숨을 고르며 거대한 에너지를 응축하고 있는 하루입니다. 입주 전 고요한 상태에서 지운(地運)이 깊어지고 있으니, 훗날 이사하시게 되면 밖으로 새는 돈이 막히고 재물이 차곡차곡 쌓이는 재물창고가 될 명당입니다."
+        site_energy = f"하늘의 구름처럼 <b>{dong} {ho}호</b>의 터가 숨을 고르며 거대한 지운(地運)을 단단하게 응축하고 있습니다. 이럴 때는 무리하게 일을 벌이기보다 내실을 다지는 것이 좋습니다. 밖으로 샐 뻔한 돈이 완벽히 막히고 훗날 크게 쓰일 재물창고가 튼튼해지는 하루입니다."
     else:
-        site_energy = f"오늘 부산에 내리는 물의 기운은 <b>{dong} {ho}호</b>의 터에 묻혀있던 묵은 액운을 깨끗하게 씻어내는 '정화의 비'입니다. 풍수에서 물(水)은 곧 재물을 뜻합니다. 입주 전 터가 깨끗하게 닦이고 있으니, 이사 후에는 막혔던 일들이 시원하게 풀려나갈 기막힌 사주입니다."
+        site_energy = f"수(水)의 기운이 <b>{dong} {ho}호</b> 터에 머물던 묵은 정체기를 시원하게 씻어내고 있습니다. 명리학에서 물은 곧 재물(財物)의 흐름을 의미합니다. 그동안 막혀있던 대출이나 금전적인 고민거리가 있었다면 씻겨 내려가듯 뜻밖의 해결책이 등장할 명당의 기운입니다."
 
-    # 2. 개인/입주 준비 운세
-    fortunes = [
-        "오늘은 귀가 얇아지면 남 좋은 일만 시키고 내 지갑만 가벼워지는 형국입니다. 가전제품이나 가구 견적 등 큰돈이 나가는 결정을 하려 했다면 무조건 내일로 미루십시오! 대신 야외 활동 중 뜻밖의 기분 좋은 소식(횡재수)을 들을 수 있습니다.",
-        "스트레스가 머리로 몰려 사소한 일에 짜증이 치솟는 날입니다. 배우자나 가족과 입주 준비로 의견 충돌이 생긴다면 무조건 '당신 말이 맞다'고 한 발 물러서십시오. 져주는 것이 곧 이기는 것이며, 그래야 집안의 재물이 엉뚱한 곳으로 새지 않습니다.",
-        "오지랖 부리다가 남의 일까지 독박 쓰기 딱 좋은 사주입니다. 오늘은 무조건 '내 코가 석 자' 마인드로 눈치껏 빠지세요. 새집에 들어갈 생각하며 긍정적인 마음을 유지하면, 오히려 막혀있던 대출이나 자금 문제가 뜻밖에 귀인을 만나 술술 풀리는 날입니다."
-    ]
-    today_fortune = random.choice(fortunes)
+    # 🌟 2. 평수(타입) 기반 심리 타겟팅 멘트 (디테일 압권!)
+    if "59" in unit_type: 
+        vibe_title = "🌱 실속과 새로운 도약의 기운"
+        fortune_text = "이 터는 새싹이 땅을 뚫고 오르는 '생동(生動)'의 기운을 품고 있어, 실속을 챙기고 새로운 시작을 준비하는 분들에게 최고의 명당입니다. 오늘은 작은 지출을 꼼꼼히 아낀 것이 훗날 큰 종잣돈으로 돌아오는 형국입니다. 투자나 계약은 돌다리도 두들겨 보듯 신중히 하시고, 오늘 저녁 배우자나 가족, 연인에게 따뜻한 식사 한 끼를 대접하십시오. 가정의 끈끈한 화합이 엉뚱하게 돈이 새는 것을 완벽히 막아줄 것입니다."
+    elif "110" in unit_type or "114" in unit_type or "104" in unit_type: 
+        vibe_title = "⛰️ 성취와 대인(大人)의 기운"
+        fortune_text = "이 터는 세상을 굽어보는 '태산(泰山)'의 기운을 가졌습니다. 이미 어느 정도 경제적 여유와 성취를 이룬 분들의 품위와 권위를 굳건히 지켜주는 자리입니다. 오늘은 얕은 수나 자잘한 지출에 너무 연연하지 마십시오. 큰 물에서 노는 사주이니, 주변 지인들에게 여유롭게 밥을 한 번 사며 덕을 베푸는 것이 좋습니다. 그들이 훗날 더 큰 명예와 기가 막힌 투자 호재를 물어다 주는 '대인의 하루'가 될 것입니다."
+    else: 
+        vibe_title = "🌳 안정과 가정 화목의 기운"
+        fortune_text = "이 터는 만물을 품고 기르는 '대지(土)'의 기운으로, 가정의 중추를 책임지고 화목함을 이끌어가는 데 최적화된 명당입니다. 오늘은 자녀의 평안과 가족 간의 화합이 곧 나의 재물운을 끌어올리는 마스터키입니다. 무리하고 공격적인 투자보다는 자산의 내실을 단단히 다지는 것이 좋으며, 오지랖 부리며 남의 일에 관여하기보다는 오직 '내 가족'을 위해 베푸는 작은 지출이 뜻밖의 호재로 돌아올 것입니다."
 
     # 3. 개운템
-    lucky_items = ["아이스 아메리카노 한 잔", "햇살 10분 맞으며 걷기", "배우자에게 따뜻한 말 한마디", "부동산/인테리어 앱 지우고 하루 쉬기", "퇴근길 로또 5천 원"]
+    lucky_items = ["따뜻한 차 한 잔", "햇살 10분 맞으며 걷기", "지갑 속 영수증 버리기", "현관 청소 상상하기", "퇴근길 로또 5천 원"]
     selected_item = random.choice(lucky_items)
     
     result_html = f"""
@@ -166,21 +189,21 @@ def get_custom_fortune(dong, ho):
         <h4 class='saju-title'>📜 {dong} {ho}호 오늘의 맞춤 운세</h4>
         
         <div class='saju-section'>
-            <div class='saju-h5'>🏡 입주 전 터의 기운 ({weather})</div>
+            <div class='saju-h5'>🏡 터의 기운 분석</div>
             <p class='saju-p'>{site_energy}</p>
         </div>
         
         <div class='saju-section'>
-            <div class='saju-h5'>✨ 오늘의 행동 지침</div>
-            <p class='saju-p'>{today_fortune}</p>
+            <div class='saju-h5'>{vibe_title}</div>
+            <p class='saju-p'>{fortune_text}</p>
         </div>
         
-        <div class='saju-section' style='background:rgba(0,0,0,0.2); padding:10px; border-radius:8px;'>
-            <p style='color:#d1d1d6; font-size:0.85em; margin-bottom:4px;'>🍀 <b>오늘의 개운템 (운을 트는 행동):</b> <span style='color:#30D158; font-weight:800;'>{selected_item}</span></p>
+        <div class='saju-section' style='background:rgba(0,0,0,0.2); padding:12px; border-radius:8px;'>
+            <p style='color:#d1d1d6; font-size:0.9em; margin-bottom:4px;'>🍀 <b>오늘의 개운템 (운을 트는 행동):</b> <span style='color:#30D158; font-weight:800;'>{selected_item}</span></p>
         </div>
         
         <div class='saju-footer'>
-            ※ 현재 거주지의 터 기운을 바탕으로 분석한 운세입니다.<br>더 뼈 때리는 나의 진짜 사주/MBTI 분석이 궁금하다면?<br><b>상단의 1:1 톡으로 팡도사에게 문의하세요!</b>
+            ※ 본 운세는 명리학적 관점과 해당 공간의 풍수적 터 기운을 심층 분석하여 제공됩니다.<br>더 뼈 때리는 나의 진짜 사주/MBTI 분석이 궁금하다면?<br><b style='color:#D4AF37;'>상단의 1:1 톡으로 팡도사에게 문의하세요!</b>
         </div>
     </div>
     """
@@ -262,11 +285,11 @@ with tab1:
     st.markdown(html_grid, unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 2] 오늘의 운세 (날씨/시간/동호수 기반 롱폼)
+# [탭 2] 오늘의 운세 (🔥 3.5초 로딩 + 평수 타겟팅)
 # ------------------------------------------
 with tab2:
     st.markdown("<h4 style='text-align:center; color:#D4AF37; margin-top:10px;'>🔮 팡도사의 동·호수 맞춤 운세</h4>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em;'>개인정보 입력 없이, 거주하실 공간의 터 기운과<br>오늘 부산의 날씨를 결합하여 하루를 점쳐드립니다.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em;'>개인정보 입력 없이, 거주하실 공간의 터 기운을 심층 분석하여 점쳐드립니다.</p>", unsafe_allow_html=True)
     
     col_d, col_h = st.columns(2)
     with col_d:
@@ -278,7 +301,11 @@ with tab2:
         if f_ho.strip() == "":
             st.warning("호수를 정확히 입력해주세요! (예: 102)")
         else:
-            fortune_html = get_custom_fortune(f_dong, f_ho)
+            # 🔥 노동 착각(Labor Illusion) 심리 마케팅 로딩창 적용
+            with st.spinner("🔮 팡도사가 고객님의 터 기운을 심층 분석 중입니다..."):
+                time.sleep(3.5) # 3.5초 동안 일부러 뜸 들이기!
+                
+            fortune_html = get_custom_fortune(f_dong, f_ho, type_dict)
             st.markdown(fortune_html, unsafe_allow_html=True)
 
 # ------------------------------------------
@@ -289,7 +316,7 @@ with tab3:
     try:
         url = "https://news.google.com/rss/search?q=에코델타시티+OR+부동산정책+OR+강서구부동산&hl=ko&gl=KR&ceid=KR:ko"
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        response = urllib.request.urlopen(req)
+        response = urllib.request.urlopen(req, timeout=3)
         xml_data = response.read()
         root = ET.fromstring(xml_data)
         
