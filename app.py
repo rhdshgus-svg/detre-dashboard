@@ -318,7 +318,7 @@ with tab2:
 # ------------------------------------------
 with tab3:
     st.markdown("<h4 style='text-align:center; color:#d1d1d6; margin-top:10px;'>📰 그랑루체 입주민 참고 실시간 뉴스</h4>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:#ff9f0a; font-size:0.75em; margin-bottom:15px;'>🚨 정보 선점을 위해 <b>최근 7일 이내</b> 메이저 언론 기사만 노출되며 자동 삭제됩니다.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#ff9f0a; font-size:0.75em; margin-bottom:15px;'>🚨 최근 30일 이내</b> 메이저 언론 기사만 노출되며 자동 삭제됩니다.</p>", unsafe_allow_html=True)
     
     try:
         # 🔥 건설, 개발, 예타 통과 등 아파트값 오르는 키워드만 초정밀 타겟팅!
@@ -351,7 +351,7 @@ with tab3:
                 now = datetime.now(dt.tzinfo)
                 diff = now - dt
                 days_passed = diff.days
-                days_left = max(0, 7 - days_passed)
+                days_left = max(0, 30 - days_passed)
                 
                 date_str = f"⏳ {days_left}일 후 삭제"
                 
@@ -365,7 +365,7 @@ with tab3:
                 count += 1
                 
         if count == 0:
-            st.info("🚨 최근 7일간 해당 키워드의 메이저 언론사 핫이슈가 없습니다.")
+            st.info("🚨 최근 30일간 해당 키워드의 메이저 언론사 핫이슈가 없습니다.")
             
     except Exception as e:
         st.info("실시간 뉴스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.")
