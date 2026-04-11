@@ -10,6 +10,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 from email.utils import parsedate_to_datetime
 from PIL import Image
+from bs4 import BeautifulSoup # 🔥 금시세 크롤링을 위한 라이브러리 추가
 
 # ==========================================
 # 1. 기본 화면 설정
@@ -21,7 +22,7 @@ except Exception:
     st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon="🏢", layout="centered")
 
 # ==========================================
-# 2. CSS 스타일링 (🔥 가독성 패치 및 VIP 폼)
+# 2. CSS 스타일링 (🔥 가독성 패치 및 프리미엄 폼)
 # ==========================================
 st.markdown("""
     <meta name="google" content="notranslate">
@@ -159,7 +160,7 @@ kakao_dict, cafe_set, df_layout, type_dict = load_data()
 if df_layout.empty: st.stop()
 
 # ==========================================
-# 🔮 날씨 및 경제 API 봇 (🔥 무적 방어막 + 실시간 연동 탑재 완료!)
+# 🔮 실시간 경제 API 봇 (🔥 무적 방어막 + 실시간 연동 탑재 완료!)
 # ==========================================
 @st.cache_data(ttl=1800) 
 def get_busan_weather():
@@ -198,22 +199,21 @@ def get_real_estate_api():
         else:
             return "6억 8,500만", "최근 거래없음"
     except:
-        # 서버 폭파 시 튕기지 않고 기본값 반환하는 철통 방어
-        return "6억 8,500만", "서버 점검중"
+        return "6억 8,500만", "조회지연(점검중)"
 
 @st.cache_data(ttl=3600)
 def get_interest_rate_api():
     try:
         # 한국은행 100대 통계지표 API (기준금리)
         bok_key = st.secrets["api_keys"]["bok_key"]
-        url = f"http://ecos.bok.or.kr/api/KeyStatisticList/{bok_key}/xml/kr/1/10"
+        url = f"http://ecos.bok.or.kr/api/KeyStatisticList/{bok_key}/xml/kr/1/100"
         req = urllib.request.Request(url)
         res = urllib.request.urlopen(req, timeout=3)
         root = ET.fromstring(res.read())
         
         base_rate = "3.50%"
         for row in root.findall('.//row'):
-            if row.find('KEYSTAT_NAME').text == "한국은행 기준금리":
+            if "기준금리" in row.find('KEYSTAT_NAME').text:
                 base_rate = row.find('DATA_VALUE').text + "%"
                 break
         return base_rate, "한국은행", "2.15% ~ 3.55%", "동결"
@@ -240,21 +240,84 @@ def get_oil_price_api():
             
         return gas, "실시간", diesel, "실시간", lpg, "실시간"
     except:
-        return "1,642원", "서버 점검중", "1,515원", "서버 점검중", "975원", "보합"
+        return "1,642원", "조회지연", "1,515원", "조회지연", "975원", "조회지연"
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=86400) # 하루에 한 번 업데이트
 def get_gold_price():
-    return "432,000원", "↑ 3,000원", "318,000원", "↑ 2,000원"
+    try:
+        # 네이버 금시세 크롤링
+        url = "https://search.naver.com/search.naver?query=금시세"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        res = urllib.request.urlopen(req, timeout=5)
+        html = res.read().decode('utf-8')
+        soup = BeautifulSoup(html, 'html.parser')
+        
+        price_tags = soup.select('.price_info .num')
+        updown_tags = soup.select('.price_info .blind')
+        diff_tags = soup.select('.price_info .num_updown')
+        
+        if len(price_tags) >= 2:
+            gold_24k = price_tags[0].text + "원"
+            gold_18k = price_tags[1].text + "원"
+            
+            def get_delta(index):
+                try:
+                    status = updown_tags[index].text.strip()
+                    diff = diff_tags[index].text.strip().replace(status, "").strip()
+                    if status == "상승": return f"↑ {diff}원"
+                    elif status == "하락": return f"↓ {diff}원"
+                    else: return "보합"
+                except:
+                    return "-"
+            
+            delta_24k = get_delta(0)
+            delta_18k = get_delta(1)
+            return gold_24k, delta_24k, gold_18k, delta_18k
+        else:
+            return "432,000원", "↑ 3,000원", "318,000원", "↑ 2,000원"
+    except:
+        return "조회지연", "-", "조회지연", "-"
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=86400) # 하루에 한 번 업데이트
 def get_global_stocks_api():
-    return [
-        ("코스피 (KOSPI)", "2,750.86", "↑ 12.30", "#FF3B30"),
-        ("나스닥 (NASDAQ)", "16,300.50", "↑ 85.20", "#FF3B30"),
-        ("S&P 500", "5,210.15", "↑ 15.10", "#FF3B30"),
-        ("니케이 (NIKKEI)", "39,500.00", "↓ 120.50", "#007AFF"),
-        ("유로스톡스 50", "4,950.25", "보합", "#8e8e93")
+    symbols = [
+        ("코스피 (KOSPI)", "^KS11"),
+        ("나스닥 (NASDAQ)", "^IXIC"),
+        ("S&P 500", "^GSPC"),
+        ("니케이 (NIKKEI)", "^N225"),
+        ("유로스톡스 50", "^STOXX50E")
     ]
+    results = []
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    
+    for name, sym in symbols:
+        try:
+            url = f"https://query2.finance.yahoo.com/v8/finance/chart/{sym}"
+            req = urllib.request.Request(url, headers=headers)
+            res = urllib.request.urlopen(req, timeout=5)
+            data = json.loads(res.read())
+            
+            meta = data['chart']['result'][0]['meta']
+            price = meta['regularMarketPrice']
+            prev_close = meta['chartPreviousClose']
+            diff = price - prev_close
+            
+            price_str = f"{price:,.2f}"
+            if diff > 0:
+                delta_str = f"↑ {abs(diff):.2f}"
+                color = "#FF3B30"
+            elif diff < 0:
+                delta_str = f"↓ {abs(diff):.2f}"
+                color = "#007AFF"
+            else:
+                delta_str = "보합"
+                color = "#8e8e93"
+                
+            results.append((name, price_str, delta_str, color))
+        except:
+            results.append((name, "조회지연", "-", "#8e8e93"))
+            
+    return results
 
 # ==========================================
 # 🌟 심리 타겟팅 운세 생성기
