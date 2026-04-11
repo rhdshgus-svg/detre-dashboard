@@ -150,7 +150,7 @@ kakao_dict, cafe_set, df_layout, type_dict = load_data()
 if df_layout.empty: st.stop()
 
 # ==========================================
-# 🔮 실시간 경제 API 봇 (🔥 무적 방어막 + 실거래가 우회 패치 적용)
+# 🔮 실시간 경제 API 봇
 # ==========================================
 @st.cache_data(ttl=1800) 
 def get_busan_weather():
@@ -168,29 +168,40 @@ def get_busan_weather():
 @st.cache_data(ttl=3600)
 def get_real_estate_api():
     try:
-        # 🚨 [핵심 패치] 국토부 봇 차단 우회를 위한 User-Agent 헤더 추가 적용!
+        # 🚨 [가짜 예시 삭제] 100% 리얼 데이터 연동 및 URL 인코딩 적용
         molit_key = st.secrets["api_keys"]["molit_key"]
-        lawd_cd = "26440"
-        deal_ym = datetime.now().strftime("%Y%m")
-        url = f"http://openapi.molit.go.kr/OpenAPI_ToolInstallPackage/service/rest/RTMSOBJSvc/getRTMSDataSvcAptTradeDev?serviceKey={molit_key}&LAWD_CD={lawd_cd}&DEAL_YMD={deal_ym}"
+        decoded_key = urllib.parse.unquote(molit_key) # 특수문자 깨짐 방지
+        encoded_key = urllib.parse.quote(decoded_key)
+        
+        lawd_cd = "26440" # 강서구
+        deal_ym = datetime.now().strftime("%Y%m") # 이번 달
+        
+        url = f"https://openapi.molit.go.kr/OpenAPI_ToolInstallPackage/service/rest/RTMSOBJSvc/getRTMSDataSvcAptTradeDev?serviceKey={encoded_key}&LAWD_CD={lawd_cd}&DEAL_YMD={deal_ym}"
         
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        res = urllib.request.urlopen(req, timeout=5)
+        res = urllib.request.urlopen(req, timeout=10)
         root = ET.fromstring(res.read())
         
-        prugio_price = None
+        trades = []
         for item in root.findall('.//item'):
-            apt_name = item.find('아파트').text if item.find('아파트') is not None else ""
-            if "푸르지오센터" in apt_name or "푸르지오" in apt_name:
-                prugio_price = item.find('거래금액').text.strip() + "만"
-                break
+            apt_name = item.find('아파트').text.strip()
+            price = item.find('거래금액').text.strip()
+            area = item.find('전용면적').text.strip()
+            dong = item.find('법정동').text.strip()
+            
+            # 강서구 중 명지동, 강동동 위주로 필터 (에코델타시티 인근)
+            if "명지" in dong or "강동" in dong:
+                trades.append((f"{apt_name} ({float(area):.0f}㎡)", f"{price}만"))
         
-        if prugio_price:
-            return prugio_price, "최근 실거래"
+        # 진짜 데이터만 출력, 데이터가 없으면 정직하게 없다고 표시
+        if len(trades) >= 2:
+            return trades[0][0], trades[0][1], trades[1][0], trades[1][1]
+        elif len(trades) == 1:
+            return trades[0][0], trades[0][1], "최근 거래 집계중", "-"
         else:
-            return "6억 8,500만", "최근 거래없음"
-    except:
-        return "6억 8,500만", "조회지연(점검중)"
+            return "명지/강동동 이번달 실거래", "신고건 없음", "데이터 집계중", "-"
+    except Exception as e:
+        return "조회지연(서버 점검중)", "-", "조회지연(서버 점검중)", "-"
 
 @st.cache_data(ttl=3600)
 def get_interest_rate_api():
@@ -477,17 +488,18 @@ with tab4:
     st.markdown("<h3 style='text-align:center; color:#D4AF37; font-weight:900; margin-top:10px; letter-spacing:-1px;'>📈 실시간 경제·금융 지표</h3>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em; margin-bottom:15px;'>※ 핵심 지표 실시간 요약</p>", unsafe_allow_html=True)
 
-    apt_price, apt_delta = get_real_estate_api()
+    # 🚨 수정된 동적 API 변수명 반영
+    apt1_name, apt1_price, apt2_name, apt2_price = get_real_estate_api()
     rate_val, rate_delta, didim_val, didim_delta = get_interest_rate_api()
     oil_gas, gas_delta, oil_diesel, diesel_delta, oil_lpg, lpg_delta = get_oil_price_api()
     stocks = get_global_stocks_api()
 
     html_econ = f"""
     <div class='econ-box'>
-        <div class='econ-title'>🏢 에코델타 실거래가 현황 (84㎡ 기준)</div>
+        <div class='econ-title'>🏢 강서구(명지·강동) 최근 실거래가</div>
         <table class='econ-table'>
-            <tr><th>푸르지오센터파크</th><td>{apt_price} <span style='color:#FF3B30; font-size:0.85em; margin-left:4px; font-weight:800;'>{apt_delta}</span></td></tr>
-            <tr><th>호반써밋</th><td>6억 5,000만 <span style='color:#8e8e93; font-size:0.85em; margin-left:4px; font-weight:800;'>보합</span></td></tr>
+            <tr><th>{apt1_name}</th><td>{apt1_price}</td></tr>
+            <tr><th>{apt2_name}</th><td>{apt2_price}</td></tr>
         </table>
     </div>
 
