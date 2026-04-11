@@ -21,7 +21,7 @@ except Exception:
     st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon="🏢", layout="centered")
 
 # ==========================================
-# 2. CSS 스타일링
+# 2. CSS 스타일링 (아코디언 및 가격 변동 UI 고급화)
 # ==========================================
 st.markdown("""
     <meta name="google" content="notranslate">
@@ -89,25 +89,36 @@ st.markdown("""
         .saju-p { color: #111111; font-size: 0.95em; font-weight: 700; line-height: 1.75; margin-top: 0; padding-left: 13px; text-align: justify; letter-spacing: -0.3px; word-break: keep-all; }
         .saju-footer { color: #555555; font-size: 0.75em; text-align: center; margin-top: 30px; border-top: 1px dashed #BDBDBD; padding-top: 15px; line-height: 1.6; word-break: keep-all; }
         
-        .econ-box { background: linear-gradient(145deg, #1c1c1e, #121212); border: 1px solid #333; border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-        .econ-title { color: #f2f2f7; font-size: 0.95em; font-weight: 900; margin-bottom: 8px; border-bottom: 1px solid #444; padding-bottom: 6px; letter-spacing: -0.5px; }
-        .econ-table { width: 100%; border-collapse: collapse; }
-        .econ-table th, .econ-table td { padding: 5px 2px; font-size: 0.85em; border-bottom: 1px dotted #333; }
+        /* 🔥 경제 지표 테이블 공통 디자인 */
+        .econ-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        .econ-table th, .econ-table td { padding: 8px 2px; font-size: 0.85em; border-bottom: 1px dotted #333; }
         .econ-table tr:last-child th, .econ-table tr:last-child td { border-bottom: none; }
         .econ-table th { color: #8e8e93; font-weight: 600; text-align: left; width: 45%; }
         .econ-table td { text-align: right; color: #d1d1d6; font-weight: 800; letter-spacing: -0.3px; }
+
+        /* 🔥 아코디언(Expander)을 기존 econ-box처럼 완벽 위장하는 CSS */
+        [data-testid="stExpander"] { background: linear-gradient(145deg, #1c1c1e, #121212) !important; border: 1px solid #333 !important; border-radius: 8px !important; box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important; margin-bottom: 12px !important; }
+        [data-testid="stExpander"] summary { padding: 12px 14px !important; }
+        [data-testid="stExpander"] summary p { color: #f2f2f7 !important; font-size: 0.95em !important; font-weight: 900 !important; letter-spacing: -0.5px !important; }
+        [data-testid="stExpanderDetails"] { padding: 0 14px 12px 14px !important; }
         
-        /* 🔥 실거래가 전용 스크롤 리스트 디자인 (유지) */
-        .trade-scroll-box { max-height: 280px; overflow-y: auto; padding-right: 5px; }
+        /* 🔥 실거래가 등락폭 전용 디자인 */
+        .trade-scroll-box { max-height: 350px; overflow-y: auto; padding-right: 5px; }
         .trade-scroll-box::-webkit-scrollbar { width: 4px; }
         .trade-scroll-box::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
-        .trade-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dotted #333; padding: 10px 2px; }
+        .trade-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dotted #333; padding: 12px 2px; }
         .trade-row:last-child { border-bottom: none; }
-        .trade-info { display: flex; flex-direction: column; gap: 3px; }
+        .trade-info { display: flex; flex-direction: column; gap: 4px; flex: 1; }
         .trade-apt { color: #f2f2f7; font-size: 0.9em; font-weight: 800; }
         .trade-area { color: #8e8e93; font-size: 0.85em; font-weight: 600; }
-        .trade-detail { color: #aaa; font-size: 0.75em; font-weight: 400; }
-        .trade-price { color: #FF3B30; font-size: 1.05em; font-weight: 900; text-align: right; letter-spacing: -0.5px; }
+        .trade-detail { color: #aaa; font-size: 0.75em; font-weight: 500; }
+        
+        .trade-price-box { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; min-width: 90px; }
+        .trade-price { color: #fff; font-size: 0.95em; font-weight: 800; letter-spacing: -0.5px; }
+        .trade-delta { font-size: 0.75em; font-weight: 800; margin-top: 3px; letter-spacing: -0.5px; }
+        .delta-up { color: #FF3B30; }   /* 빨간색 (상승) */
+        .delta-down { color: #0A84FF; } /* 파란색 (하락) */
+        .delta-new { color: #8e8e93; }  /* 회색 (신규/보합) */
         
         .by-text { text-align: right; color: #444; font-size: 0.6em; margin-top: 40px; margin-bottom: 10px; padding-right: 10px; }
     </style>
@@ -200,8 +211,9 @@ def get_real_estate_api():
         encoded_key = urllib.parse.quote(urllib.parse.unquote(molit_key))
         LAWD_CD = "26440" # 강서구
         now = datetime.now()
-        target_trades = []
+        raw_trades = []
         
+        # 최근 3개월 데이터 싹 쓸어오기
         for i in range(3):
             y = now.year - (now.month - i - 1) // 12
             m = (now.month - i - 1) % 12 + 1
@@ -223,32 +235,52 @@ def get_real_estate_api():
                     
                     if "명지" in dong_name or "강동" in dong_name:
                         apt = item.find('aptNm').text.strip() if item.find('aptNm') is not None else "아파트명 없음"
-                        price_raw = item.find('dealAmount').text.strip() if item.find('dealAmount') is not None else "0"
+                        price_str = item.find('dealAmount').text.strip() if item.find('dealAmount') is not None else "0"
                         area = item.find('excluUseAr').text.strip() if item.find('excluUseAr') is not None else "0"
-                        
-                        # 추가 디테일 정보
                         deal_d = item.find('dealDay').text.strip() if item.find('dealDay') is not None else ""
                         floor = item.find('floor').text.strip() if item.find('floor') is not None else ""
                         apt_dong = item.find('aptDong').text.strip() if item.find('aptDong') is not None else ""
                         
-                        formatted_price = format_korean_money(price_raw)
                         date_str = f"{deal_ym[2:4]}.{deal_ym[4:6]}.{deal_d.zfill(2)}"
-                        
-                        # 동호수/층수 표시 포맷팅
                         dong_str = f"{apt_dong}동 " if apt_dong and apt_dong != " " else ""
                         detail_str = f"{dong_str}{floor}층" if floor else dong_str
+                        price_int = int(price_str.replace(",", ""))
                         
-                        target_trades.append({
-                            "apt": apt,
-                            "area": float(area),
-                            "price": formatted_price,
-                            "date": date_str,
-                            "detail": detail_str
+                        raw_trades.append({
+                            "apt": apt, "area": float(area), "price_int": price_int,
+                            "date": date_str, "detail": detail_str
                         })
-                        
-        # 날짜 최신순으로 정렬
-        target_trades.sort(key=lambda x: x['date'], reverse=True)
-        return target_trades
+
+        # 🚨 [핵심 패치] 등락폭(▲▼) 계산을 위해 시간순(과거->최신)으로 정렬하여 스캔!
+        raw_trades.sort(key=lambda x: x['date'])
+        
+        prev_prices = {}
+        for t in raw_trades:
+            # 같은 아파트 + 같은 평수를 기준으로 이전 가격 찾기
+            key = f"{t['apt']}_{t['area']}"
+            curr_price = t['price_int']
+            
+            if key in prev_prices:
+                diff = curr_price - prev_prices[key]
+                if diff > 0:
+                    t['delta_str'] = f"▲ {format_korean_money(str(diff))}"
+                    t['delta_color'] = "delta-up"
+                elif diff < 0:
+                    t['delta_str'] = f"▼ {format_korean_money(str(abs(diff)))}"
+                    t['delta_color'] = "delta-down"
+                else:
+                    t['delta_str'] = "보합"
+                    t['delta_color'] = "delta-new"
+            else:
+                t['delta_str'] = "신규" # 3개월 내 이전 거래가 없는 경우
+                t['delta_color'] = "delta-new"
+                
+            prev_prices[key] = curr_price
+            t['price_formatted'] = format_korean_money(str(curr_price))
+
+        # 계산이 끝나면 화면에 보여주기 위해 최신순(내림차순)으로 다시 정렬!
+        raw_trades.sort(key=lambda x: x['date'], reverse=True)
+        return raw_trades
             
     except Exception as e:
         return []
@@ -322,7 +354,7 @@ def get_global_stocks_api():
                 color = "#FF3B30"
             elif diff < 0:
                 delta_str = f"↓ {abs(diff):.2f}"
-                color = "#007AFF"
+                color = "#0A84FF"
             else:
                 delta_str = "보합"
                 color = "#8e8e93"
@@ -485,7 +517,7 @@ with tab2:
             valid_combinations = set(zip(df_layout['동'], df_layout['호']))
             input_ho_formatted = f_ho.strip().zfill(4) 
             if (f_dong, input_ho_formatted) not in valid_combinations:
-                st.warning("🔮 앗! 해당 동·호수는 팡도사의 레이더에 잡히지 않는 '없는 기운'입니다. 혹시 아직 지어지지 허공의 터를 누르신 건 아니겠죠? 😅 동과 호수를 다시 한번 정확히 확인해 주세요!")
+                st.warning("🔮 앗! 해당 동·호수는 팡도사의 레이더에 잡히지 않는 '없는 기운'입니다. 혹시 아직 지어지지 않은 허공의 터를 누르신 건 아니겠죠? 😅 동과 호수를 다시 한번 정확히 확인해 주세요!")
             else:
                 with st.spinner("🔮 팡도사가 고객님의 명조(命造)를 심층 분석 중입니다..."):
                     time.sleep(3.5) 
@@ -543,34 +575,42 @@ with tab4:
     oil_gas, gas_delta, oil_diesel, diesel_delta, oil_lpg, lpg_delta = get_oil_price_api()
     stocks = get_global_stocks_api()
 
-    # 🔥 🚨 [버그 수정 구역] 마크다운 들여쓰기 꼬임 방지를 위해 HTML 태그를 한 줄로 단단하게 붙였습니다!
-    html_econ = "<div class='econ-box'><div class='econ-title'>🏢 강서구(명지·강동) 최근 3개월 실거래가</div><div class='trade-scroll-box'>"
-    
-    if apt_trades:
-        for t in apt_trades:
-            html_econ += f"<div class='trade-row'><div class='trade-info'><div class='trade-apt'>{t['apt']} <span class='trade-area'>({t['area']:.0f}㎡)</span></div><div class='trade-detail'>📅 {t['date']} | 🏢 {t['detail']}</div></div><div class='trade-price'>{t['price']}</div></div>"
-    else:
-        html_econ += "<div style='text-align:center; color:#8e8e93; padding:15px; font-size:0.85em;'>최근 3개월 신고 내역이 없거나 점검중입니다.</div>"
+    # 🔥 1. 실거래가 아코디언 (가장 중요하므로 기본으로 열려있게 설정)
+    with st.expander("🏢 강서구(명지·강동) 최근 3개월 실거래가", expanded=True):
+        search_kw = st.text_input("단지명 검색", placeholder="🔍 찾고 싶은 단지명을 입력하세요 (예: 호반, 금강)", label_visibility="collapsed")
+        
+        filtered_trades = apt_trades
+        if search_kw:
+            clean_kw = search_kw.replace(" ", "")
+            filtered_trades = [t for t in apt_trades if clean_kw in t['apt'].replace(" ", "")]
 
-    html_econ += "</div></div>"
+        html_econ = "<div class='trade-scroll-box'>"
+        if filtered_trades:
+            for t in filtered_trades:
+                html_econ += f"<div class='trade-row'><div class='trade-info'><div class='trade-apt'>{t['apt']} <span class='trade-area'>({t['area']:.0f}㎡)</span></div><div class='trade-detail'>📅 {t['date']} | 🏢 {t['detail']}</div></div><div class='trade-price-box'><div class='trade-price'>{t['price_formatted']}</div><div class='trade-delta {t['delta_color']}'>{t['delta_str']}</div></div></div>"
+        else:
+            if search_kw: html_econ += f"<div style='text-align:center; color:#8e8e93; padding:15px; font-size:0.85em;'>'{search_kw}' 단지의 최근 거래 내역이 없습니다.</div>"
+            else: html_econ += "<div style='text-align:center; color:#8e8e93; padding:15px; font-size:0.85em;'>최근 3개월 신고 내역이 없거나 점검중입니다.</div>"
+        html_econ += "</div>"
+        st.markdown(html_econ, unsafe_allow_html=True)
 
-    html_econ += f"<div class='econ-box'><div class='econ-title'>🏦 주택담보대출 평균금리 (한국은행)</div><table class='econ-table'>"
-    html_econ += f"<tr><th>1금융권 (시중은행)</th><td>{rate_val} <span style='color:#007AFF; font-size:0.85em; margin-left:4px; font-weight:800;'>{rate_delta}</span></td></tr>"
-    html_econ += f"<tr><th>디딤돌대출 (정부정책)</th><td>{didim_val} <span style='color:#8e8e93; font-size:0.85em; margin-left:4px; font-weight:800;'>{didim_delta}</span></td></tr>"
-    html_econ += "</table></div>"
+    # 🔥 2. 주택담보대출 금리 아코디언 (접어둠)
+    with st.expander("🏦 주택담보대출 평균금리 (한국은행)", expanded=False):
+        html_rate = f"<table class='econ-table'><tr><th>1금융권 (시중은행)</th><td>{rate_val} <span style='color:#0A84FF; font-size:0.85em; margin-left:4px; font-weight:800;'>{rate_delta}</span></td></tr><tr><th>디딤돌대출 (정부정책)</th><td>{didim_val} <span style='color:#8e8e93; font-size:0.85em; margin-left:4px; font-weight:800;'>{didim_delta}</span></td></tr></table>"
+        st.markdown(html_rate, unsafe_allow_html=True)
 
-    html_econ += f"<div class='econ-box'><div class='econ-title'>⛽ 부산 평균 유가 정보 (오피넷)</div><table class='econ-table'>"
-    html_econ += f"<tr><th>휘발유</th><td>{oil_gas} <span style='color:#FF3B30; font-size:0.85em; margin-left:4px; font-weight:800;'>{gas_delta}</span></td></tr>"
-    html_econ += f"<tr><th>경유</th><td>{oil_diesel} <span style='color:#FF3B30; font-size:0.85em; margin-left:4px; font-weight:800;'>{diesel_delta}</span></td></tr>"
-    html_econ += f"<tr><th>LPG</th><td>{oil_lpg} <span style='color:#8e8e93; font-size:0.85em; margin-left:4px; font-weight:800;'>{lpg_delta}</span></td></tr>"
-    html_econ += "</table></div>"
+    # 🔥 3. 유가 정보 아코디언 (접어둠)
+    with st.expander("⛽ 부산 평균 유가 정보 (오피넷)", expanded=False):
+        html_oil = f"<table class='econ-table'><tr><th>휘발유</th><td>{oil_gas} <span style='color:#FF3B30; font-size:0.85em; margin-left:4px; font-weight:800;'>{gas_delta}</span></td></tr><tr><th>경유</th><td>{oil_diesel} <span style='color:#FF3B30; font-size:0.85em; margin-left:4px; font-weight:800;'>{diesel_delta}</span></td></tr><tr><th>LPG</th><td>{oil_lpg} <span style='color:#8e8e93; font-size:0.85em; margin-left:4px; font-weight:800;'>{lpg_delta}</span></td></tr></table>"
+        st.markdown(html_oil, unsafe_allow_html=True)
 
-    html_econ += f"<div class='econ-box' style='border: 1px solid #D4AF37;'><div class='econ-title' style='color:#D4AF37;'>🌐 글로벌 주요 증시 현황</div><table class='econ-table'>"
-    for name, price, delta, color in stocks:
-        html_econ += f"<tr><th>{name}</th><td>{price} <span style='color:{color}; font-size:0.85em; margin-left:4px; font-weight:800;'>{delta}</span></td></tr>"
-    html_econ += "</table></div>"
-
-    st.markdown(html_econ, unsafe_allow_html=True)
+    # 🔥 4. 글로벌 증시 아코디언 (접어둠)
+    with st.expander("🌐 글로벌 주요 증시 현황", expanded=False):
+        html_stock = "<table class='econ-table'>"
+        for name, price, delta, color in stocks:
+            html_stock += f"<tr><th>{name}</th><td>{price} <span style='color:{color}; font-size:0.85em; margin-left:4px; font-weight:800;'>{delta}</span></td></tr>"
+        html_stock += "</table>"
+        st.markdown(html_stock, unsafe_allow_html=True)
 
 # 🔥 이스터에그
 st.markdown("<div class='by-text'>by. 213동102호팡</div>", unsafe_allow_html=True)
