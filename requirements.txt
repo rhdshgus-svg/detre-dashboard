@@ -2,4 +2,3 @@ streamlit
 Pillow
 pandas
 openpyxl
-beautifulsoup4
