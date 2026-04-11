@@ -7,7 +7,7 @@ import json
 import random
 import time
 import xml.etree.ElementTree as ET
-from datetime import datetime, timedelta
+from datetime import datetime
 from email.utils import parsedate_to_datetime
 from PIL import Image
 
@@ -150,7 +150,7 @@ kakao_dict, cafe_set, df_layout, type_dict = load_data()
 if df_layout.empty: st.stop()
 
 # ==========================================
-# 🔮 실시간 경제 API 봇
+# 🔮 실시간 경제 API 봇 (🔥 무적 방어막 + 실거래가 영어 태그 완벽 호환!)
 # ==========================================
 @st.cache_data(ttl=1800) 
 def get_busan_weather():
@@ -168,38 +168,59 @@ def get_busan_weather():
 @st.cache_data(ttl=3600)
 def get_real_estate_api():
     try:
-        # 🚨 [가짜 예시 삭제] 100% 리얼 데이터 연동 및 URL 인코딩 적용
+        # 🚨 [최종 패치] API 키 인코딩 + 최근 3개월 탐색 + 영어 태그(aptNm 등) 매칭!
         molit_key = st.secrets["api_keys"]["molit_key"]
-        decoded_key = urllib.parse.unquote(molit_key) # 특수문자 깨짐 방지
+        decoded_key = urllib.parse.unquote(molit_key)
         encoded_key = urllib.parse.quote(decoded_key)
         
-        lawd_cd = "26440" # 강서구
-        deal_ym = datetime.now().strftime("%Y%m") # 이번 달
+        LAWD_CD = "26440" # 강서구
+        now = datetime.now()
+        target_trades = []
         
-        url = f"https://openapi.molit.go.kr/OpenAPI_ToolInstallPackage/service/rest/RTMSOBJSvc/getRTMSDataSvcAptTradeDev?serviceKey={encoded_key}&LAWD_CD={lawd_cd}&DEAL_YMD={deal_ym}"
-        
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        res = urllib.request.urlopen(req, timeout=10)
-        root = ET.fromstring(res.read())
-        
-        trades = []
-        for item in root.findall('.//item'):
-            apt_name = item.find('아파트').text.strip()
-            price = item.find('거래금액').text.strip()
-            area = item.find('전용면적').text.strip()
-            dong = item.find('법정동').text.strip()
+        for i in range(3):
+            y = now.year - (now.month - i - 1) // 12
+            m = (now.month - i - 1) % 12 + 1
+            deal_ym = f"{y}{m:02d}"
             
-            # 강서구 중 명지동, 강동동 위주로 필터 (에코델타시티 인근)
-            if "명지" in dong or "강동" in dong:
-                trades.append((f"{apt_name} ({float(area):.0f}㎡)", f"{price}만"))
-        
-        # 진짜 데이터만 출력, 데이터가 없으면 정직하게 없다고 표시
-        if len(trades) >= 2:
-            return trades[0][0], trades[0][1], trades[1][0], trades[1][1]
-        elif len(trades) == 1:
-            return trades[0][0], trades[0][1], "최근 거래 집계중", "-"
+            url = f"https://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev?serviceKey={encoded_key}&LAWD_CD={LAWD_CD}&DEAL_YMD={deal_ym}"
+            
+            headers = {'User-Agent': 'Mozilla/5.0'}
+            req = urllib.request.Request(url, headers=headers)
+            res = urllib.request.urlopen(req, timeout=5)
+            
+            root = ET.fromstring(res.read().decode('utf-8'))
+            result_code = root.find('.//resultCode')
+            
+            # 🚨 00 과 000 모두 성공으로 처리!
+            if result_code is not None and result_code.text in ["00", "000"]:
+                for item in root.findall('.//item'):
+                    # XML 태그 영문 대응 패치 (umdNm, aptNm, dealAmount, excluUseAr)
+                    dong_node = item.find('umdNm')
+                    dong = dong_node.text.strip() if dong_node is not None else ""
+                    
+                    if "명지" in dong or "강동" in dong:
+                        apt_node = item.find('aptNm')
+                        apt = apt_node.text.strip() if apt_node is not None else ""
+                        
+                        price_node = item.find('dealAmount')
+                        price = price_node.text.strip() if price_node is not None else ""
+                        
+                        area_node = item.find('excluUseAr')
+                        area = area_node.text.strip() if area_node is not None else "0"
+                        
+                        target_trades.append((f"{apt} ({float(area):.0f}㎡)", f"{price}만"))
+                
+                # 명지동/강동동 데이터를 찾았으면 더 과거로 안 가고 중단!
+                if target_trades:
+                    break 
+
+        if len(target_trades) >= 2:
+            return target_trades[0][0], target_trades[0][1], target_trades[1][0], target_trades[1][1]
+        elif len(target_trades) == 1:
+            return target_trades[0][0], target_trades[0][1], "최근 거래 집계중", "-"
         else:
-            return "명지/강동동 이번달 실거래", "신고건 없음", "데이터 집계중", "-"
+            return "명지/강동동 실거래", "신고건 없음", "데이터 집계중", "-"
+            
     except Exception as e:
         return "조회지연(서버 점검중)", "-", "조회지연(서버 점검중)", "-"
 
@@ -242,7 +263,7 @@ def get_oil_price_api():
     except:
         return "1,642원", "조회지연", "1,515원", "조회지연", "975원", "조회지연"
 
-@st.cache_data(ttl=86400) # 하루에 한 번 업데이트 (야후 파이낸스 글로벌 증시)
+@st.cache_data(ttl=86400) # 하루에 한 번 업데이트
 def get_global_stocks_api():
     symbols = [
         ("코스피 (KOSPI)", "^KS11"),
@@ -488,7 +509,6 @@ with tab4:
     st.markdown("<h3 style='text-align:center; color:#D4AF37; font-weight:900; margin-top:10px; letter-spacing:-1px;'>📈 실시간 경제·금융 지표</h3>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em; margin-bottom:15px;'>※ 핵심 지표 실시간 요약</p>", unsafe_allow_html=True)
 
-    # 🚨 수정된 동적 API 변수명 반영
     apt1_name, apt1_price, apt2_name, apt2_price = get_real_estate_api()
     rate_val, rate_delta, didim_val, didim_delta = get_interest_rate_api()
     oil_gas, gas_delta, oil_diesel, diesel_delta, oil_lpg, lpg_delta = get_oil_price_api()
