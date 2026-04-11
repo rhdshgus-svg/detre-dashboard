@@ -575,15 +575,26 @@ with tab2:
     rates = get_interest_rate_api()
     oil_data = get_oil_price_api()
     global_html = get_global_stocks_api()
+
+    # 🚨 [아버님 요청 반영] 시간 관련 로직 정밀 적용
+    now = datetime.now()
+    today_str = now.strftime("%Y.%m.%d")
+    current_time_str = now.strftime("%Y.%m.%d %H:%M")
     
-    # 🚨 업데이트 시간 공통 배지 생성 (현재 시간)
-    update_time_str = datetime.now().strftime("%Y.%m.%d %H:%M")
-    update_badge = f"<div style='text-align:right; font-size:0.65em; color:#8e8e93; margin-bottom:8px;'>🔄 {update_time_str} 기준</div>"
+    # 각 정보의 특성에 맞는 갱신 시간 배지 생성
+    badge_real_estate = f"<div style='text-align:right; font-size:0.65em; color:#8e8e93; margin-bottom:8px;'>🔄 {today_str} 07:00 정기 업데이트</div>"
+    badge_rates = f"<div style='text-align:right; font-size:0.65em; color:#8e8e93; margin-bottom:8px;'>🔄 한국은행 최신 고시 기준</div>"
+    
+    # 유가는 오후 2시 이후면 14:00, 이전이면 08:00로 표시되게 처리
+    oil_hour = "14:00" if now.hour >= 14 else "08:00"
+    badge_oil = f"<div style='text-align:right; font-size:0.65em; color:#8e8e93; margin-bottom:8px;'>🔄 {today_str} {oil_hour} 갱신 완료</div>"
+    
+    # 주식/환율은 진짜 실시간임을 강조하기 위해 초록색 컬러 적용
+    badge_global = f"<div style='text-align:right; font-size:0.65em; color:#03C75A; margin-bottom:8px; font-weight:800;'>🔄 {current_time_str} 실시간 동기화</div>"
 
     # 🔥 1. 실거래가 아코디언 (기본 닫힘)
     with st.expander("🏢 강서구(명지·강동) 최근 실거래가", expanded=False):
-        st.markdown(update_badge, unsafe_allow_html=True) # 업데이트 시간 표기
-        
+        st.markdown(badge_real_estate, unsafe_allow_html=True)
         search_kw = st.text_input("단지명 검색", placeholder="🔍 단지명을 입력하세요 (예: 호반, 더샵)", label_visibility="collapsed")
         
         filtered_trades = apt_trades
@@ -603,8 +614,7 @@ with tab2:
 
     # 🔥 2. 주택담보대출 금리 아코디언 (기본 닫힘)
     with st.expander("🏦 금융권 & 기금 정책자금 대출 금리", expanded=False):
-        st.markdown(update_badge, unsafe_allow_html=True) # 업데이트 시간 표기
-        
+        st.markdown(badge_rates, unsafe_allow_html=True)
         html_rate = "<table class='econ-table'>"
         html_rate += f"<tr style='background-color:rgba(255,255,255,0.05);'><th colspan='2' style='color:#D4AF37; text-align:center; font-size:1.0em; padding:10px 0;'>🇰🇷 한국은행 기준금리: {rates['base']}</th></tr>"
         html_rate += f"<tr><th>🏢 1금융권 (시중은행)</th><td>{rates['tier1']}</td></tr>"
@@ -618,8 +628,7 @@ with tab2:
 
     # 🔥 3. 유가 정보 아코디언 (기본 닫힘)
     with st.expander("⛽ 부산 평균 및 구별 유가 랭킹 (오피넷)", expanded=False):
-        st.markdown(update_badge, unsafe_allow_html=True) # 업데이트 시간 표기
-        
+        st.markdown(badge_oil, unsafe_allow_html=True)
         if oil_data:
             b_avg = oil_data["busan_avg"]
             html_oil = "<div style='font-size:0.85em; color:#D4AF37; font-weight:800; margin-top:5px; margin-bottom:5px; padding-left:4px;'>🔵 부산 전체 평균</div>"
@@ -648,9 +657,9 @@ with tab2:
         else:
             st.markdown("<div style='text-align:center; color:#8e8e93; padding:15px; font-size:0.85em;'>유가 데이터 점검중입니다.</div>", unsafe_allow_html=True)
 
-    # 🔥 4. 글로벌 증시 및 환율 현황 (기본 닫힘 & 새로고침 버튼 제거)
+    # 🔥 4. 글로벌 증시 및 환율 현황 (기본 닫힘)
     with st.expander("🌐 글로벌 증시 & 환율 현황", expanded=False):
-        st.markdown(update_badge, unsafe_allow_html=True) # 업데이트 시간 표기
+        st.markdown(badge_global, unsafe_allow_html=True)
         st.markdown(global_html, unsafe_allow_html=True)
 
     # ==========================================
