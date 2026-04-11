@@ -97,6 +97,18 @@ st.markdown("""
         .econ-table th { color: #8e8e93; font-weight: 600; text-align: left; width: 45%; }
         .econ-table td { text-align: right; color: #d1d1d6; font-weight: 800; letter-spacing: -0.3px; }
         
+        /* 🔥 실거래가 전용 스크롤 리스트 디자인 */
+        .trade-scroll-box { max-height: 280px; overflow-y: auto; padding-right: 5px; }
+        .trade-scroll-box::-webkit-scrollbar { width: 4px; }
+        .trade-scroll-box::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+        .trade-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dotted #333; padding: 10px 2px; }
+        .trade-row:last-child { border-bottom: none; }
+        .trade-info { display: flex; flex-direction: column; gap: 3px; }
+        .trade-apt { color: #f2f2f7; font-size: 0.9em; font-weight: 800; }
+        .trade-area { color: #8e8e93; font-size: 0.85em; font-weight: 600; }
+        .trade-detail { color: #aaa; font-size: 0.75em; font-weight: 400; }
+        .trade-price { color: #FF3B30; font-size: 1.05em; font-weight: 900; text-align: right; letter-spacing: -0.5px; }
+        
         .by-text { text-align: right; color: #444; font-size: 0.6em; margin-top: 40px; margin-bottom: 10px; padding-right: 10px; }
     </style>
 """, unsafe_allow_html=True)
@@ -150,7 +162,23 @@ kakao_dict, cafe_set, df_layout, type_dict = load_data()
 if df_layout.empty: st.stop()
 
 # ==========================================
-# 🔮 실시간 경제 API 봇 (🔥 무적 방어막 + 실거래가 영어 태그 완벽 호환!)
+# 💰 한국어 금액 포맷 변환기 (43,200 -> 4억 3,200만원)
+# ==========================================
+def format_korean_money(price_str):
+    try:
+        num = int(price_str.replace(",", ""))
+        uk = num // 10000
+        man = num % 10000
+        if uk > 0:
+            if man > 0: return f"{uk}억 {man:,}만원"
+            else: return f"{uk}억원"
+        else:
+            return f"{man:,}만원"
+    except:
+        return f"{price_str}만원"
+
+# ==========================================
+# 🔮 실시간 경제 API 봇
 # ==========================================
 @st.cache_data(ttl=1800) 
 def get_busan_weather():
@@ -168,11 +196,8 @@ def get_busan_weather():
 @st.cache_data(ttl=3600)
 def get_real_estate_api():
     try:
-        # 🚨 [최종 패치] API 키 인코딩 + 최근 3개월 탐색 + 영어 태그(aptNm 등) 매칭!
         molit_key = st.secrets["api_keys"]["molit_key"]
-        decoded_key = urllib.parse.unquote(molit_key)
-        encoded_key = urllib.parse.quote(decoded_key)
-        
+        encoded_key = urllib.parse.quote(urllib.parse.unquote(molit_key))
         LAWD_CD = "26440" # 강서구
         now = datetime.now()
         target_trades = []
@@ -191,38 +216,42 @@ def get_real_estate_api():
             root = ET.fromstring(res.read().decode('utf-8'))
             result_code = root.find('.//resultCode')
             
-            # 🚨 00 과 000 모두 성공으로 처리!
             if result_code is not None and result_code.text in ["00", "000"]:
                 for item in root.findall('.//item'):
-                    # XML 태그 영문 대응 패치 (umdNm, aptNm, dealAmount, excluUseAr)
                     dong_node = item.find('umdNm')
-                    dong = dong_node.text.strip() if dong_node is not None else ""
+                    dong_name = dong_node.text.strip() if dong_node is not None else ""
                     
-                    if "명지" in dong or "강동" in dong:
-                        apt_node = item.find('aptNm')
-                        apt = apt_node.text.strip() if apt_node is not None else ""
+                    if "명지" in dong_name or "강동" in dong_name:
+                        apt = item.find('aptNm').text.strip() if item.find('aptNm') is not None else "아파트명 없음"
+                        price_raw = item.find('dealAmount').text.strip() if item.find('dealAmount') is not None else "0"
+                        area = item.find('excluUseAr').text.strip() if item.find('excluUseAr') is not None else "0"
                         
-                        price_node = item.find('dealAmount')
-                        price = price_node.text.strip() if price_node is not None else ""
+                        # 추가 디테일 정보
+                        deal_d = item.find('dealDay').text.strip() if item.find('dealDay') is not None else ""
+                        floor = item.find('floor').text.strip() if item.find('floor') is not None else ""
+                        apt_dong = item.find('aptDong').text.strip() if item.find('aptDong') is not None else ""
                         
-                        area_node = item.find('excluUseAr')
-                        area = area_node.text.strip() if area_node is not None else "0"
+                        formatted_price = format_korean_money(price_raw)
+                        date_str = f"{deal_ym[2:4]}.{deal_ym[4:6]}.{deal_d.zfill(2)}"
                         
-                        target_trades.append((f"{apt} ({float(area):.0f}㎡)", f"{price}만"))
-                
-                # 명지동/강동동 데이터를 찾았으면 더 과거로 안 가고 중단!
-                if target_trades:
-                    break 
-
-        if len(target_trades) >= 2:
-            return target_trades[0][0], target_trades[0][1], target_trades[1][0], target_trades[1][1]
-        elif len(target_trades) == 1:
-            return target_trades[0][0], target_trades[0][1], "최근 거래 집계중", "-"
-        else:
-            return "명지/강동동 실거래", "신고건 없음", "데이터 집계중", "-"
+                        # 동호수/층수 표시 포맷팅
+                        dong_str = f"{apt_dong}동 " if apt_dong and apt_dong != " " else ""
+                        detail_str = f"{dong_str}{floor}층" if floor else dong_str
+                        
+                        target_trades.append({
+                            "apt": apt,
+                            "area": float(area),
+                            "price": formatted_price,
+                            "date": date_str,
+                            "detail": detail_str
+                        })
+                        
+        # 날짜 최신순으로 정렬
+        target_trades.sort(key=lambda x: x['date'], reverse=True)
+        return target_trades
             
     except Exception as e:
-        return "조회지연(서버 점검중)", "-", "조회지연(서버 점검중)", "-"
+        return []
 
 @st.cache_data(ttl=3600)
 def get_interest_rate_api():
@@ -263,7 +292,7 @@ def get_oil_price_api():
     except:
         return "1,642원", "조회지연", "1,515원", "조회지연", "975원", "조회지연"
 
-@st.cache_data(ttl=86400) # 하루에 한 번 업데이트
+@st.cache_data(ttl=86400)
 def get_global_stocks_api():
     symbols = [
         ("코스피 (KOSPI)", "^KS11"),
@@ -509,20 +538,36 @@ with tab4:
     st.markdown("<h3 style='text-align:center; color:#D4AF37; font-weight:900; margin-top:10px; letter-spacing:-1px;'>📈 실시간 경제·금융 지표</h3>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em; margin-bottom:15px;'>※ 핵심 지표 실시간 요약</p>", unsafe_allow_html=True)
 
-    apt1_name, apt1_price, apt2_name, apt2_price = get_real_estate_api()
+    apt_trades = get_real_estate_api()
     rate_val, rate_delta, didim_val, didim_delta = get_interest_rate_api()
     oil_gas, gas_delta, oil_diesel, diesel_delta, oil_lpg, lpg_delta = get_oil_price_api()
     stocks = get_global_stocks_api()
 
+    # 🏢 실거래가 동적 렌더링 (스크롤 박스 추가)
     html_econ = f"""
     <div class='econ-box'>
-        <div class='econ-title'>🏢 강서구(명지·강동) 최근 실거래가</div>
-        <table class='econ-table'>
-            <tr><th>{apt1_name}</th><td>{apt1_price}</td></tr>
-            <tr><th>{apt2_name}</th><td>{apt2_price}</td></tr>
-        </table>
-    </div>
+        <div class='econ-title'>🏢 강서구(명지·강동) 최근 3개월 실거래가</div>
+        <div class='trade-scroll-box'>
+    """
+    
+    if apt_trades:
+        for t in apt_trades:
+            html_econ += f"""
+            <div class='trade-row'>
+                <div class='trade-info'>
+                    <div class='trade-apt'>{t['apt']} <span class='trade-area'>({t['area']:.0f}㎡)</span></div>
+                    <div class='trade-detail'>📅 {t['date']} | 🏢 {t['detail']}</div>
+                </div>
+                <div class='trade-price'>{t['price']}</div>
+            </div>
+            """
+    else:
+        html_econ += "<div style='text-align:center; color:#8e8e93; padding:15px; font-size:0.85em;'>최근 3개월 신고 내역이 없거나 점검중입니다.</div>"
 
+    html_econ += "</div></div>"
+
+    # 나머지 지표들
+    html_econ += f"""
     <div class='econ-box'>
         <div class='econ-title'>🏦 주택담보대출 평균금리 (한국은행)</div>
         <table class='econ-table'>
