@@ -12,13 +12,26 @@ from email.utils import parsedate_to_datetime
 from PIL import Image
 
 # ==========================================
-# [블록 1] 기본 화면 설정
+# [블록 1] 기본 화면 설정 및 🚨 구글 애널리틱스(CCTV) 탑재
 # ==========================================
 try:
     logo_img = Image.open("logo.png")
     st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon=logo_img, layout="centered")
 except Exception:
     st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon="🏢", layout="centered")
+
+# 🔥 아버님의 구글 애널리틱스 추적 코드 심기!
+GA_ID = "G-K4JM55MDEQ"
+ga_script = f"""
+<script async src="https://www.googletagmanager.com/gtag/js?id={GA_ID}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){{dataLayer.push(arguments);}}
+  gtag('js', new Date());
+  gtag('config', '{GA_ID}');
+</script>
+"""
+st.markdown(ga_script, unsafe_allow_html=True)
 
 # ==========================================
 # [블록 2] CSS 스타일링
@@ -505,7 +518,7 @@ st.markdown("""
 # ==========================================
 # [블록 5] 종합 포털 탭(Tab) 메뉴
 # ==========================================
-tab1, tab2, tab3, tab4 = st.tabs(["🏢 입주현황", "📊 핵심비밀정보", "🔮 오늘의 운세", "📰 관련뉴스"])
+tab1, tab2, tab3, tab4 = st.tabs(["🏢 입주현황", "📊 입주민 전용정보", "🔮 오늘의 운세", "📰 관련뉴스"])
 
 # ------------------------------------------
 # [탭 1] 메인: 세대별 입주현황
@@ -576,20 +589,16 @@ with tab2:
     oil_data = get_oil_price_api()
     global_html = get_global_stocks_api()
 
-    # 🚨 [아버님 요청 반영] 시간 관련 로직 정밀 적용
     now = datetime.now()
     today_str = now.strftime("%Y.%m.%d")
     current_time_str = now.strftime("%Y.%m.%d %H:%M")
     
-    # 각 정보의 특성에 맞는 갱신 시간 배지 생성
     badge_real_estate = f"<div style='text-align:right; font-size:0.65em; color:#8e8e93; margin-bottom:8px;'>🔄 {today_str} 07:00 정기 업데이트</div>"
     badge_rates = f"<div style='text-align:right; font-size:0.65em; color:#8e8e93; margin-bottom:8px;'>🔄 한국은행 최신 고시 기준</div>"
     
-    # 유가는 오후 2시 이후면 14:00, 이전이면 08:00로 표시되게 처리
     oil_hour = "14:00" if now.hour >= 14 else "08:00"
     badge_oil = f"<div style='text-align:right; font-size:0.65em; color:#8e8e93; margin-bottom:8px;'>🔄 {today_str} {oil_hour} 갱신 완료</div>"
     
-    # 주식/환율은 진짜 실시간임을 강조하기 위해 초록색 컬러 적용
     badge_global = f"<div style='text-align:right; font-size:0.65em; color:#03C75A; margin-bottom:8px; font-weight:800;'>🔄 {current_time_str} 실시간 동기화</div>"
 
     # 🔥 1. 실거래가 아코디언 (기본 닫힘)
