@@ -82,6 +82,10 @@ st.markdown("""
         
         button[data-baseweb="tab"] { font-weight: 800 !important; font-size: 0.9em !important; }
         
+        /* 🔥 버튼 디자인 개선 (새로고침 버튼용) */
+        .stButton>button { border: 1px solid #333 !important; border-radius: 6px !important; font-weight: 800 !important; font-size: 0.8em !important; transition: all 0.2s; }
+        .stButton>button:hover { border-color: #D4AF37 !important; color: #D4AF37 !important; background-color: rgba(212,175,55,0.1) !important; }
+
         .saju-box { background: linear-gradient(180deg, #FFFDF8 0%, #F4EFE6 100%); border-radius: 12px; border: 1px solid #D4AF37; padding: 25px 20px; text-align: left; margin-top: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .saju-title { color: #800020; text-align: center; margin-top: 0; font-size: clamp(1.05em, 5vw, 1.25em); font-weight: 900; margin-bottom: 25px; line-height: 1.4; letter-spacing: -0.8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .saju-section { margin-bottom: 22px; }
@@ -89,20 +93,17 @@ st.markdown("""
         .saju-p { color: #111111; font-size: 0.95em; font-weight: 700; line-height: 1.75; margin-top: 0; padding-left: 13px; text-align: justify; letter-spacing: -0.3px; word-break: keep-all; }
         .saju-footer { color: #555555; font-size: 0.75em; text-align: center; margin-top: 30px; border-top: 1px dashed #BDBDBD; padding-top: 15px; line-height: 1.6; word-break: keep-all; }
         
-        /* 🔥 경제 지표 테이블 공통 디자인 */
         .econ-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
         .econ-table th, .econ-table td { padding: 10px 4px; font-size: 0.85em; border-bottom: 1px dotted #333; vertical-align: middle; }
         .econ-table tr:last-child th, .econ-table tr:last-child td { border-bottom: none; }
         .econ-table th { color: #8e8e93; font-weight: 600; text-align: left; }
         .econ-table td { text-align: right; color: #d1d1d6; font-weight: 800; letter-spacing: -0.3px; }
 
-        /* 🔥 아코디언(Expander) 고급 위장 CSS */
         [data-testid="stExpander"] { background: linear-gradient(145deg, #1c1c1e, #121212) !important; border: 1px solid #333 !important; border-radius: 8px !important; box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important; margin-bottom: 12px !important; }
         [data-testid="stExpander"] summary { padding: 12px 14px !important; }
         [data-testid="stExpander"] summary p { color: #f2f2f7 !important; font-size: 0.95em !important; font-weight: 900 !important; letter-spacing: -0.5px !important; }
         [data-testid="stExpanderDetails"] { padding: 0 14px 12px 14px !important; }
         
-        /* 🔥 실거래가 및 공통 등락폭 색상 (한국 부동산/주식 표준) */
         .trade-scroll-box { max-height: 350px; overflow-y: auto; padding-right: 5px; }
         .trade-scroll-box::-webkit-scrollbar { width: 4px; }
         .trade-scroll-box::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
@@ -117,10 +118,9 @@ st.markdown("""
         .trade-price { color: #fff; font-size: 0.85em; font-weight: 800; letter-spacing: -0.5px; } 
         .trade-delta { font-size: 0.70em; font-weight: 800; margin-top: 3px; letter-spacing: -0.5px; }
         
-        /* 🔥 완벽한 등락폭 색상 지정 */
-        .delta-up { color: #FF3B30 !important; }   /* 빨간색 (상승) */
-        .delta-down { color: #0A84FF !important; } /* 파란색 (하락) */
-        .delta-new { color: #FFFFFF !important; }  /* 흰색 (보합/신규) */
+        .delta-up { color: #FF3B30 !important; }   
+        .delta-down { color: #0A84FF !important; } 
+        .delta-new { color: #FFFFFF !important; }  
         
         .by-text { text-align: right; color: #444; font-size: 0.6em; margin-top: 40px; margin-bottom: 10px; padding-right: 10px; }
     </style>
@@ -212,7 +212,6 @@ def get_real_estate_api():
         now = datetime.now()
         raw_trades = []
         
-        # 🚨 [가장 완벽했던 V14 부동산 원본 코드 복구 - 3개월 탐색]
         for i in range(3):
             y = now.year - (now.month - i - 1) // 12
             m = (now.month - i - 1) % 12 + 1
@@ -253,7 +252,6 @@ def get_real_estate_api():
                             "date": date_str, "detail": detail_str
                         })
 
-        # 등락폭(▲▼) 계산을 위해 과거부터 정렬 (시간순)
         raw_trades.sort(key=lambda x: x['date'])
         
         prev_prices = {}
@@ -279,14 +277,13 @@ def get_real_estate_api():
             prev_prices[key] = curr_price
             t['price_formatted'] = format_korean_money(str(curr_price))
 
-        # 화면 출력을 위해 최신순으로 다시 정렬
         raw_trades.sort(key=lambda x: x['date'], reverse=True)
         return raw_trades
             
     except Exception as e:
         return []
 
-@st.cache_data(ttl=43200) # 금리 데이터
+@st.cache_data(ttl=43200)
 def get_interest_rate_api():
     try:
         bok_key = st.secrets["api_keys"]["bok_key"]
@@ -323,8 +320,7 @@ def get_oil_price_api():
     try:
         opinet_key = st.secrets["api_keys"]["opinet_key"]
         
-        # 1. 부산(Busan)의 진짜 SIDO 코드를 찾아내는 로직
-        busan_cd = "08" # 기본값
+        busan_cd = "08"
         try:
             req_find = urllib.request.Request(f"http://www.opinet.co.kr/api/avgSidoPrice.do?out=xml&prodcd=B027&code={opinet_key}")
             res_find = urllib.request.urlopen(req_find, timeout=5)
@@ -336,7 +332,6 @@ def get_oil_price_api():
         except:
             pass
 
-        # 2. 부산 전체 평균 수집
         url_sido = f"http://www.opinet.co.kr/api/avgSidoPrice.do?out=xml&sido={busan_cd}&code={opinet_key}"
         req_sido = urllib.request.Request(url_sido)
         res_sido = urllib.request.urlopen(req_sido, timeout=5)
@@ -357,7 +352,6 @@ def get_oil_price_api():
             elif prodcd == "D047": diesel, diesel_delta = f"{price:,.0f}원", (diff_str, color)
             elif prodcd == "K015": lpg, lpg_delta = f"{price:,.0f}원", (diff_str, color)
 
-        # 3. 부산 16개 구/군별 휘발유 및 경유 정밀 수집! (전국 오작동 완벽 차단)
         districts = {}
         for prod_name, prod_cd in [("gas", "B027"), ("diesel", "D047")]:
             url_sigun = f"http://www.opinet.co.kr/api/avgSigunPrice.do?out=xml&sido={busan_cd}&prodcd={prod_cd}&code={opinet_key}"
@@ -383,7 +377,6 @@ def get_oil_price_api():
                     "color": color
                 }
         
-        # 휘발유 가격이 가장 싼 순서대로 정렬!
         dist_list = list(districts.values())
         dist_list.sort(key=lambda x: x.get('gas', {}).get('price_val', 999999))
         
@@ -417,11 +410,11 @@ def get_global_stocks_api():
 
     html = "<table class='econ-table'>"
     
-    # 1. 글로벌 주요 증시 (코스닥 추가)
+    # 1. 글로벌 주요 증시
     for name, sym in [("🇺🇸 나스닥", "^IXIC"), ("🇺🇸 S&P 500", "^GSPC"), ("🇰🇷 코스피", "^KS11"), ("🇰🇷 코스닥", "^KQ11")]:
         html += fetch_yahoo(name, sym)
     
-    # 2. 주요 국가 환율 (금색 구분선)
+    # 2. 주요 국가 환율
     html += "<tr style='background-color:rgba(255,255,255,0.05);'><th colspan='2' style='color:#D4AF37; text-align:center; padding:8px 0; border-top:1px solid #333; font-size:0.95em;'>💱 주요 국가 환율</th></tr>"
     for name, sym, mult in [("💵 미국 (USD/KRW)", "KRW=X", 1), ("💶 유럽 (EUR/KRW)", "EURKRW=X", 1), ("🇯🇵 일본 (100 JPY/KRW)", "JPYKRW=X", 100)]:
         html += fetch_yahoo(name, sym, mult)
@@ -429,16 +422,11 @@ def get_global_stocks_api():
     # 3. 대한민국 10대 해외여행지 환율
     html += "<tr style='background-color:rgba(255,255,255,0.05);'><th colspan='2' style='color:#03C75A; text-align:center; padding:8px 0; border-top:1px solid #333; font-size:0.95em;'>✈️ 10대 해외여행지 환율</th></tr>"
     tourist_dests = [
-        ("🇨🇳 중국 (CNY/KRW)", "CNYKRW=X", 1),
-        ("🇹🇼 대만 (TWD/KRW)", "TWDKRW=X", 1),
-        ("🇻🇳 베트남 (100 VND/KRW)", "VNDKRW=X", 100),
-        ("🇹🇭 태국 (THB/KRW)", "THBKRW=X", 1),
-        ("🇵🇭 필리핀 (PHP/KRW)", "PHPKRW=X", 1),
-        ("🇸🇬 싱가포르 (SGD/KRW)", "SGDKRW=X", 1),
-        ("🇭🇰 홍콩 (HKD/KRW)", "HKDKRW=X", 1),
-        ("🇲🇾 말레이시아 (MYR/KRW)", "MYRKRW=X", 1),
-        ("🇮🇩 인니 (100 IDR/KRW)", "IDRKRW=X", 100),
-        ("🇦🇺 호주 (AUD/KRW)", "AUDKRW=X", 1)
+        ("🇨🇳 중국 (CNY/KRW)", "CNYKRW=X", 1), ("🇹🇼 대만 (TWD/KRW)", "TWDKRW=X", 1),
+        ("🇻🇳 베트남 (100 VND/KRW)", "VNDKRW=X", 100), ("🇹🇭 태국 (THB/KRW)", "THBKRW=X", 1),
+        ("🇵🇭 필리핀 (PHP/KRW)", "PHPKRW=X", 1), ("🇸🇬 싱가포르 (SGD/KRW)", "SGDKRW=X", 1),
+        ("🇭🇰 홍콩 (HKD/KRW)", "HKDKRW=X", 1), ("🇲🇾 말레이시아 (MYR/KRW)", "MYRKRW=X", 1),
+        ("🇮🇩 인니 (100 IDR/KRW)", "IDRKRW=X", 100), ("🇦🇺 호주 (AUD/KRW)", "AUDKRW=X", 1)
     ]
     for name, sym, mult in tourist_dests:
         html += fetch_yahoo(name, sym, mult)
@@ -586,17 +574,16 @@ with tab1:
 # [탭 2] 핵심비밀정보 (심리전 UX 탑재)
 # ------------------------------------------
 with tab2:
-    # 🚨 [아버님 요청 반영] 타이틀 위아래 여백 최소화
     st.markdown("<h3 style='text-align:center; color:#D4AF37; font-weight:900; margin-top:0px; margin-bottom:2px; letter-spacing:-1px;'>📊 VIP 핵심 비밀 정보</h3>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em; margin-bottom:10px;'>※ <span style='color:#03C75A;'>Advanced Data Pipeline</span> 기술로 수집된 최상급 실시간 지표</p>", unsafe_allow_html=True)
 
     apt_trades = get_real_estate_api()
     rates = get_interest_rate_api()
     oil_data = get_oil_price_api()
-    global_html = get_global_stocks_api()
+    # 글로벌 환율은 밑에서 버튼과 함께 동적으로 호출됩니다!
 
-    # 🔥 1. 실거래가 아코디언 
-    with st.expander("🏢 강서구(명지·강동) 최근 실거래가", expanded=True):
+    # 🚨 [아버님 요청 반영] 1. 실거래가 아코디언 (expanded=False 로 기본 닫힘 상태 변경!)
+    with st.expander("🏢 강서구(명지·강동) 최근 실거래가", expanded=False):
         search_kw = st.text_input("단지명 검색", placeholder="🔍 단지명을 입력하세요 (예: 호반, 더샵)", label_visibility="collapsed")
         
         filtered_trades = apt_trades
@@ -657,15 +644,23 @@ with tab2:
         else:
             st.markdown("<div style='text-align:center; color:#8e8e93; padding:15px; font-size:0.85em;'>유가 데이터 점검중입니다.</div>", unsafe_allow_html=True)
 
-    # 🔥 4. 글로벌 증시 및 환율 현황
+    # 🚨 [아버님 요청 반영] 4. 글로벌 증시 및 환율 현황 (새로고침 버튼 탑재!)
     with st.expander("🌐 글로벌 증시 & 환율 현황", expanded=False):
+        col1, col2 = st.columns([7, 3]) # 버튼을 우측에 깔끔하게 배치
+        with col2:
+            # 버튼을 누르면 이 API의 임시 저장소(캐시)를 강제로 날려버립니다!
+            if st.button("🔄 실시간 갱신", key="refresh_stock_btn", use_container_width=True):
+                get_global_stocks_api.clear()
+                
+        # 캐시가 날아갔다면 0.1초 만에 최신 환율을 다시 긁어옵니다.
+        global_html = get_global_stocks_api()
         st.markdown(global_html, unsafe_allow_html=True)
+        
+        # 입주민이 "언제 갱신된 거지?" 알 수 있게 현재 시간 딱 박아줍니다.
+        now_str = datetime.now().strftime("%H:%M:%S")
+        st.markdown(f"<p style='text-align:right; font-size:0.7em; color:#03C75A; margin-top:4px;'>✅ {now_str} 최신 동기화 완료</p>", unsafe_allow_html=True)
 
-    # ==========================================
-    # 🔥 기대감을 증폭시키는 킬러 기능 티저(Teaser) 영역
-    # ==========================================
-
-    # 🚨 [아버님 요청 반영] 5. 조달청 관급공사 티저 (어르신 타겟팅 감동 멘트)
+    # 🔥 5. 조달청 관급공사 티저
     with st.expander("🚀 우리 동네 개발/호재 정보망 (준비중 ⏳)", expanded=False):
         st.markdown("""
         <div style='text-align:center; padding: 25px 15px; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px dashed #0A84FF; margin-top: 5px;'>
@@ -676,8 +671,8 @@ with tab2:
             </p>
             <p style='color:#8e8e93; font-size:0.85em; line-height:1.5; margin-bottom:15px; word-break: keep-all;'>
                 인터넷 검색이 번거로우신 분들도 이제 걱정 마십시오!<br>
-                그간 <b>부동산이나 인터넷카페등 발품 팔아 얻었던 정보들</b>(도로 개설, 공원 조성, 정거장 신설 등)을<br>
-                이제 이 어플 하나로 <b style='color:#03C75A;'>정확한 진행정보를 편안하게 획득</b>하실 수 있습니다.
+                그간 <b>부동산이나 관공서를 다니며 발품 팔아 얻었던 귀한 정보들</b>(도로 개설, 공원 조성, 정거장 신설 등)을<br>
+                이제 이 어플 하나로 <b style='color:#03C75A;'>가장 빠르고 편안하게 획득</b>하실 수 있습니다.
             </p>
             <div style='display:inline-block; background:#1C1C1E; border:1px solid #333; padding:8px 15px; border-radius:20px;'>
                 <span style='color:#D4AF37; font-size:0.8em; font-weight:800;'>💡 서버 연동 테스트 중입니다. 런칭을 기대해 주세요!</span>
