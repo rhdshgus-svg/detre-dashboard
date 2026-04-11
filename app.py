@@ -10,7 +10,6 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 from email.utils import parsedate_to_datetime
 from PIL import Image
-from bs4 import BeautifulSoup # 🔥 금시세 크롤링을 위한 라이브러리 추가
 
 # ==========================================
 # 1. 기본 화면 설정
@@ -22,23 +21,18 @@ except Exception:
     st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon="🏢", layout="centered")
 
 # ==========================================
-# 2. CSS 스타일링 (🔥 가독성 패치 및 프리미엄 폼)
+# 2. CSS 스타일링
 # ==========================================
 st.markdown("""
     <meta name="google" content="notranslate">
-    
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135673.png">
     <link rel="icon" sizes="192x192" href="https://cdn-icons-png.flaticon.com/512/3135/3135673.png">
-    <link rel="icon" sizes="512x512" href="https://cdn-icons-png.flaticon.com/512/3135/3135673.png">
-    
     <style>
-        /* 🔥 안드로이드 앱 당겨서 새로고침 완벽 차단! */
         html, body, #root, .stApp, .main, [data-testid="stAppViewContainer"], section {
             overscroll-behavior: none !important;
             overscroll-behavior-y: none !important;
             overscroll-behavior-x: none !important;
         }
-        
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         * { font-family: 'Pretendard', sans-serif; }
         #MainMenu {visibility: hidden;} footer {visibility: hidden;} header {visibility: hidden;}
@@ -47,7 +41,6 @@ st.markdown("""
         .premium-title { font-size: clamp(2.0em, 8vw, 2.8em); font-weight: 900; text-align: center; color: #2b6cb0; text-shadow: 0 2px 10px rgba(43, 108, 176, 0.3); margin-bottom: 4px; line-height: 1.2; }
         .promo-title { font-size: 0.85em; text-align: center; color: #D4AF37; font-weight: 700; margin-top: 0px; margin-bottom: 8px; line-height: 1.3; }
         
-        /* 사주 링크 및 입예협 공식 배너 스타일 */
         .btn-saju { background-color: rgba(212, 175, 55, 0.1); color: #D4AF37 !important; border: 1px solid #D4AF37; display: inline-flex; justify-content: center; align-items: center; font-weight: 800; font-size: 0.75em; padding: 6px 16px; border-radius: 8px; text-decoration: none !important; margin-bottom: 15px; transition: all 0.2s ease; }
         .official-btn { display: flex; justify-content: center; align-items: center; font-weight: 900; font-size: 0.85em; padding: 12px 16px; border-radius: 10px; text-decoration: none !important; margin-bottom: 6px; transition: all 0.2s ease; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         .btn-naver { background-color: #03C75A; color: white !important; }
@@ -84,13 +77,11 @@ st.markdown("""
         .news-link { color: #d1d1d6; text-decoration: none; font-size: 0.85em; display: block; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #333; line-height: 1.5; }
         .news-link:hover { color: #D4AF37; }
         .news-source { color: #4A90E2; font-weight: 900; margin-right: 4px; font-size: 0.9em; }
-        
         .fomo-tag { color: #FF3B30; font-weight: 800; font-size: 0.8em; margin-left: 6px; background-color: rgba(255, 59, 48, 0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(255, 59, 48, 0.3); display: inline-block; margin-top: 4px;}
         .news-date { color: #aaa; font-size: 0.8em; font-weight: 600; }
         
         button[data-baseweb="tab"] { font-weight: 800 !important; font-size: 0.9em !important; }
         
-        /* 🔥 사주(신점) 박스 프리미엄 가독성 패치 */
         .saju-box { background: linear-gradient(180deg, #FFFDF8 0%, #F4EFE6 100%); border-radius: 12px; border: 1px solid #D4AF37; padding: 25px 20px; text-align: left; margin-top: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .saju-title { color: #800020; text-align: center; margin-top: 0; font-size: clamp(1.05em, 5vw, 1.25em); font-weight: 900; margin-bottom: 25px; line-height: 1.4; letter-spacing: -0.8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .saju-section { margin-bottom: 22px; }
@@ -98,7 +89,6 @@ st.markdown("""
         .saju-p { color: #111111; font-size: 0.95em; font-weight: 700; line-height: 1.75; margin-top: 0; padding-left: 13px; text-align: justify; letter-spacing: -0.3px; word-break: keep-all; }
         .saju-footer { color: #555555; font-size: 0.75em; text-align: center; margin-top: 30px; border-top: 1px dashed #BDBDBD; padding-top: 15px; line-height: 1.6; word-break: keep-all; }
         
-        /* 🔥 경제 대시보드 리포트형 초압축 스타일 */
         .econ-box { background: linear-gradient(145deg, #1c1c1e, #121212); border: 1px solid #333; border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
         .econ-title { color: #f2f2f7; font-size: 0.95em; font-weight: 900; margin-bottom: 8px; border-bottom: 1px solid #444; padding-bottom: 6px; letter-spacing: -0.5px; }
         .econ-table { width: 100%; border-collapse: collapse; }
@@ -160,7 +150,7 @@ kakao_dict, cafe_set, df_layout, type_dict = load_data()
 if df_layout.empty: st.stop()
 
 # ==========================================
-# 🔮 실시간 경제 API 봇 (🔥 무적 방어막 + 실시간 연동 탑재 완료!)
+# 🔮 실시간 경제 API 봇 (🔥 무적 방어막 + 실거래가 우회 패치 적용)
 # ==========================================
 @st.cache_data(ttl=1800) 
 def get_busan_weather():
@@ -178,13 +168,14 @@ def get_busan_weather():
 @st.cache_data(ttl=3600)
 def get_real_estate_api():
     try:
-        # 국토교통부 아파트 실거래가 API (강서구 26440)
+        # 🚨 [핵심 패치] 국토부 봇 차단 우회를 위한 User-Agent 헤더 추가 적용!
         molit_key = st.secrets["api_keys"]["molit_key"]
         lawd_cd = "26440"
         deal_ym = datetime.now().strftime("%Y%m")
         url = f"http://openapi.molit.go.kr/OpenAPI_ToolInstallPackage/service/rest/RTMSOBJSvc/getRTMSDataSvcAptTradeDev?serviceKey={molit_key}&LAWD_CD={lawd_cd}&DEAL_YMD={deal_ym}"
-        req = urllib.request.Request(url)
-        res = urllib.request.urlopen(req, timeout=3)
+        
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        res = urllib.request.urlopen(req, timeout=5)
         root = ET.fromstring(res.read())
         
         prugio_price = None
@@ -204,11 +195,10 @@ def get_real_estate_api():
 @st.cache_data(ttl=3600)
 def get_interest_rate_api():
     try:
-        # 한국은행 100대 통계지표 API (기준금리)
         bok_key = st.secrets["api_keys"]["bok_key"]
         url = f"http://ecos.bok.or.kr/api/KeyStatisticList/{bok_key}/xml/kr/1/100"
         req = urllib.request.Request(url)
-        res = urllib.request.urlopen(req, timeout=3)
+        res = urllib.request.urlopen(req, timeout=5)
         root = ET.fromstring(res.read())
         
         base_rate = "3.50%"
@@ -223,11 +213,10 @@ def get_interest_rate_api():
 @st.cache_data(ttl=3600)
 def get_oil_price_api():
     try:
-        # 한국석유공사 오피넷 API (부산 02)
         opinet_key = st.secrets["api_keys"]["opinet_key"]
         url = f"http://www.opinet.co.kr/api/avgSidoPrice.do?out=xml&sido=02&code={opinet_key}"
         req = urllib.request.Request(url)
-        res = urllib.request.urlopen(req, timeout=3)
+        res = urllib.request.urlopen(req, timeout=5)
         root = ET.fromstring(res.read())
         
         gas, diesel, lpg = "1,642원", "1,515원", "975원"
@@ -242,43 +231,7 @@ def get_oil_price_api():
     except:
         return "1,642원", "조회지연", "1,515원", "조회지연", "975원", "조회지연"
 
-@st.cache_data(ttl=86400) # 하루에 한 번 업데이트
-def get_gold_price():
-    try:
-        # 네이버 금시세 크롤링
-        url = "https://search.naver.com/search.naver?query=금시세"
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        res = urllib.request.urlopen(req, timeout=5)
-        html = res.read().decode('utf-8')
-        soup = BeautifulSoup(html, 'html.parser')
-        
-        price_tags = soup.select('.price_info .num')
-        updown_tags = soup.select('.price_info .blind')
-        diff_tags = soup.select('.price_info .num_updown')
-        
-        if len(price_tags) >= 2:
-            gold_24k = price_tags[0].text + "원"
-            gold_18k = price_tags[1].text + "원"
-            
-            def get_delta(index):
-                try:
-                    status = updown_tags[index].text.strip()
-                    diff = diff_tags[index].text.strip().replace(status, "").strip()
-                    if status == "상승": return f"↑ {diff}원"
-                    elif status == "하락": return f"↓ {diff}원"
-                    else: return "보합"
-                except:
-                    return "-"
-            
-            delta_24k = get_delta(0)
-            delta_18k = get_delta(1)
-            return gold_24k, delta_24k, gold_18k, delta_18k
-        else:
-            return "432,000원", "↑ 3,000원", "318,000원", "↑ 2,000원"
-    except:
-        return "조회지연", "-", "조회지연", "-"
-
-@st.cache_data(ttl=86400) # 하루에 한 번 업데이트
+@st.cache_data(ttl=86400) # 하루에 한 번 업데이트 (야후 파이낸스 글로벌 증시)
 def get_global_stocks_api():
     symbols = [
         ("코스피 (KOSPI)", "^KS11"),
@@ -527,7 +480,6 @@ with tab4:
     apt_price, apt_delta = get_real_estate_api()
     rate_val, rate_delta, didim_val, didim_delta = get_interest_rate_api()
     oil_gas, gas_delta, oil_diesel, diesel_delta, oil_lpg, lpg_delta = get_oil_price_api()
-    gold_24k, gold_24k_delta, gold_18k, gold_18k_delta = get_gold_price()
     stocks = get_global_stocks_api()
 
     html_econ = f"""
@@ -544,14 +496,6 @@ with tab4:
         <table class='econ-table'>
             <tr><th>1금융권 (시중은행)</th><td>{rate_val} <span style='color:#007AFF; font-size:0.85em; margin-left:4px; font-weight:800;'>{rate_delta}</span></td></tr>
             <tr><th>디딤돌대출 (정부정책)</th><td>{didim_val} <span style='color:#8e8e93; font-size:0.85em; margin-left:4px; font-weight:800;'>{didim_delta}</span></td></tr>
-        </table>
-    </div>
-
-    <div class='econ-box'>
-        <div class='econ-title'>💰 국내 순금 시세 (1돈=3.75g 기준)</div>
-        <table class='econ-table'>
-            <tr><th>순금 (24K)</th><td>{gold_24k} <span style='color:#FF3B30; font-size:0.85em; margin-left:4px; font-weight:800;'>{gold_24k_delta}</span></td></tr>
-            <tr><th>18K</th><td>{gold_18k} <span style='color:#FF3B30; font-size:0.85em; margin-left:4px; font-weight:800;'>{gold_18k_delta}</span></td></tr>
         </table>
     </div>
 
