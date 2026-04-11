@@ -21,7 +21,7 @@ except Exception:
     st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon="🏢", layout="centered")
 
 # ==========================================
-# [블록 2] CSS 스타일링 (색상, 폰트 및 모바일 최적화)
+# [블록 2] CSS 스타일링
 # ==========================================
 st.markdown("""
     <meta name="google" content="notranslate">
@@ -29,9 +29,7 @@ st.markdown("""
     <link rel="icon" sizes="192x192" href="https://cdn-icons-png.flaticon.com/512/3135/3135673.png">
     <style>
         html, body, #root, .stApp, .main, [data-testid="stAppViewContainer"], section {
-            overscroll-behavior: none !important;
-            overscroll-behavior-y: none !important;
-            overscroll-behavior-x: none !important;
+            overscroll-behavior: none !important; overscroll-behavior-y: none !important; overscroll-behavior-x: none !important;
         }
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         * { font-family: 'Pretendard', sans-serif; }
@@ -81,10 +79,6 @@ st.markdown("""
         .news-date { color: #aaa; font-size: 0.8em; font-weight: 600; }
         
         button[data-baseweb="tab"] { font-weight: 800 !important; font-size: 0.9em !important; }
-        
-        /* 🔥 버튼 디자인 개선 (새로고침 버튼용) */
-        .stButton>button { border: 1px solid #333 !important; border-radius: 6px !important; font-weight: 800 !important; font-size: 0.8em !important; transition: all 0.2s; }
-        .stButton>button:hover { border-color: #D4AF37 !important; color: #D4AF37 !important; background-color: rgba(212,175,55,0.1) !important; }
 
         .saju-box { background: linear-gradient(180deg, #FFFDF8 0%, #F4EFE6 100%); border-radius: 12px; border: 1px solid #D4AF37; padding: 25px 20px; text-align: left; margin-top: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .saju-title { color: #800020; text-align: center; margin-top: 0; font-size: clamp(1.05em, 5vw, 1.25em); font-weight: 900; margin-bottom: 25px; line-height: 1.4; letter-spacing: -0.8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -580,10 +574,16 @@ with tab2:
     apt_trades = get_real_estate_api()
     rates = get_interest_rate_api()
     oil_data = get_oil_price_api()
-    # 글로벌 환율은 밑에서 버튼과 함께 동적으로 호출됩니다!
+    global_html = get_global_stocks_api()
+    
+    # 🚨 업데이트 시간 공통 배지 생성 (현재 시간)
+    update_time_str = datetime.now().strftime("%Y.%m.%d %H:%M")
+    update_badge = f"<div style='text-align:right; font-size:0.65em; color:#8e8e93; margin-bottom:8px;'>🔄 {update_time_str} 기준</div>"
 
-    # 🚨 [아버님 요청 반영] 1. 실거래가 아코디언 (expanded=False 로 기본 닫힘 상태 변경!)
+    # 🔥 1. 실거래가 아코디언 (기본 닫힘)
     with st.expander("🏢 강서구(명지·강동) 최근 실거래가", expanded=False):
+        st.markdown(update_badge, unsafe_allow_html=True) # 업데이트 시간 표기
+        
         search_kw = st.text_input("단지명 검색", placeholder="🔍 단지명을 입력하세요 (예: 호반, 더샵)", label_visibility="collapsed")
         
         filtered_trades = apt_trades
@@ -601,8 +601,10 @@ with tab2:
         html_econ += "</div>"
         st.markdown(html_econ, unsafe_allow_html=True)
 
-    # 🔥 2. 주택담보대출 금리 아코디언
+    # 🔥 2. 주택담보대출 금리 아코디언 (기본 닫힘)
     with st.expander("🏦 금융권 & 기금 정책자금 대출 금리", expanded=False):
+        st.markdown(update_badge, unsafe_allow_html=True) # 업데이트 시간 표기
+        
         html_rate = "<table class='econ-table'>"
         html_rate += f"<tr style='background-color:rgba(255,255,255,0.05);'><th colspan='2' style='color:#D4AF37; text-align:center; font-size:1.0em; padding:10px 0;'>🇰🇷 한국은행 기준금리: {rates['base']}</th></tr>"
         html_rate += f"<tr><th>🏢 1금융권 (시중은행)</th><td>{rates['tier1']}</td></tr>"
@@ -614,8 +616,10 @@ with tab2:
         html_rate += "</table>"
         st.markdown(html_rate, unsafe_allow_html=True)
 
-    # 🔥 3. 유가 정보 아코디언 
+    # 🔥 3. 유가 정보 아코디언 (기본 닫힘)
     with st.expander("⛽ 부산 평균 및 구별 유가 랭킹 (오피넷)", expanded=False):
+        st.markdown(update_badge, unsafe_allow_html=True) # 업데이트 시간 표기
+        
         if oil_data:
             b_avg = oil_data["busan_avg"]
             html_oil = "<div style='font-size:0.85em; color:#D4AF37; font-weight:800; margin-top:5px; margin-bottom:5px; padding-left:4px;'>🔵 부산 전체 평균</div>"
@@ -644,21 +648,14 @@ with tab2:
         else:
             st.markdown("<div style='text-align:center; color:#8e8e93; padding:15px; font-size:0.85em;'>유가 데이터 점검중입니다.</div>", unsafe_allow_html=True)
 
-    # 🚨 [아버님 요청 반영] 4. 글로벌 증시 및 환율 현황 (새로고침 버튼 탑재!)
+    # 🔥 4. 글로벌 증시 및 환율 현황 (기본 닫힘 & 새로고침 버튼 제거)
     with st.expander("🌐 글로벌 증시 & 환율 현황", expanded=False):
-        col1, col2 = st.columns([7, 3]) # 버튼을 우측에 깔끔하게 배치
-        with col2:
-            # 버튼을 누르면 이 API의 임시 저장소(캐시)를 강제로 날려버립니다!
-            if st.button("🔄 실시간 갱신", key="refresh_stock_btn", use_container_width=True):
-                get_global_stocks_api.clear()
-                
-        # 캐시가 날아갔다면 0.1초 만에 최신 환율을 다시 긁어옵니다.
-        global_html = get_global_stocks_api()
+        st.markdown(update_badge, unsafe_allow_html=True) # 업데이트 시간 표기
         st.markdown(global_html, unsafe_allow_html=True)
-        
-        # 입주민이 "언제 갱신된 거지?" 알 수 있게 현재 시간 딱 박아줍니다.
-        now_str = datetime.now().strftime("%H:%M:%S")
-        st.markdown(f"<p style='text-align:right; font-size:0.7em; color:#03C75A; margin-top:4px;'>✅ {now_str} 최신 동기화 완료</p>", unsafe_allow_html=True)
+
+    # ==========================================
+    # 🔥 기대감을 증폭시키는 킬러 기능 티저(Teaser) 영역
+    # ==========================================
 
     # 🔥 5. 조달청 관급공사 티저
     with st.expander("🚀 우리 동네 개발/호재 정보망 (준비중 ⏳)", expanded=False):
