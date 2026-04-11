@@ -676,8 +676,8 @@ with tab2:
             </p>
             <p style='color:#8e8e93; font-size:0.85em; line-height:1.5; margin-bottom:15px; word-break: keep-all;'>
                 인터넷 검색이 번거로우신 분들도 이제 걱정 마십시오!<br>
-                그간 <b>부동산이나 관공서를 다니며 발품 팔아 얻었던 귀한 정보들</b>(도로 개설, 공원 조성, 정거장 신설 등)을<br>
-                이제 이 어플 하나로 <b style='color:#03C75A;'>가장 빠르고 편안하게 획득</b>하실 수 있습니다.
+                그간 <b>부동산이나 인터넷카페등 발품 팔아 얻었던 정보들</b>(도로 개설, 공원 조성, 정거장 신설 등)을<br>
+                이제 이 어플 하나로 <b style='color:#03C75A;'>정확한 진행정보를 편안하게 획득</b>하실 수 있습니다.
             </p>
             <div style='display:inline-block; background:#1C1C1E; border:1px solid #333; padding:8px 15px; border-radius:20px;'>
                 <span style='color:#D4AF37; font-size:0.8em; font-weight:800;'>💡 서버 연동 테스트 중입니다. 런칭을 기대해 주세요!</span>
