@@ -12,7 +12,7 @@ from email.utils import parsedate_to_datetime
 from PIL import Image
 
 # ==========================================
-# 1. 기본 화면 설정
+# [블록 1] 기본 화면 설정
 # ==========================================
 try:
     logo_img = Image.open("logo.png")
@@ -21,7 +21,7 @@ except Exception:
     st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon="🏢", layout="centered")
 
 # ==========================================
-# 2. CSS 스타일링 (아코디언 및 가격 변동 UI 고급화)
+# [블록 2] CSS 스타일링
 # ==========================================
 st.markdown("""
     <meta name="google" content="notranslate">
@@ -96,7 +96,7 @@ st.markdown("""
         .econ-table th { color: #8e8e93; font-weight: 600; text-align: left; width: 45%; }
         .econ-table td { text-align: right; color: #d1d1d6; font-weight: 800; letter-spacing: -0.3px; }
 
-        /* 🔥 아코디언(Expander)을 기존 econ-box처럼 완벽 위장하는 CSS */
+        /* 🔥 아코디언(Expander) 고급 위장 CSS */
         [data-testid="stExpander"] { background: linear-gradient(145deg, #1c1c1e, #121212) !important; border: 1px solid #333 !important; border-radius: 8px !important; box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important; margin-bottom: 12px !important; }
         [data-testid="stExpander"] summary { padding: 12px 14px !important; }
         [data-testid="stExpander"] summary p { color: #f2f2f7 !important; font-size: 0.95em !important; font-weight: 900 !important; letter-spacing: -0.5px !important; }
@@ -125,7 +125,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 3. 데이터 로딩 (구글 시트 연동)
+# [블록 3] 데이터 로딩 (구글 시트 연동)
 # ==========================================
 SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQoR29bAcAP0KUBEvS3S6gn5Qz1MTKDJOxz-lW1UEyV_vOcISPxNW2uMuYMrz9HUw/pub?gid=1967078212&single=true&output=csv"
 LAYOUT_FILE = "디에트르 그랑루체 카페가입 현황.xlsx" 
@@ -172,9 +172,7 @@ def load_data():
 kakao_dict, cafe_set, df_layout, type_dict = load_data()
 if df_layout.empty: st.stop()
 
-# ==========================================
-# 💰 한국어 금액 포맷 변환기 (43,200 -> 4억 3,200만원)
-# ==========================================
+# 한국어 금액 포맷 변환기 (43,200 -> 4억 3,200만원)
 def format_korean_money(price_str):
     try:
         num = int(price_str.replace(",", ""))
@@ -189,7 +187,7 @@ def format_korean_money(price_str):
         return f"{price_str}만원"
 
 # ==========================================
-# 🔮 실시간 경제 API 봇
+# [블록 4] 실시간 API 연동 봇
 # ==========================================
 @st.cache_data(ttl=1800) 
 def get_busan_weather():
@@ -220,7 +218,6 @@ def get_real_estate_api():
             deal_ym = f"{y}{m:02d}"
             
             url = f"https://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev?serviceKey={encoded_key}&LAWD_CD={LAWD_CD}&DEAL_YMD={deal_ym}"
-            
             headers = {'User-Agent': 'Mozilla/5.0'}
             req = urllib.request.Request(url, headers=headers)
             res = urllib.request.urlopen(req, timeout=5)
@@ -251,12 +248,11 @@ def get_real_estate_api():
                             "date": date_str, "detail": detail_str
                         })
 
-        # 🚨 [핵심 패치] 등락폭(▲▼) 계산을 위해 시간순(과거->최신)으로 정렬하여 스캔!
+        # 등락폭(▲▼) 계산을 위해 시간순 정렬 스캔
         raw_trades.sort(key=lambda x: x['date'])
         
         prev_prices = {}
         for t in raw_trades:
-            # 같은 아파트 + 같은 평수를 기준으로 이전 가격 찾기
             key = f"{t['apt']}_{t['area']}"
             curr_price = t['price_int']
             
@@ -272,20 +268,20 @@ def get_real_estate_api():
                     t['delta_str'] = "보합"
                     t['delta_color'] = "delta-new"
             else:
-                t['delta_str'] = "신규" # 3개월 내 이전 거래가 없는 경우
+                t['delta_str'] = "신규"
                 t['delta_color'] = "delta-new"
                 
             prev_prices[key] = curr_price
             t['price_formatted'] = format_korean_money(str(curr_price))
 
-        # 계산이 끝나면 화면에 보여주기 위해 최신순(내림차순)으로 다시 정렬!
+        # 화면 출력을 위해 최신순으로 다시 정렬
         raw_trades.sort(key=lambda x: x['date'], reverse=True)
         return raw_trades
             
     except Exception as e:
         return []
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=43200) # 한국은행 금리는 하루에 2번만 갱신
 def get_interest_rate_api():
     try:
         bok_key = st.secrets["api_keys"]["bok_key"]
@@ -294,14 +290,28 @@ def get_interest_rate_api():
         res = urllib.request.urlopen(req, timeout=5)
         root = ET.fromstring(res.read())
         
-        base_rate = "3.50%"
+        base_rate = "3.50"
         for row in root.findall('.//row'):
             if "기준금리" in row.find('KEYSTAT_NAME').text:
-                base_rate = row.find('DATA_VALUE').text + "%"
+                base_rate = row.find('DATA_VALUE').text
                 break
-        return base_rate, "한국은행", "2.15% ~ 3.55%", "동결"
+                
+        base_f = float(base_rate)
+        
+        rates = {
+            "base": f"{base_f:.2f}%",
+            "tier1": f"{base_f + 0.35:.2f}% ~ {base_f + 0.85:.2f}%",
+            "tier2": f"{base_f + 1.50:.2f}% ~ {base_f + 2.50:.2f}%",
+            "didim": "2.15% ~ 3.55%",
+            "baby": "1.60% ~ 3.30%",
+            "bogeum": "4.20% ~ 4.50%"
+        }
+        return rates
     except:
-        return "3.50%", "동결", "2.15% ~ 3.55%", "동결"
+        return {
+            "base": "3.50%", "tier1": "3.85% ~ 4.25%", "tier2": "4.95% ~ 5.80%", 
+            "didim": "2.15% ~ 3.55%", "baby": "1.60% ~ 3.30%", "bogeum": "4.20% ~ 4.50%"
+        }
 
 @st.cache_data(ttl=3600)
 def get_oil_price_api():
@@ -365,9 +375,6 @@ def get_global_stocks_api():
             
     return results
 
-# ==========================================
-# 🌟 심리 타겟팅 운세 생성기
-# ==========================================
 def get_custom_fortune(dong, ho, type_dict):
     today_str = datetime.now().strftime("%Y%m%d")
     seed_val = f"{today_str}_{dong}_{ho}_secret"
@@ -423,7 +430,7 @@ def get_custom_fortune(dong, ho, type_dict):
     return result_html
 
 # ==========================================
-# 4. 화면 상단 타이틀 및 공통 배너 
+# 상단 타이틀 및 공통 배너 
 # ==========================================
 st.markdown("<div class='premium-title'>Detre Granluce</div>", unsafe_allow_html=True)
 st.markdown("""
@@ -440,7 +447,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 5. 종합 포털 탭(Tab) 메뉴
+# [블록 5] 종합 포털 탭(Tab) 메뉴 및 컨텐츠
 # ==========================================
 tab1, tab2, tab3, tab4 = st.tabs(["🏢 입주현황", "🔮 오늘의 운세", "📰 관련뉴스", "📈 경제지표"])
 
@@ -564,18 +571,18 @@ with tab3:
     except: st.info("실시간 뉴스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.")
 
 # ------------------------------------------
-# [탭 4] 실시간 경제지표 
+# [탭 4] 실시간 경제지표 (V15 금융 초호화 업그레이드)
 # ------------------------------------------
 with tab4:
     st.markdown("<h3 style='text-align:center; color:#D4AF37; font-weight:900; margin-top:10px; letter-spacing:-1px;'>📈 실시간 경제·금융 지표</h3>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em; margin-bottom:15px;'>※ 핵심 지표 실시간 요약</p>", unsafe_allow_html=True)
 
     apt_trades = get_real_estate_api()
-    rate_val, rate_delta, didim_val, didim_delta = get_interest_rate_api()
+    rates = get_interest_rate_api()
     oil_gas, gas_delta, oil_diesel, diesel_delta, oil_lpg, lpg_delta = get_oil_price_api()
     stocks = get_global_stocks_api()
 
-    # 🔥 1. 실거래가 아코디언 (가장 중요하므로 기본으로 열려있게 설정)
+    # 🔥 1. 실거래가 아코디언
     with st.expander("🏢 강서구(명지·강동) 최근 3개월 실거래가", expanded=True):
         search_kw = st.text_input("단지명 검색", placeholder="🔍 찾고 싶은 단지명을 입력하세요 (예: 호반, 금강)", label_visibility="collapsed")
         
@@ -587,6 +594,7 @@ with tab4:
         html_econ = "<div class='trade-scroll-box'>"
         if filtered_trades:
             for t in filtered_trades:
+                # 스트림릿 버그 방지를 위해 한 줄로 연결
                 html_econ += f"<div class='trade-row'><div class='trade-info'><div class='trade-apt'>{t['apt']} <span class='trade-area'>({t['area']:.0f}㎡)</span></div><div class='trade-detail'>📅 {t['date']} | 🏢 {t['detail']}</div></div><div class='trade-price-box'><div class='trade-price'>{t['price_formatted']}</div><div class='trade-delta {t['delta_color']}'>{t['delta_str']}</div></div></div>"
         else:
             if search_kw: html_econ += f"<div style='text-align:center; color:#8e8e93; padding:15px; font-size:0.85em;'>'{search_kw}' 단지의 최근 거래 내역이 없습니다.</div>"
@@ -594,17 +602,29 @@ with tab4:
         html_econ += "</div>"
         st.markdown(html_econ, unsafe_allow_html=True)
 
-    # 🔥 2. 주택담보대출 금리 아코디언 (접어둠)
-    with st.expander("🏦 주택담보대출 평균금리 (한국은행)", expanded=False):
-        html_rate = f"<table class='econ-table'><tr><th>1금융권 (시중은행)</th><td>{rate_val} <span style='color:#0A84FF; font-size:0.85em; margin-left:4px; font-weight:800;'>{rate_delta}</span></td></tr><tr><th>디딤돌대출 (정부정책)</th><td>{didim_val} <span style='color:#8e8e93; font-size:0.85em; margin-left:4px; font-weight:800;'>{didim_delta}</span></td></tr></table>"
+    # 🔥 2. 주택담보대출 금리 아코디언
+    with st.expander("🏦 금융권 & 기금 정책자금 대출 금리", expanded=False):
+        html_rate = "<table class='econ-table'>"
+        html_rate += f"<tr style='background-color:rgba(255,255,255,0.05);'><th colspan='2' style='color:#D4AF37; text-align:center; font-size:1.0em; padding:10px 0;'>🇰🇷 한국은행 기준금리: {rates['base']}</th></tr>"
+        html_rate += f"<tr><th>🏢 1금융권 (시중은행)</th><td>{rates['tier1']}</td></tr>"
+        html_rate += f"<tr><th>🏦 2금융권 (저축·새마을)</th><td>{rates['tier2']}</td></tr>"
+        html_rate += "<tr style='background-color:rgba(255,255,255,0.05);'><th colspan='2' style='color:#03C75A; text-align:center; padding:8px 0; border-top:1px solid #333;'>🏛️ 국토부·주택도시기금 정책자금 (고정)</th></tr>"
+        html_rate += f"<tr><th>👶 신생아 특례 (출산가구)</th><td style='color:#FF3B30;'>{rates['baby']}</td></tr>"
+        html_rate += f"<tr><th>🏠 내집마련 디딤돌</th><td>{rates['didim']}</td></tr>"
+        html_rate += f"<tr><th>🛡️ 특례 보금자리론</th><td>{rates['bogeum']}</td></tr>"
+        html_rate += "</table>"
         st.markdown(html_rate, unsafe_allow_html=True)
 
-    # 🔥 3. 유가 정보 아코디언 (접어둠)
+    # 🔥 3. 유가 정보 아코디언
     with st.expander("⛽ 부산 평균 유가 정보 (오피넷)", expanded=False):
-        html_oil = f"<table class='econ-table'><tr><th>휘발유</th><td>{oil_gas} <span style='color:#FF3B30; font-size:0.85em; margin-left:4px; font-weight:800;'>{gas_delta}</span></td></tr><tr><th>경유</th><td>{oil_diesel} <span style='color:#FF3B30; font-size:0.85em; margin-left:4px; font-weight:800;'>{diesel_delta}</span></td></tr><tr><th>LPG</th><td>{oil_lpg} <span style='color:#8e8e93; font-size:0.85em; margin-left:4px; font-weight:800;'>{lpg_delta}</span></td></tr></table>"
+        html_oil = "<table class='econ-table'>"
+        html_oil += f"<tr><th>휘발유</th><td>{oil_gas} <span style='color:#FF3B30; font-size:0.85em; margin-left:4px; font-weight:800;'>{gas_delta}</span></td></tr>"
+        html_oil += f"<tr><th>경유</th><td>{oil_diesel} <span style='color:#FF3B30; font-size:0.85em; margin-left:4px; font-weight:800;'>{diesel_delta}</span></td></tr>"
+        html_oil += f"<tr><th>LPG</th><td>{oil_lpg} <span style='color:#8e8e93; font-size:0.85em; margin-left:4px; font-weight:800;'>{lpg_delta}</span></td></tr>"
+        html_oil += "</table>"
         st.markdown(html_oil, unsafe_allow_html=True)
 
-    # 🔥 4. 글로벌 증시 아코디언 (접어둠)
+    # 🔥 4. 글로벌 증시 아코디언
     with st.expander("🌐 글로벌 주요 증시 현황", expanded=False):
         html_stock = "<table class='econ-table'>"
         for name, price, delta, color in stocks:
