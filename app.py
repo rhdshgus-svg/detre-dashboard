@@ -479,7 +479,7 @@ def get_custom_fortune(dong, ho, type_dict):
     if "59" in unit_type: 
         fortune_pools = [
             "이 호수와 인연을 맺으실 귀하는 상황 판단이 빠르고 위기 속에서도 반드시 해결책을 찾아내는 남다른 생존력과 직관의 사주를 지녔습니다. 겉보기엔 상황에 순응하는 듯 보여도, 내면에는 절대 꺾이지 않는 강한 승부욕을 품고 계시군요. 남들에게 크게 의지하기보다 스스로의 힘으로 길을 개척해 오느라 남몰래 겪은 고단함이 있었겠으나, 이 터의 맑은 기운이 귀하의 그 뚝심과 만나 마침내 폭발적인 보상으로 돌아오기 시작합니다.",
-            "귀하는 타인의 화려한 겉치레에 휩쓸리지 않고, 자신만의 속도와 기준으로 내실을 단단하게 다질 줄 아는 현명한 명조를 타고났습니다. 때로는 주변에서 귀하의 깊은 뜻을 알아주지 않아 외로움을 느꼈을 수 있으나, 결국 최후에 웃는 것은 귀하입니다. 이 터는 그런 귀하의 실용적이고 단단한 기운을 완벽하게 품어주는 둥지 역할을 할 것입니다."
+            "귀하는 타인의 화려한 겉치레에 휩쓸리지 않고, 자신만의 속도와 기준으로 내실을 단단하게 다질 줄 아는 현명한 명조를 타고났습니다. 때로는 주변에서 귀하의 깊은 뜻을 알아주지 않아 외로움을 느꼈을 수 있으나, 결국 최후에 웃는 초후에 웃는 것은 귀하입니다. 이 터는 그런 귀하의 실용적이고 단단한 기운을 완벽하게 품어주는 둥지 역할을 할 것입니다."
         ]
     elif "110" in unit_type or "114" in unit_type or "104" in unit_type: 
         fortune_pools = [
@@ -523,9 +523,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# [블록 5] 종합 포털 탭(Tab) 메뉴 및 컨텐츠
+# [블록 5] 종합 포털 탭(Tab) 메뉴 및 컨텐츠 (V19 동선 최적화 패치)
 # ==========================================
-tab1, tab2, tab3, tab4 = st.tabs(["🏢 입주현황", "🔮 오늘의 운세", "📰 관련뉴스", "📈 경제지표"])
+tab1, tab2, tab3, tab4 = st.tabs(["🏢 입주현황", "📈 생활경제", "🔮 오늘의 운세", "📰 관련뉴스"])
 
 # ------------------------------------------
 # [탭 1] 메인: 세대별 입주현황
@@ -585,72 +585,10 @@ with tab1:
     st.markdown(html_grid, unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 2] 오늘의 운세 
+# [탭 2] 생활경제 (동선 최적화로 2번째 탭으로 이동)
 # ------------------------------------------
 with tab2:
-    st.markdown("<h4 style='text-align:center; color:#D4AF37; margin-top:10px;'>🔮 팡도사의 동·호수 맞춤 신점</h4>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em;'>개인정보 입력 없이, 귀하의 사주 명조를 심층 분석하여 점쳐드립니다.</p>", unsafe_allow_html=True)
-    col_d, col_h = st.columns(2)
-    with col_d: f_dong = st.selectbox("입주 예정 동", all_dongs_raw, key="f_dong", label_visibility="collapsed")
-    with col_h: f_ho = st.text_input("입주 예정 호수", placeholder="호수 입력 (예: 1201)", key="f_ho", label_visibility="collapsed")
-    
-    if st.button("✨ 오늘 나의 무료신점 뽑기", use_container_width=True):
-        if f_ho.strip() == "": st.warning("호수를 정확히 입력해주세요! (예: 1201)")
-        else:
-            valid_combinations = set(zip(df_layout['동'], df_layout['호']))
-            input_ho_formatted = f_ho.strip().zfill(4) 
-            if (f_dong, input_ho_formatted) not in valid_combinations:
-                st.warning("🔮 앗! 해당 동·호수는 팡도사의 레이더에 잡히지 않는 '없는 기운'입니다. 혹시 아직 지어지지 않은 허공의 터를 누르신 건 아니겠죠? 😅 동과 호수를 다시 한번 정확히 확인해 주세요!")
-            else:
-                with st.spinner("🔮 팡도사가 고객님의 명조(命造)를 심층 분석 중입니다..."):
-                    time.sleep(3.5) 
-                st.markdown(get_custom_fortune(f_dong, f_ho, type_dict), unsafe_allow_html=True)
-
-# ------------------------------------------
-# [탭 3] 관련뉴스 
-# ------------------------------------------
-with tab3:
-    st.markdown("<div style='background: linear-gradient(90deg, #F0F4F8, #D9E2EC); padding: 12px; border-radius: 8px; margin-top: 10px; margin-bottom: 15px;'><h4 style='text-align:center; color:#0B1E36; font-weight:900; margin:0; letter-spacing:-0.5px;'>📰 우리단지 관련뉴스</h4></div>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:#ff9f0a; font-size:0.75em; margin-bottom:15px;'>🚨 최근 30일이내 기사중 중복내용 제외 10건만 노출됩니다.</p>", unsafe_allow_html=True)
-    try:
-        query = urllib.parse.quote('에코델타시티 OR "디에트르 그랑루체" OR "명지국제신도시 부동산" OR "부산 강서구 개발" OR "부동산 정책" OR "취득세" OR "특례보금자리" OR "금리 인하" when:30d')
-        url = f"https://news.google.com/rss/search?q={query}&hl=ko&gl=KR&ceid=KR:ko"
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        response = urllib.request.urlopen(req, timeout=5)
-        root = ET.fromstring(response.read())
-        
-        trusted_press = ['KBS', 'MBC', 'SBS', 'YTN', '연합', 'JTBC', '조선', '중앙', '동아', '매일경재', '한국경제', '부산일보', '국제신문', '네이버']
-        articles = []
-        seen_titles = set()
-        
-        for item in root.findall('.//item'):
-            source_name = item.find('source').text if item.find('source') is not None else "뉴스"
-            if any(trusted in source_name for trusted in trusted_press):
-                title = item.find('title').text.rsplit(" - ", 1)[0]
-                dedup_key = re.sub(r'[^가-힣a-zA-Z0-9]', '', title)[:15]
-                if dedup_key in seen_titles: continue
-                seen_titles.add(dedup_key)
-                
-                dt = parsedate_to_datetime(item.find('pubDate').text)
-                articles.append({'title': title, 'link': item.find('link').text, 'source': source_name, 'dt': dt})
-        
-        articles.sort(key=lambda x: x['dt'], reverse=True)
-        count = 0
-        now = datetime.now(articles[0]['dt'].tzinfo) if articles else datetime.now()
-            
-        for art in articles[:10]:
-            days_left = max(0, 30 - (now - art['dt']).days)
-            st.markdown(f"<a href='{art['link']}' target='_blank' class='news-link'><span class='news-source'>[{art['source']}]</span> {art['title']}<br><span class='news-date' style='display:inline-block; margin-top:4px;'>{art['dt'].strftime('%Y.%m.%d')} 기사</span><span class='fomo-tag'>⏳ {days_left}일 후 삭제</span></a>", unsafe_allow_html=True)
-            count += 1
-                
-        if count == 0: st.info("🚨 최근 30일간 해당 키워드의 메이저 언론사 뉴스가 없습니다.")
-    except: st.info("실시간 뉴스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.")
-
-# ------------------------------------------
-# [탭 4] 실시간 경제지표 
-# ------------------------------------------
-with tab4:
-    st.markdown("<h3 style='text-align:center; color:#D4AF37; font-weight:900; margin-top:10px; letter-spacing:-1px;'>📈 실시간 경제·금융 지표</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align:center; color:#D4AF37; font-weight:900; margin-top:10px; letter-spacing:-1px;'>📈 생활 경제 핵심 지표</h3>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em; margin-bottom:15px;'>※ 핵심 지표 실시간 요약</p>", unsafe_allow_html=True)
 
     apt_trades = get_real_estate_api()
@@ -723,6 +661,68 @@ with tab4:
     # 🔥 4. 글로벌 증시 및 환율 통합 아코디언 (코스닥 + 관광지 환율 통합 완료)
     with st.expander("🌐 글로벌 증시 & 환율 현황", expanded=False):
         st.markdown(global_html, unsafe_allow_html=True)
+
+# ------------------------------------------
+# [탭 3] 오늘의 운세 (3번째 탭으로 이동)
+# ------------------------------------------
+with tab3:
+    st.markdown("<h4 style='text-align:center; color:#D4AF37; margin-top:10px;'>🔮 팡도사의 동·호수 맞춤 신점</h4>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em;'>개인정보 입력 없이, 귀하의 사주 명조를 심층 분석하여 점쳐드립니다.</p>", unsafe_allow_html=True)
+    col_d, col_h = st.columns(2)
+    with col_d: f_dong = st.selectbox("입주 예정 동", all_dongs_raw, key="f_dong", label_visibility="collapsed")
+    with col_h: f_ho = st.text_input("입주 예정 호수", placeholder="호수 입력 (예: 1201)", key="f_ho", label_visibility="collapsed")
+    
+    if st.button("✨ 오늘 나의 무료신점 뽑기", use_container_width=True):
+        if f_ho.strip() == "": st.warning("호수를 정확히 입력해주세요! (예: 1201)")
+        else:
+            valid_combinations = set(zip(df_layout['동'], df_layout['호']))
+            input_ho_formatted = f_ho.strip().zfill(4) 
+            if (f_dong, input_ho_formatted) not in valid_combinations:
+                st.warning("🔮 앗! 해당 동·호수는 팡도사의 레이더에 잡히지 않는 '없는 기운'입니다. 혹시 아직 지어지지 않은 허공의 터를 누르신 건 아니겠죠? 😅 동과 호수를 다시 한번 정확히 확인해 주세요!")
+            else:
+                with st.spinner("🔮 팡도사가 고객님의 명조(命造)를 심층 분석 중입니다..."):
+                    time.sleep(3.5) 
+                st.markdown(get_custom_fortune(f_dong, f_ho, type_dict), unsafe_allow_html=True)
+
+# ------------------------------------------
+# [탭 4] 관련뉴스 (4번째 탭으로 이동)
+# ------------------------------------------
+with tab4:
+    st.markdown("<div style='background: linear-gradient(90deg, #F0F4F8, #D9E2EC); padding: 12px; border-radius: 8px; margin-top: 10px; margin-bottom: 15px;'><h4 style='text-align:center; color:#0B1E36; font-weight:900; margin:0; letter-spacing:-0.5px;'>📰 우리단지 관련뉴스</h4></div>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#ff9f0a; font-size:0.75em; margin-bottom:15px;'>🚨 최근 30일이내 기사중 중복내용 제외 10건만 노출됩니다.</p>", unsafe_allow_html=True)
+    try:
+        query = urllib.parse.quote('에코델타시티 OR "디에트르 그랑루체" OR "명지국제신도시 부동산" OR "부산 강서구 개발" OR "부동산 정책" OR "취득세" OR "특례보금자리" OR "금리 인하" when:30d')
+        url = f"https://news.google.com/rss/search?q={query}&hl=ko&gl=KR&ceid=KR:ko"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        response = urllib.request.urlopen(req, timeout=5)
+        root = ET.fromstring(response.read())
+        
+        trusted_press = ['KBS', 'MBC', 'SBS', 'YTN', '연합', 'JTBC', '조선', '중앙', '동아', '매일경재', '한국경제', '부산일보', '국제신문', '네이버']
+        articles = []
+        seen_titles = set()
+        
+        for item in root.findall('.//item'):
+            source_name = item.find('source').text if item.find('source') is not None else "뉴스"
+            if any(trusted in source_name for trusted in trusted_press):
+                title = item.find('title').text.rsplit(" - ", 1)[0]
+                dedup_key = re.sub(r'[^가-힣a-zA-Z0-9]', '', title)[:15]
+                if dedup_key in seen_titles: continue
+                seen_titles.add(dedup_key)
+                
+                dt = parsedate_to_datetime(item.find('pubDate').text)
+                articles.append({'title': title, 'link': item.find('link').text, 'source': source_name, 'dt': dt})
+        
+        articles.sort(key=lambda x: x['dt'], reverse=True)
+        count = 0
+        now = datetime.now(articles[0]['dt'].tzinfo) if articles else datetime.now()
+            
+        for art in articles[:10]:
+            days_left = max(0, 30 - (now - art['dt']).days)
+            st.markdown(f"<a href='{art['link']}' target='_blank' class='news-link'><span class='news-source'>[{art['source']}]</span> {art['title']}<br><span class='news-date' style='display:inline-block; margin-top:4px;'>{art['dt'].strftime('%Y.%m.%d')} 기사</span><span class='fomo-tag'>⏳ {days_left}일 후 삭제</span></a>", unsafe_allow_html=True)
+            count += 1
+                
+        if count == 0: st.info("🚨 최근 30일간 해당 키워드의 메이저 언론사 뉴스가 없습니다.")
+    except: st.info("실시간 뉴스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.")
 
 # 🔥 이스터에그
 st.markdown("<div class='by-text'>by. 213동102호팡</div>", unsafe_allow_html=True)
