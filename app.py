@@ -586,8 +586,9 @@ with tab1:
 # [탭 2] 핵심비밀정보 (심리전 UX 탑재)
 # ------------------------------------------
 with tab2:
-    st.markdown("<h3 style='text-align:center; color:#D4AF37; font-weight:900; margin-top:10px; letter-spacing:-1px;'>📊 VIP 핵심 비밀 정보</h3>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em; margin-bottom:15px;'>※ <span style='color:#03C75A;'>Advanced Data Pipeline</span> 기술로 수집된 최상급 실시간 지표</p>", unsafe_allow_html=True)
+    # 🚨 [아버님 요청 반영] 타이틀 위아래 여백 최소화
+    st.markdown("<h3 style='text-align:center; color:#D4AF37; font-weight:900; margin-top:0px; margin-bottom:2px; letter-spacing:-1px;'>📊 VIP 핵심 비밀 정보</h3>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em; margin-bottom:10px;'>※ <span style='color:#03C75A;'>Advanced Data Pipeline</span> 기술로 수집된 최상급 실시간 지표</p>", unsafe_allow_html=True)
 
     apt_trades = get_real_estate_api()
     rates = get_interest_rate_api()
@@ -660,8 +661,32 @@ with tab2:
     with st.expander("🌐 글로벌 증시 & 환율 현황", expanded=False):
         st.markdown(global_html, unsafe_allow_html=True)
 
-    # 🔥 5. V23 신규: 농수산/공산품 융합 검색기 티저
-    with st.expander("🛒 주요 농수산품 시세 변동 및 공산품 평균 판매가 검색기 (준비중 ⏳)", expanded=False):
+    # ==========================================
+    # 🔥 기대감을 증폭시키는 킬러 기능 티저(Teaser) 영역
+    # ==========================================
+
+    # 🚨 [아버님 요청 반영] 5. 조달청 관급공사 티저 (어르신 타겟팅 감동 멘트)
+    with st.expander("🚀 우리 동네 개발/호재 정보망 (준비중 ⏳)", expanded=False):
+        st.markdown("""
+        <div style='text-align:center; padding: 25px 15px; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px dashed #0A84FF; margin-top: 5px;'>
+            <h4 style='color:#0A84FF; margin-bottom:12px; font-weight:900;'>🚧 조달청(G2B) 실시간 연동 준비 중! 🚧</h4>
+            <p style='color:#d1d1d6; font-size:0.9em; line-height:1.6; margin-bottom:20px; word-break: keep-all;'>
+                우리 지역 개발과 관련된 <b style='color:#FF3B30;'>국가 조달청 관급공사 공고</b>들을<br>
+                실시간으로 연동하여 직접 눈으로 확인하실 수 있게 시스템을 구축하고 있습니다.
+            </p>
+            <p style='color:#8e8e93; font-size:0.85em; line-height:1.5; margin-bottom:15px; word-break: keep-all;'>
+                인터넷 검색이 번거로우신 분들도 이제 걱정 마십시오!<br>
+                그간 <b>부동산이나 관공서를 다니며 발품 팔아 얻었던 귀한 정보들</b>(도로 개설, 공원 조성, 정거장 신설 등)을<br>
+                이제 이 어플 하나로 <b style='color:#03C75A;'>가장 빠르고 편안하게 획득</b>하실 수 있습니다.
+            </p>
+            <div style='display:inline-block; background:#1C1C1E; border:1px solid #333; padding:8px 15px; border-radius:20px;'>
+                <span style='color:#D4AF37; font-size:0.8em; font-weight:800;'>💡 서버 연동 테스트 중입니다. 런칭을 기대해 주세요!</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # 🔥 6. 농수산/공산품 물가 티저
+    with st.expander("🛒 주요 농수산/공산품 물가 검색기 (준비중 ⏳)", expanded=False):
         html_coming_soon = """
         <div style='text-align:center; padding: 25px 15px; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px dashed #D4AF37; margin-top: 5px;'>
             <h4 style='color:#D4AF37; margin-bottom:12px; font-weight:900;'>🚧 향후 정식 오픈 예정! 🚧</h4>
