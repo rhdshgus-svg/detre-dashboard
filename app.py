@@ -21,7 +21,7 @@ except Exception:
     st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon="🏢", layout="centered")
 
 # ==========================================
-# [블록 2] CSS 스타일링 (색상 및 폰트 최적화)
+# [블록 2] CSS 스타일링 (색상, 폰트 및 모바일 최적화)
 # ==========================================
 st.markdown("""
     <meta name="google" content="notranslate">
@@ -91,9 +91,9 @@ st.markdown("""
         
         /* 🔥 경제 지표 테이블 공통 디자인 */
         .econ-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
-        .econ-table th, .econ-table td { padding: 8px 2px; font-size: 0.85em; border-bottom: 1px dotted #333; }
+        .econ-table th, .econ-table td { padding: 8px 2px; font-size: 0.85em; border-bottom: 1px dotted #333; vertical-align: middle; }
         .econ-table tr:last-child th, .econ-table tr:last-child td { border-bottom: none; }
-        .econ-table th { color: #8e8e93; font-weight: 600; text-align: left; width: 45%; }
+        .econ-table th { color: #8e8e93; font-weight: 600; text-align: left; }
         .econ-table td { text-align: right; color: #d1d1d6; font-weight: 800; letter-spacing: -0.3px; }
 
         /* 🔥 아코디언(Expander) 고급 위장 CSS */
@@ -114,12 +114,13 @@ st.markdown("""
         .trade-detail { color: #aaa; font-size: 0.75em; font-weight: 500; }
         
         .trade-price-box { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; min-width: 80px; }
-        .trade-price { color: #fff; font-size: 0.85em; font-weight: 800; letter-spacing: -0.5px; } /* 금액 폰트 작게 */
+        .trade-price { color: #fff; font-size: 0.85em; font-weight: 800; letter-spacing: -0.5px; } 
         .trade-delta { font-size: 0.70em; font-weight: 800; margin-top: 3px; letter-spacing: -0.5px; }
         
+        /* 등락폭 전용 색상 클래스 */
         .delta-up { color: #FF3B30 !important; }   /* 빨간색 (상승) */
         .delta-down { color: #0A84FF !important; } /* 파란색 (하락) */
-        .delta-new { color: #f2f2f7 !important; }  /* 흰색/보합 */
+        .delta-new { color: #f2f2f7 !important; }  /* 흰색 (보합/신규) */
         
         .by-text { text-align: right; color: #444; font-size: 0.6em; margin-top: 40px; margin-bottom: 10px; padding-right: 10px; }
     </style>
@@ -173,7 +174,7 @@ def load_data():
 kakao_dict, cafe_set, df_layout, type_dict = load_data()
 if df_layout.empty: st.stop()
 
-# 한국어 금액 포맷 변환기
+# 한국어 금액 포맷 변환기 
 def format_korean_money(price_str):
     try:
         num = int(price_str.replace(",", ""))
@@ -212,8 +213,8 @@ def get_real_estate_api():
         now = datetime.now()
         raw_trades = []
         
-        # 🚨 [버그 픽스] 데이터 공백기를 피하기 위해 최근 '5개월' 탐색으로 확장!
-        for i in range(5):
+        # 🚨 [가장 완벽했던 V14 부동산 원본 코드 복구 - 3개월 탐색]
+        for i in range(3):
             y = now.year - (now.month - i - 1) // 12
             m = (now.month - i - 1) % 12 + 1
             deal_ym = f"{y}{m:02d}"
@@ -286,7 +287,7 @@ def get_real_estate_api():
     except Exception as e:
         return []
 
-@st.cache_data(ttl=43200) # 한국은행 기준금리
+@st.cache_data(ttl=43200) # 금리 데이터
 def get_interest_rate_api():
     try:
         bok_key = st.secrets["api_keys"]["bok_key"]
@@ -323,7 +324,7 @@ def get_oil_price_api():
     try:
         opinet_key = st.secrets["api_keys"]["opinet_key"]
         
-        # 1. 부산 전체 평균
+        # 1. 부산 전체 평균 수집
         url_sido = f"http://www.opinet.co.kr/api/avgSidoPrice.do?out=xml&sido=02&code={opinet_key}"
         req_sido = urllib.request.Request(url_sido)
         res_sido = urllib.request.urlopen(req_sido, timeout=5)
@@ -337,22 +338,24 @@ def get_oil_price_api():
             price = float(row.find('PRICE').text)
             diff = float(row.find('DIFF').text)
             
-            diff_str = f"▲{diff}" if diff > 0 else (f"▼{abs(diff)}" if diff < 0 else "-")
+            diff_str = f"▲{diff:,.0f}" if diff > 0 else (f"▼{abs(diff):,.0f}" if diff < 0 else "- 보합")
             color = "delta-up" if diff > 0 else ("delta-down" if diff < 0 else "delta-new")
             
             if prodcd == "B027": gas, gas_delta = f"{price:,.0f}원", (diff_str, color)
             elif prodcd == "D047": diesel, diesel_delta = f"{price:,.0f}원", (diff_str, color)
             elif prodcd == "K015": lpg, lpg_delta = f"{price:,.0f}원", (diff_str, color)
 
-        # 2. 구별(SIGUN) 데이터 수집 및 휘발유 최저가 정렬
-        url_sigun = f"http://www.opinet.co.kr/api/avgSigunPrice.do?out=xml&sido=02&code={opinet_key}"
-        req_sigun = urllib.request.Request(url_sigun)
-        res_sigun = urllib.request.urlopen(req_sigun, timeout=5)
-        root_sigun = ET.fromstring(res_sigun.read())
+        # 🚨 [V16 신규] 2. 부산시 16개 구/군별 휘발유 및 경유 데이터 정밀 수집!
+        districts = {}
         
-        districts = []
-        for row in root_sigun.findall('.//OIL'):
-            if row.find('PRODCD').text == "B027": # 휘발유 기준
+        # 휘발유(B027)와 경유(D047) 각각 요청
+        for prod_name, prod_cd in [("gas", "B027"), ("diesel", "D047")]:
+            url_sigun = f"http://www.opinet.co.kr/api/avgSigunPrice.do?out=xml&sido=02&prodcd={prod_cd}&code={opinet_key}"
+            req_sigun = urllib.request.Request(url_sigun)
+            res_sigun = urllib.request.urlopen(req_sigun, timeout=5)
+            root_sigun = ET.fromstring(res_sigun.read())
+            
+            for row in root_sigun.findall('.//OIL'):
                 sigun_nm = row.find('SIGUNNM').text
                 price = float(row.find('PRICE').text)
                 diff = float(row.find('DIFF').text)
@@ -360,23 +363,30 @@ def get_oil_price_api():
                 diff_str = f"▲{diff:,.0f}" if diff > 0 else (f"▼{abs(diff):,.0f}" if diff < 0 else "- 보합")
                 color = "delta-up" if diff > 0 else ("delta-down" if diff < 0 else "delta-new")
                 
-                districts.append({
-                    "name": sigun_nm, "price_val": price,
-                    "price_str": f"{price:,.0f}원", "diff_str": diff_str, "color": color
-                })
+                if sigun_nm not in districts:
+                    districts[sigun_nm] = {"name": sigun_nm}
+                
+                districts[sigun_nm][prod_name] = {
+                    "price_val": price,
+                    "price_str": f"{price:,.0f}원",
+                    "diff_str": diff_str,
+                    "color": color
+                }
         
-        districts.sort(key=lambda x: x['price_val']) # 저렴한 순 정렬
+        # 딕셔너리를 리스트로 변환 후, '휘발유' 가격이 가장 싼 순서대로 정렬!
+        dist_list = list(districts.values())
+        dist_list.sort(key=lambda x: x.get('gas', {}).get('price_val', 999999))
         
         return {
             "busan_avg": {"gas": gas, "gas_d": gas_delta, "diesel": diesel, "diesel_d": diesel_delta, "lpg": lpg, "lpg_d": lpg_delta},
-            "districts": districts
+            "districts": dist_list
         }
-    except:
+    except Exception as e:
         return None
 
 @st.cache_data(ttl=3600)
 def get_global_stocks_api():
-    # 🚨 [추가 업데이트] 미국 달러, 유로, 엔화(100) 환율 정보 추가!
+    # 글로벌 증시 및 환율 통합
     symbols = [
         ("🇺🇸 나스닥 (NASDAQ)", "^IXIC"),
         ("🇺🇸 S&P 500", "^GSPC"),
@@ -400,7 +410,7 @@ def get_global_stocks_api():
             price = meta['regularMarketPrice']
             prev_close = meta['chartPreviousClose']
             
-            # 일본 엔화는 100엔 단위로 표시하기 위해 100을 곱함
+            # 일본 엔화는 100엔 기준으로 표시 (한국 표준)
             if sym == "JPYKRW=X":
                 price *= 100
                 prev_close *= 100
@@ -623,7 +633,7 @@ with tab3:
     except: st.info("실시간 뉴스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.")
 
 # ------------------------------------------
-# [탭 4] 실시간 경제지표 (V16 마스터 최종)
+# [탭 4] 실시간 경제지표 
 # ------------------------------------------
 with tab4:
     st.markdown("<h3 style='text-align:center; color:#D4AF37; font-weight:900; margin-top:10px; letter-spacing:-1px;'>📈 실시간 경제·금융 지표</h3>", unsafe_allow_html=True)
@@ -670,19 +680,27 @@ with tab4:
     with st.expander("⛽ 부산 평균 및 구별 유가 (오피넷)", expanded=False):
         if oil_data:
             b_avg = oil_data["busan_avg"]
-            html_oil = "<div style='font-size:0.85em; color:#D4AF37; font-weight:800; margin-top:5px; margin-bottom:5px;'>🔵 부산 전체 평균</div>"
+            html_oil = "<div style='font-size:0.85em; color:#D4AF37; font-weight:800; margin-top:5px; margin-bottom:5px; padding-left:4px;'>🔵 부산 전체 평균</div>"
             html_oil += "<table class='econ-table' style='margin-bottom:15px;'>"
             html_oil += f"<tr><th>휘발유</th><td>{b_avg['gas']} <span class='{b_avg['gas_d'][1]}' style='margin-left:4px; font-weight:800;'>{b_avg['gas_d'][0]}</span></td></tr>"
             html_oil += f"<tr><th>경유</th><td>{b_avg['diesel']} <span class='{b_avg['diesel_d'][1]}' style='margin-left:4px; font-weight:800;'>{b_avg['diesel_d'][0]}</span></td></tr>"
             html_oil += f"<tr><th>LPG</th><td>{b_avg['lpg']} <span class='{b_avg['lpg_d'][1]}' style='margin-left:4px; font-weight:800;'>{b_avg['lpg_d'][0]}</span></td></tr>"
             html_oil += "</table>"
             
-            html_oil += "<div style='font-size:0.85em; color:#03C75A; font-weight:800; margin-bottom:5px;'>🟢 구별 휘발유 최저가 랭킹</div>"
-            html_oil += "<div class='trade-scroll-box' style='max-height: 220px;'>"
+            html_oil += "<div style='font-size:0.85em; color:#03C75A; font-weight:800; margin-bottom:5px; padding-left:4px;'>🟢 부산 구/군별 최저가 랭킹 (휘발유 기준)</div>"
+            html_oil += "<div class='trade-scroll-box' style='max-height: 250px;'>"
             html_oil += "<table class='econ-table'>"
+            html_oil += "<tr><th style='width:35%; text-align:center;'>지역</th><th style='text-align:right;'>휘발유</th><th style='text-align:right;'>경유</th></tr>"
+            
             for idx, d in enumerate(oil_data["districts"]):
                 rank = f"{idx+1}위"
-                html_oil += f"<tr><th style='width:45%;'>{rank} {d['name']}</th><td>{d['price_str']} <span class='{d['color']}' style='margin-left:4px; font-weight:800;'>{d['diff_str']}</span></td></tr>"
+                g_info = d.get('gas', {})
+                d_info = d.get('diesel', {})
+                
+                html_oil += f"<tr><th style='text-align:left;'>{rank} {d['name']}</th>"
+                html_oil += f"<td>{g_info.get('price_str', '-')} <br><span class='{g_info.get('color', 'delta-new')}' style='font-size:0.85em;'>{g_info.get('diff_str', '')}</span></td>"
+                html_oil += f"<td>{d_info.get('price_str', '-')} <br><span class='{d_info.get('color', 'delta-new')}' style='font-size:0.85em;'>{d_info.get('diff_str', '')}</span></td></tr>"
+                
             html_oil += "</table></div>"
             st.markdown(html_oil, unsafe_allow_html=True)
         else:
