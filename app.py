@@ -91,7 +91,7 @@ st.markdown("""
         
         /* 🔥 경제 지표 테이블 공통 디자인 */
         .econ-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
-        .econ-table th, .econ-table td { padding: 8px 2px; font-size: 0.85em; border-bottom: 1px dotted #333; vertical-align: middle; }
+        .econ-table th, .econ-table td { padding: 10px 4px; font-size: 0.85em; border-bottom: 1px dotted #333; vertical-align: middle; }
         .econ-table tr:last-child th, .econ-table tr:last-child td { border-bottom: none; }
         .econ-table th { color: #8e8e93; font-weight: 600; text-align: left; }
         .econ-table td { text-align: right; color: #d1d1d6; font-weight: 800; letter-spacing: -0.3px; }
@@ -174,7 +174,6 @@ def load_data():
 kakao_dict, cafe_set, df_layout, type_dict = load_data()
 if df_layout.empty: st.stop()
 
-# 한국어 금액 포맷 변환기 
 def format_korean_money(price_str):
     try:
         num = int(price_str.replace(",", ""))
@@ -397,7 +396,6 @@ def get_oil_price_api():
 
 @st.cache_data(ttl=3600)
 def get_global_stocks_api():
-    # 🚨 [V18 핵심 패치] 증시 코스닥 추가 및 10대 인기 해외 여행지 환율 완벽 통합
     def fetch_yahoo(name, sym, multiplier=1):
         try:
             url = f"https://query2.finance.yahoo.com/v8/finance/chart/{sym}"
@@ -419,16 +417,13 @@ def get_global_stocks_api():
 
     html = "<table class='econ-table'>"
     
-    # 1. 글로벌 주요 증시 (코스닥 추가)
     for name, sym in [("🇺🇸 나스닥", "^IXIC"), ("🇺🇸 S&P 500", "^GSPC"), ("🇰🇷 코스피", "^KS11"), ("🇰🇷 코스닥", "^KQ11")]:
         html += fetch_yahoo(name, sym)
     
-    # 2. 주요 국가 환율 (금색 구분선)
     html += "<tr style='background-color:rgba(255,255,255,0.05);'><th colspan='2' style='color:#D4AF37; text-align:center; padding:8px 0; border-top:1px solid #333; font-size:0.95em;'>💱 주요 국가 환율</th></tr>"
     for name, sym, mult in [("💵 미국 (USD/KRW)", "KRW=X", 1), ("💶 유럽 (EUR/KRW)", "EURKRW=X", 1), ("🇯🇵 일본 (100 JPY/KRW)", "JPYKRW=X", 100)]:
         html += fetch_yahoo(name, sym, mult)
         
-    # 3. 대한민국 10대 해외여행지 환율 (녹색 구분선 / 베트남, 인니는 은행 기준 100단위 적용)
     html += "<tr style='background-color:rgba(255,255,255,0.05);'><th colspan='2' style='color:#03C75A; text-align:center; padding:8px 0; border-top:1px solid #333; font-size:0.95em;'>✈️ 10대 해외여행지 환율</th></tr>"
     tourist_dests = [
         ("🇨🇳 중국 (CNY/KRW)", "CNYKRW=X", 1),
@@ -479,7 +474,7 @@ def get_custom_fortune(dong, ho, type_dict):
     if "59" in unit_type: 
         fortune_pools = [
             "이 호수와 인연을 맺으실 귀하는 상황 판단이 빠르고 위기 속에서도 반드시 해결책을 찾아내는 남다른 생존력과 직관의 사주를 지녔습니다. 겉보기엔 상황에 순응하는 듯 보여도, 내면에는 절대 꺾이지 않는 강한 승부욕을 품고 계시군요. 남들에게 크게 의지하기보다 스스로의 힘으로 길을 개척해 오느라 남몰래 겪은 고단함이 있었겠으나, 이 터의 맑은 기운이 귀하의 그 뚝심과 만나 마침내 폭발적인 보상으로 돌아오기 시작합니다.",
-            "귀하는 타인의 화려한 겉치레에 휩쓸리지 않고, 자신만의 속도와 기준으로 내실을 단단하게 다질 줄 아는 현명한 명조를 타고났습니다. 때로는 주변에서 귀하의 깊은 뜻을 알아주지 않아 외로움을 느꼈을 수 있으나, 결국 최후에 웃는 초후에 웃는 것은 귀하입니다. 이 터는 그런 귀하의 실용적이고 단단한 기운을 완벽하게 품어주는 둥지 역할을 할 것입니다."
+            "귀하는 타인의 화려한 겉치레에 휩쓸리지 않고, 자신만의 속도와 기준으로 내실을 단단하게 다질 줄 아는 현명한 명조를 타고났습니다. 때로는 주변에서 귀하의 깊은 뜻을 알아주지 않아 외로움을 느꼈을 수 있으나, 결국 최후에 웃는 것은 귀하입니다. 이 터는 그런 귀하의 실용적이고 단단한 기운을 완벽하게 품어주는 둥지 역할을 할 것입니다."
         ]
     elif "110" in unit_type or "114" in unit_type or "104" in unit_type: 
         fortune_pools = [
@@ -523,7 +518,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# [블록 5] 종합 포털 탭(Tab) 메뉴 및 컨텐츠 (V19 동선 최적화 패치)
+# [블록 5] 종합 포털 탭(Tab) 메뉴 (V20 동선 최적화 탭 배열)
 # ==========================================
 tab1, tab2, tab3, tab4 = st.tabs(["🏢 입주현황", "📈 생활경제", "🔮 오늘의 운세", "📰 관련뉴스"])
 
@@ -661,6 +656,23 @@ with tab2:
     # 🔥 4. 글로벌 증시 및 환율 통합 아코디언 (코스닥 + 관광지 환율 통합 완료)
     with st.expander("🌐 글로벌 증시 & 환율 현황", expanded=False):
         st.markdown(global_html, unsafe_allow_html=True)
+
+    # 🔥 5. 공산품 최저가 검색기 (월요일 정식 오픈 전 티저 영역!)
+    with st.expander("🛍️ 마트/편의점 생필품 최저가 검색기 (준비중 ⏳)", expanded=False):
+        html_coming_soon = """
+        <div style='text-align:center; padding: 25px 10px; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px dashed #555; margin-top: 5px;'>
+            <h4 style='color:#D4AF37; margin-bottom:8px; font-weight:900;'>🚧 월요일 정식 오픈 예정! 🚧</h4>
+            <p style='color:#d1d1d6; font-size:0.85em; line-height:1.6; margin-bottom:15px;'>
+                대형마트, 백화점, SSM, 편의점, 전통시장의<br>
+                <span style='color:#0A84FF; font-weight:800;'>주요 공산품 (라면, 우유, 화장지 등 150여 종)</span><br>
+                가격 비교 검색기가 곧 연동됩니다!
+            </p>
+            <div style='display:inline-block; background:#1C1C1E; border:1px solid #333; padding:8px 15px; border-radius:20px;'>
+                <span style='color:#03C75A; font-size:0.8em; font-weight:800;'>💡 초고속 캐싱 필터 엔진 탑재 대기 중</span>
+            </div>
+        </div>
+        """
+        st.markdown(html_coming_soon, unsafe_allow_html=True)
 
 # ------------------------------------------
 # [탭 3] 오늘의 운세 (3번째 탭으로 이동)
