@@ -117,7 +117,7 @@ st.markdown("""
         .trade-price { color: #fff; font-size: 0.85em; font-weight: 800; letter-spacing: -0.5px; } 
         .trade-delta { font-size: 0.70em; font-weight: 800; margin-top: 3px; letter-spacing: -0.5px; }
         
-        /* 🔥 [버그 픽스 완료] 보합은 완벽한 흰색 처리 */
+        /* 🔥 완벽한 등락폭 색상 지정 */
         .delta-up { color: #FF3B30 !important; }   /* 빨간색 (상승) */
         .delta-down { color: #0A84FF !important; } /* 파란색 (하락) */
         .delta-new { color: #FFFFFF !important; }  /* 흰색 (보합/신규) */
@@ -397,7 +397,7 @@ def get_oil_price_api():
 
 @st.cache_data(ttl=3600)
 def get_global_stocks_api():
-    # 증시 및 주요국+관광지 환율을 한번에 뽑아 HTML로 넘기는 마스터 함수
+    # 🚨 [V18 핵심 패치] 증시 코스닥 추가 및 10대 인기 해외 여행지 환율 완벽 통합
     def fetch_yahoo(name, sym, multiplier=1):
         try:
             url = f"https://query2.finance.yahoo.com/v8/finance/chart/{sym}"
@@ -419,18 +419,30 @@ def get_global_stocks_api():
 
     html = "<table class='econ-table'>"
     
-    # 1. 글로벌 증시 (코스닥 추가 완료)
-    for name, sym in [("🇺🇸 나스닥", "^IXIC"), ("🇺🇸 S&P 500", "^GSPC"), ("🇰🇷 코스피", "^KS11"), ("🇰🇷 코스닥", "^KQ11"), ("🇯🇵 니케이", "^N225")]:
+    # 1. 글로벌 주요 증시 (코스닥 추가)
+    for name, sym in [("🇺🇸 나스닥", "^IXIC"), ("🇺🇸 S&P 500", "^GSPC"), ("🇰🇷 코스피", "^KS11"), ("🇰🇷 코스닥", "^KQ11")]:
         html += fetch_yahoo(name, sym)
     
-    # 2. 주요 국가 환율 (금색 줄바꿈 추가)
+    # 2. 주요 국가 환율 (금색 구분선)
     html += "<tr style='background-color:rgba(255,255,255,0.05);'><th colspan='2' style='color:#D4AF37; text-align:center; padding:8px 0; border-top:1px solid #333; font-size:0.95em;'>💱 주요 국가 환율</th></tr>"
-    for name, sym, mult in [("💵 미국 (USD/KRW)", "KRW=X", 1), ("💶 유럽 (EUR/KRW)", "EURKRW=X", 1), ("💴 일본 (100 JPY/KRW)", "JPYKRW=X", 100)]:
+    for name, sym, mult in [("💵 미국 (USD/KRW)", "KRW=X", 1), ("💶 유럽 (EUR/KRW)", "EURKRW=X", 1), ("🇯🇵 일본 (100 JPY/KRW)", "JPYKRW=X", 100)]:
         html += fetch_yahoo(name, sym, mult)
         
-    # 3. 주요 관광지 환율 (녹색 줄바꿈 추가)
-    html += "<tr style='background-color:rgba(255,255,255,0.05);'><th colspan='2' style='color:#03C75A; text-align:center; padding:8px 0; border-top:1px solid #333; font-size:0.95em;'>✈️ 주요 관광지 환율</th></tr>"
-    for name, sym, mult in [("🇨🇳 중국 (CNY/KRW)", "CNYKRW=X", 1), ("🇹🇭 태국 (THB/KRW)", "THBKRW=X", 1), ("🇻🇳 베트남 (100 VND/KRW)", "VNDKRW=X", 100), ("🇵🇭 필리핀 (PHP/KRW)", "PHPKRW=X", 1)]:
+    # 3. 대한민국 10대 해외여행지 환율 (녹색 구분선 / 베트남, 인니는 은행 기준 100단위 적용)
+    html += "<tr style='background-color:rgba(255,255,255,0.05);'><th colspan='2' style='color:#03C75A; text-align:center; padding:8px 0; border-top:1px solid #333; font-size:0.95em;'>✈️ 10대 해외여행지 환율</th></tr>"
+    tourist_dests = [
+        ("🇨🇳 중국 (CNY/KRW)", "CNYKRW=X", 1),
+        ("🇹🇼 대만 (TWD/KRW)", "TWDKRW=X", 1),
+        ("🇻🇳 베트남 (100 VND/KRW)", "VNDKRW=X", 100),
+        ("🇹🇭 태국 (THB/KRW)", "THBKRW=X", 1),
+        ("🇵🇭 필리핀 (PHP/KRW)", "PHPKRW=X", 1),
+        ("🇸🇬 싱가포르 (SGD/KRW)", "SGDKRW=X", 1),
+        ("🇭🇰 홍콩 (HKD/KRW)", "HKDKRW=X", 1),
+        ("🇲🇾 말레이시아 (MYR/KRW)", "MYRKRW=X", 1),
+        ("🇮🇩 인니 (100 IDR/KRW)", "IDRKRW=X", 100),
+        ("🇦🇺 호주 (AUD/KRW)", "AUDKRW=X", 1)
+    ]
+    for name, sym, mult in tourist_dests:
         html += fetch_yahoo(name, sym, mult)
 
     html += "</table>"
@@ -635,7 +647,7 @@ with tab3:
     except: st.info("실시간 뉴스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.")
 
 # ------------------------------------------
-# [탭 4] 실시간 경제지표 (V17 마스터 최종)
+# [탭 4] 실시간 경제지표 
 # ------------------------------------------
 with tab4:
     st.markdown("<h3 style='text-align:center; color:#D4AF37; font-weight:900; margin-top:10px; letter-spacing:-1px;'>📈 실시간 경제·금융 지표</h3>", unsafe_allow_html=True)
