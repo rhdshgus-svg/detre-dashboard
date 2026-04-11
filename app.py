@@ -117,10 +117,10 @@ st.markdown("""
         .trade-price { color: #fff; font-size: 0.85em; font-weight: 800; letter-spacing: -0.5px; } 
         .trade-delta { font-size: 0.70em; font-weight: 800; margin-top: 3px; letter-spacing: -0.5px; }
         
-        /* 등락폭 전용 색상 클래스 */
+        /* 🔥 [버그 픽스 완료] 보합은 완벽한 흰색 처리 */
         .delta-up { color: #FF3B30 !important; }   /* 빨간색 (상승) */
         .delta-down { color: #0A84FF !important; } /* 파란색 (하락) */
-        .delta-new { color: #f2f2f7 !important; }  /* 흰색 (보합/신규) */
+        .delta-new { color: #FFFFFF !important; }  /* 흰색 (보합/신규) */
         
         .by-text { text-align: right; color: #444; font-size: 0.6em; margin-top: 40px; margin-bottom: 10px; padding-right: 10px; }
     </style>
@@ -324,8 +324,21 @@ def get_oil_price_api():
     try:
         opinet_key = st.secrets["api_keys"]["opinet_key"]
         
-        # 1. 부산 전체 평균 수집
-        url_sido = f"http://www.opinet.co.kr/api/avgSidoPrice.do?out=xml&sido=02&code={opinet_key}"
+        # 1. 부산(Busan)의 진짜 SIDO 코드를 찾아내는 로직
+        busan_cd = "08" # 기본값
+        try:
+            req_find = urllib.request.Request(f"http://www.opinet.co.kr/api/avgSidoPrice.do?out=xml&prodcd=B027&code={opinet_key}")
+            res_find = urllib.request.urlopen(req_find, timeout=5)
+            root_find = ET.fromstring(res_find.read())
+            for row in root_find.findall('.//OIL'):
+                if "부산" in row.find('SIDONM').text:
+                    busan_cd = row.find('SIDOCD').text
+                    break
+        except:
+            pass
+
+        # 2. 부산 전체 평균 수집
+        url_sido = f"http://www.opinet.co.kr/api/avgSidoPrice.do?out=xml&sido={busan_cd}&code={opinet_key}"
         req_sido = urllib.request.Request(url_sido)
         res_sido = urllib.request.urlopen(req_sido, timeout=5)
         root_sido = ET.fromstring(res_sido.read())
@@ -345,12 +358,10 @@ def get_oil_price_api():
             elif prodcd == "D047": diesel, diesel_delta = f"{price:,.0f}원", (diff_str, color)
             elif prodcd == "K015": lpg, lpg_delta = f"{price:,.0f}원", (diff_str, color)
 
-        # 🚨 [V16 신규] 2. 부산시 16개 구/군별 휘발유 및 경유 데이터 정밀 수집!
+        # 3. 부산 16개 구/군별 휘발유 및 경유 정밀 수집! (전국 오작동 완벽 차단)
         districts = {}
-        
-        # 휘발유(B027)와 경유(D047) 각각 요청
         for prod_name, prod_cd in [("gas", "B027"), ("diesel", "D047")]:
-            url_sigun = f"http://www.opinet.co.kr/api/avgSigunPrice.do?out=xml&sido=02&prodcd={prod_cd}&code={opinet_key}"
+            url_sigun = f"http://www.opinet.co.kr/api/avgSigunPrice.do?out=xml&sido={busan_cd}&prodcd={prod_cd}&code={opinet_key}"
             req_sigun = urllib.request.Request(url_sigun)
             res_sigun = urllib.request.urlopen(req_sigun, timeout=5)
             root_sigun = ET.fromstring(res_sigun.read())
@@ -368,12 +379,12 @@ def get_oil_price_api():
                 
                 districts[sigun_nm][prod_name] = {
                     "price_val": price,
-                    "price_str": f"{price:,.0f}원",
+                    "price_str": f"{price:,.0f}",
                     "diff_str": diff_str,
                     "color": color
                 }
         
-        # 딕셔너리를 리스트로 변환 후, '휘발유' 가격이 가장 싼 순서대로 정렬!
+        # 휘발유 가격이 가장 싼 순서대로 정렬!
         dist_list = list(districts.values())
         dist_list.sort(key=lambda x: x.get('gas', {}).get('price_val', 999999))
         
@@ -386,53 +397,44 @@ def get_oil_price_api():
 
 @st.cache_data(ttl=3600)
 def get_global_stocks_api():
-    # 글로벌 증시 및 환율 통합
-    symbols = [
-        ("🇺🇸 나스닥 (NASDAQ)", "^IXIC"),
-        ("🇺🇸 S&P 500", "^GSPC"),
-        ("🇰🇷 코스피 (KOSPI)", "^KS11"),
-        ("🇯🇵 니케이 (NIKKEI)", "^N225"),
-        ("💵 달러/원 환율", "KRW=X"),
-        ("💶 유로/원 환율", "EURKRW=X"),
-        ("💴 100엔/원 환율", "JPYKRW=X")
-    ]
-    results = []
-    headers = {'User-Agent': 'Mozilla/5.0'}
-    
-    for name, sym in symbols:
+    # 증시 및 주요국+관광지 환율을 한번에 뽑아 HTML로 넘기는 마스터 함수
+    def fetch_yahoo(name, sym, multiplier=1):
         try:
             url = f"https://query2.finance.yahoo.com/v8/finance/chart/{sym}"
-            req = urllib.request.Request(url, headers=headers)
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
             res = urllib.request.urlopen(req, timeout=5)
             data = json.loads(res.read())
-            
             meta = data['chart']['result'][0]['meta']
-            price = meta['regularMarketPrice']
-            prev_close = meta['chartPreviousClose']
             
-            # 일본 엔화는 100엔 기준으로 표시 (한국 표준)
-            if sym == "JPYKRW=X":
-                price *= 100
-                prev_close *= 100
-                
+            price = meta['regularMarketPrice'] * multiplier
+            prev_close = meta['chartPreviousClose'] * multiplier
             diff = price - prev_close
-            price_str = f"{price:,.2f}"
             
-            if diff > 0:
-                delta_str = f"▲ {abs(diff):.2f}"
-                color = "delta-up"
-            elif diff < 0:
-                delta_str = f"▼ {abs(diff):.2f}"
-                color = "delta-down"
-            else:
-                delta_str = "- 보합"
-                color = "delta-new"
-                
-            results.append((name, price_str, delta_str, color))
+            diff_str = f"▲ {diff:,.2f}" if diff > 0 else (f"▼ {abs(diff):,.2f}" if diff < 0 else "- 보합")
+            color = "delta-up" if diff > 0 else ("delta-down" if diff < 0 else "delta-new")
+            
+            return f"<tr><th>{name}</th><td>{price:,.2f} <span class='{color}' style='margin-left:4px; font-weight:800;'>{diff_str}</span></td></tr>"
         except:
-            results.append((name, "조회지연", "-", "delta-new"))
-            
-    return results
+            return f"<tr><th>{name}</th><td>조회지연 <span class='delta-new' style='margin-left:4px; font-weight:800;'>-</span></td></tr>"
+
+    html = "<table class='econ-table'>"
+    
+    # 1. 글로벌 증시 (코스닥 추가 완료)
+    for name, sym in [("🇺🇸 나스닥", "^IXIC"), ("🇺🇸 S&P 500", "^GSPC"), ("🇰🇷 코스피", "^KS11"), ("🇰🇷 코스닥", "^KQ11"), ("🇯🇵 니케이", "^N225")]:
+        html += fetch_yahoo(name, sym)
+    
+    # 2. 주요 국가 환율 (금색 줄바꿈 추가)
+    html += "<tr style='background-color:rgba(255,255,255,0.05);'><th colspan='2' style='color:#D4AF37; text-align:center; padding:8px 0; border-top:1px solid #333; font-size:0.95em;'>💱 주요 국가 환율</th></tr>"
+    for name, sym, mult in [("💵 미국 (USD/KRW)", "KRW=X", 1), ("💶 유럽 (EUR/KRW)", "EURKRW=X", 1), ("💴 일본 (100 JPY/KRW)", "JPYKRW=X", 100)]:
+        html += fetch_yahoo(name, sym, mult)
+        
+    # 3. 주요 관광지 환율 (녹색 줄바꿈 추가)
+    html += "<tr style='background-color:rgba(255,255,255,0.05);'><th colspan='2' style='color:#03C75A; text-align:center; padding:8px 0; border-top:1px solid #333; font-size:0.95em;'>✈️ 주요 관광지 환율</th></tr>"
+    for name, sym, mult in [("🇨🇳 중국 (CNY/KRW)", "CNYKRW=X", 1), ("🇹🇭 태국 (THB/KRW)", "THBKRW=X", 1), ("🇻🇳 베트남 (100 VND/KRW)", "VNDKRW=X", 100), ("🇵🇭 필리핀 (PHP/KRW)", "PHPKRW=X", 1)]:
+        html += fetch_yahoo(name, sym, mult)
+
+    html += "</table>"
+    return html
 
 # ==========================================
 # 🌟 심리 타겟팅 운세 생성기
@@ -633,7 +635,7 @@ with tab3:
     except: st.info("실시간 뉴스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.")
 
 # ------------------------------------------
-# [탭 4] 실시간 경제지표 
+# [탭 4] 실시간 경제지표 (V17 마스터 최종)
 # ------------------------------------------
 with tab4:
     st.markdown("<h3 style='text-align:center; color:#D4AF37; font-weight:900; margin-top:10px; letter-spacing:-1px;'>📈 실시간 경제·금융 지표</h3>", unsafe_allow_html=True)
@@ -642,9 +644,9 @@ with tab4:
     apt_trades = get_real_estate_api()
     rates = get_interest_rate_api()
     oil_data = get_oil_price_api()
-    stocks = get_global_stocks_api()
+    global_html = get_global_stocks_api()
 
-    # 🔥 1. 실거래가 아코디언
+    # 🔥 1. 실거래가 아코디언 (가장 완벽했던 V14 원본 복구)
     with st.expander("🏢 강서구(명지·강동) 최근 실거래가", expanded=True):
         search_kw = st.text_input("단지명 검색", placeholder="🔍 단지명을 입력하세요 (예: 호반, 더샵)", label_visibility="collapsed")
         
@@ -676,8 +678,8 @@ with tab4:
         html_rate += "</table>"
         st.markdown(html_rate, unsafe_allow_html=True)
 
-    # 🔥 3. 유가 정보 아코디언 (부산 평균 + 구별 랭킹)
-    with st.expander("⛽ 부산 평균 및 구별 유가 (오피넷)", expanded=False):
+    # 🔥 3. 유가 정보 아코디언 (부산 평균 + 부산시 16개 구/군별 최저가 랭킹)
+    with st.expander("⛽ 부산 평균 및 구별 유가 랭킹 (오피넷)", expanded=False):
         if oil_data:
             b_avg = oil_data["busan_avg"]
             html_oil = "<div style='font-size:0.85em; color:#D4AF37; font-weight:800; margin-top:5px; margin-bottom:5px; padding-left:4px;'>🔵 부산 전체 평균</div>"
@@ -690,7 +692,7 @@ with tab4:
             html_oil += "<div style='font-size:0.85em; color:#03C75A; font-weight:800; margin-bottom:5px; padding-left:4px;'>🟢 부산 구/군별 최저가 랭킹 (휘발유 기준)</div>"
             html_oil += "<div class='trade-scroll-box' style='max-height: 250px;'>"
             html_oil += "<table class='econ-table'>"
-            html_oil += "<tr><th style='width:35%; text-align:center;'>지역</th><th style='text-align:right;'>휘발유</th><th style='text-align:right;'>경유</th></tr>"
+            html_oil += "<tr><th style='width:35%; text-align:left;'>지역 (순위)</th><th style='text-align:right;'>휘발유</th><th style='text-align:right;'>경유</th></tr>"
             
             for idx, d in enumerate(oil_data["districts"]):
                 rank = f"{idx+1}위"
@@ -698,21 +700,17 @@ with tab4:
                 d_info = d.get('diesel', {})
                 
                 html_oil += f"<tr><th style='text-align:left;'>{rank} {d['name']}</th>"
-                html_oil += f"<td>{g_info.get('price_str', '-')} <br><span class='{g_info.get('color', 'delta-new')}' style='font-size:0.85em;'>{g_info.get('diff_str', '')}</span></td>"
-                html_oil += f"<td>{d_info.get('price_str', '-')} <br><span class='{d_info.get('color', 'delta-new')}' style='font-size:0.85em;'>{d_info.get('diff_str', '')}</span></td></tr>"
+                html_oil += f"<td>{g_info.get('price_str', '-')}원 <br><span class='{g_info.get('color', 'delta-new')}' style='font-size:0.85em;'>{g_info.get('diff_str', '')}</span></td>"
+                html_oil += f"<td>{d_info.get('price_str', '-')}원 <br><span class='{d_info.get('color', 'delta-new')}' style='font-size:0.85em;'>{d_info.get('diff_str', '')}</span></td></tr>"
                 
             html_oil += "</table></div>"
             st.markdown(html_oil, unsafe_allow_html=True)
         else:
             st.markdown("<div style='text-align:center; color:#8e8e93; padding:15px; font-size:0.85em;'>유가 데이터 점검중입니다.</div>", unsafe_allow_html=True)
 
-    # 🔥 4. 글로벌 증시 및 환율 현황 아코디언
+    # 🔥 4. 글로벌 증시 및 환율 통합 아코디언 (코스닥 + 관광지 환율 통합 완료)
     with st.expander("🌐 글로벌 증시 & 환율 현황", expanded=False):
-        html_stock = "<table class='econ-table'>"
-        for name, price, delta, color in stocks:
-            html_stock += f"<tr><th>{name}</th><td>{price} <span class='{color}' style='margin-left:4px; font-weight:800;'>{delta}</span></td></tr>"
-        html_stock += "</table>"
-        st.markdown(html_stock, unsafe_allow_html=True)
+        st.markdown(global_html, unsafe_allow_html=True)
 
 # 🔥 이스터에그
 st.markdown("<div class='by-text'>by. 213동102호팡</div>", unsafe_allow_html=True)
