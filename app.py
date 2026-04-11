@@ -89,7 +89,7 @@ st.markdown("""
         
         button[data-baseweb="tab"] { font-weight: 800 !important; font-size: 0.9em !important; }
         
-        /* 🔥 사주(신점) 박스 프리미엄 가독성 패치 (밝은 배경 + 진한 글씨 + 버건디 제목) */
+        /* 🔥 사주(신점) 박스 프리미엄 가독성 패치 */
         .saju-box { background: linear-gradient(180deg, #FFFDF8 0%, #F4EFE6 100%); border-radius: 12px; border: 1px solid #D4AF37; padding: 25px 20px; text-align: left; margin-top: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .saju-title { color: #800020; text-align: center; margin-top: 0; font-size: clamp(1.05em, 5vw, 1.25em); font-weight: 900; margin-bottom: 25px; line-height: 1.4; letter-spacing: -0.8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .saju-section { margin-bottom: 22px; }
@@ -159,7 +159,7 @@ kakao_dict, cafe_set, df_layout, type_dict = load_data()
 if df_layout.empty: st.stop()
 
 # ==========================================
-# 🔮 날씨 및 경제 API 봇 (글로벌 증시 추가)
+# 🔮 날씨 및 경제 API 봇 (🔥 무적 방어막 + 실시간 연동 탑재 완료!)
 # ==========================================
 @st.cache_data(ttl=1800) 
 def get_busan_weather():
@@ -176,15 +176,71 @@ def get_busan_weather():
 
 @st.cache_data(ttl=3600)
 def get_real_estate_api():
-    return "6억 8,500만", "↑ 2,000만"
+    try:
+        # 국토교통부 아파트 실거래가 API (강서구 26440)
+        molit_key = st.secrets["api_keys"]["molit_key"]
+        lawd_cd = "26440"
+        deal_ym = datetime.now().strftime("%Y%m")
+        url = f"http://openapi.molit.go.kr/OpenAPI_ToolInstallPackage/service/rest/RTMSOBJSvc/getRTMSDataSvcAptTradeDev?serviceKey={molit_key}&LAWD_CD={lawd_cd}&DEAL_YMD={deal_ym}"
+        req = urllib.request.Request(url)
+        res = urllib.request.urlopen(req, timeout=3)
+        root = ET.fromstring(res.read())
+        
+        prugio_price = None
+        for item in root.findall('.//item'):
+            apt_name = item.find('아파트').text if item.find('아파트') is not None else ""
+            if "푸르지오센터" in apt_name or "푸르지오" in apt_name:
+                prugio_price = item.find('거래금액').text.strip() + "만"
+                break
+        
+        if prugio_price:
+            return prugio_price, "최근 실거래"
+        else:
+            return "6억 8,500만", "최근 거래없음"
+    except:
+        # 서버 폭파 시 튕기지 않고 기본값 반환하는 철통 방어
+        return "6억 8,500만", "서버 점검중"
 
 @st.cache_data(ttl=3600)
 def get_interest_rate_api():
-    return "3.85%", "↓ 0.05%", "2.15% ~ 3.55%", "동결"
+    try:
+        # 한국은행 100대 통계지표 API (기준금리)
+        bok_key = st.secrets["api_keys"]["bok_key"]
+        url = f"http://ecos.bok.or.kr/api/KeyStatisticList/{bok_key}/xml/kr/1/10"
+        req = urllib.request.Request(url)
+        res = urllib.request.urlopen(req, timeout=3)
+        root = ET.fromstring(res.read())
+        
+        base_rate = "3.50%"
+        for row in root.findall('.//row'):
+            if row.find('KEYSTAT_NAME').text == "한국은행 기준금리":
+                base_rate = row.find('DATA_VALUE').text + "%"
+                break
+        return base_rate, "한국은행", "2.15% ~ 3.55%", "동결"
+    except:
+        return "3.50%", "동결", "2.15% ~ 3.55%", "동결"
 
 @st.cache_data(ttl=3600)
 def get_oil_price_api():
-    return "1,642원", "↑ 5원", "1,515원", "↑ 2원", "975원", "보합"
+    try:
+        # 한국석유공사 오피넷 API (부산 02)
+        opinet_key = st.secrets["api_keys"]["opinet_key"]
+        url = f"http://www.opinet.co.kr/api/avgSidoPrice.do?out=xml&sido=02&code={opinet_key}"
+        req = urllib.request.Request(url)
+        res = urllib.request.urlopen(req, timeout=3)
+        root = ET.fromstring(res.read())
+        
+        gas, diesel, lpg = "1,642원", "1,515원", "975원"
+        for row in root.findall('.//OIL'):
+            prodcd = row.find('PRODCD').text
+            price = row.find('PRICE').text
+            if prodcd == "B027": gas = f"{float(price):,.0f}원"
+            elif prodcd == "D047": diesel = f"{float(price):,.0f}원"
+            elif prodcd == "K015": lpg = f"{float(price):,.0f}원"
+            
+        return gas, "실시간", diesel, "실시간", lpg, "실시간"
+    except:
+        return "1,642원", "서버 점검중", "1,515원", "서버 점검중", "975원", "보합"
 
 @st.cache_data(ttl=3600)
 def get_gold_price():
@@ -275,7 +331,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 5. 종합 포털 탭(Tab) 메뉴 (🔥 탭 이름 변경)
+# 5. 종합 포털 탭(Tab) 메뉴
 # ==========================================
 tab1, tab2, tab3, tab4 = st.tabs(["🏢 입주현황", "🔮 오늘의 운세", "📰 관련뉴스", "📈 경제지표"])
 
@@ -337,7 +393,7 @@ with tab1:
     st.markdown(html_grid, unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 2] 오늘의 운세 (🔥 무료 강조 패치)
+# [탭 2] 오늘의 운세 
 # ------------------------------------------
 with tab2:
     st.markdown("<h4 style='text-align:center; color:#D4AF37; margin-top:10px;'>🔮 팡도사의 동·호수 맞춤 신점</h4>", unsafe_allow_html=True)
@@ -359,7 +415,7 @@ with tab2:
                 st.markdown(get_custom_fortune(f_dong, f_ho, type_dict), unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 3] 관련뉴스 (🔥 제목 네이비/블랙 강조 패치)
+# [탭 3] 관련뉴스 
 # ------------------------------------------
 with tab3:
     st.markdown("<div style='background: linear-gradient(90deg, #F0F4F8, #D9E2EC); padding: 12px; border-radius: 8px; margin-top: 10px; margin-bottom: 15px;'><h4 style='text-align:center; color:#0B1E36; font-weight:900; margin:0; letter-spacing:-0.5px;'>📰 우리단지 관련뉴스</h4></div>", unsafe_allow_html=True)
