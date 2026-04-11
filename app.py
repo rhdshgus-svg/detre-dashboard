@@ -97,7 +97,7 @@ st.markdown("""
         .econ-table th { color: #8e8e93; font-weight: 600; text-align: left; width: 45%; }
         .econ-table td { text-align: right; color: #d1d1d6; font-weight: 800; letter-spacing: -0.3px; }
         
-        /* 🔥 실거래가 전용 스크롤 리스트 디자인 */
+        /* 🔥 실거래가 전용 스크롤 리스트 디자인 (유지) */
         .trade-scroll-box { max-height: 280px; overflow-y: auto; padding-right: 5px; }
         .trade-scroll-box::-webkit-scrollbar { width: 4px; }
         .trade-scroll-box::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
@@ -485,7 +485,7 @@ with tab2:
             valid_combinations = set(zip(df_layout['동'], df_layout['호']))
             input_ho_formatted = f_ho.strip().zfill(4) 
             if (f_dong, input_ho_formatted) not in valid_combinations:
-                st.warning("🔮 앗! 해당 동·호수는 팡도사의 레이더에 잡히지 않는 '없는 기운'입니다. 혹시 아직 지어지지 않은 허공의 터를 누르신 건 아니겠죠? 😅 동과 호수를 다시 한번 정확히 확인해 주세요!")
+                st.warning("🔮 앗! 해당 동·호수는 팡도사의 레이더에 잡히지 않는 '없는 기운'입니다. 혹시 아직 지어지지 허공의 터를 누르신 건 아니겠죠? 😅 동과 호수를 다시 한번 정확히 확인해 주세요!")
             else:
                 with st.spinner("🔮 팡도사가 고객님의 명조(命造)를 심층 분석 중입니다..."):
                     time.sleep(3.5) 
@@ -543,60 +543,33 @@ with tab4:
     oil_gas, gas_delta, oil_diesel, diesel_delta, oil_lpg, lpg_delta = get_oil_price_api()
     stocks = get_global_stocks_api()
 
-    # 🏢 실거래가 동적 렌더링 (스크롤 박스 추가)
-    html_econ = f"""
-    <div class='econ-box'>
-        <div class='econ-title'>🏢 강서구(명지·강동) 최근 3개월 실거래가</div>
-        <div class='trade-scroll-box'>
-    """
+    # 🔥 🚨 [버그 수정 구역] 마크다운 들여쓰기 꼬임 방지를 위해 HTML 태그를 한 줄로 단단하게 붙였습니다!
+    html_econ = "<div class='econ-box'><div class='econ-title'>🏢 강서구(명지·강동) 최근 3개월 실거래가</div><div class='trade-scroll-box'>"
     
     if apt_trades:
         for t in apt_trades:
-            html_econ += f"""
-            <div class='trade-row'>
-                <div class='trade-info'>
-                    <div class='trade-apt'>{t['apt']} <span class='trade-area'>({t['area']:.0f}㎡)</span></div>
-                    <div class='trade-detail'>📅 {t['date']} | 🏢 {t['detail']}</div>
-                </div>
-                <div class='trade-price'>{t['price']}</div>
-            </div>
-            """
+            html_econ += f"<div class='trade-row'><div class='trade-info'><div class='trade-apt'>{t['apt']} <span class='trade-area'>({t['area']:.0f}㎡)</span></div><div class='trade-detail'>📅 {t['date']} | 🏢 {t['detail']}</div></div><div class='trade-price'>{t['price']}</div></div>"
     else:
         html_econ += "<div style='text-align:center; color:#8e8e93; padding:15px; font-size:0.85em;'>최근 3개월 신고 내역이 없거나 점검중입니다.</div>"
 
     html_econ += "</div></div>"
 
-    # 나머지 지표들
-    html_econ += f"""
-    <div class='econ-box'>
-        <div class='econ-title'>🏦 주택담보대출 평균금리 (한국은행)</div>
-        <table class='econ-table'>
-            <tr><th>1금융권 (시중은행)</th><td>{rate_val} <span style='color:#007AFF; font-size:0.85em; margin-left:4px; font-weight:800;'>{rate_delta}</span></td></tr>
-            <tr><th>디딤돌대출 (정부정책)</th><td>{didim_val} <span style='color:#8e8e93; font-size:0.85em; margin-left:4px; font-weight:800;'>{didim_delta}</span></td></tr>
-        </table>
-    </div>
+    html_econ += f"<div class='econ-box'><div class='econ-title'>🏦 주택담보대출 평균금리 (한국은행)</div><table class='econ-table'>"
+    html_econ += f"<tr><th>1금융권 (시중은행)</th><td>{rate_val} <span style='color:#007AFF; font-size:0.85em; margin-left:4px; font-weight:800;'>{rate_delta}</span></td></tr>"
+    html_econ += f"<tr><th>디딤돌대출 (정부정책)</th><td>{didim_val} <span style='color:#8e8e93; font-size:0.85em; margin-left:4px; font-weight:800;'>{didim_delta}</span></td></tr>"
+    html_econ += "</table></div>"
 
-    <div class='econ-box'>
-        <div class='econ-title'>⛽ 부산 평균 유가 정보 (오피넷)</div>
-        <table class='econ-table'>
-            <tr><th>휘발유</th><td>{oil_gas} <span style='color:#FF3B30; font-size:0.85em; margin-left:4px; font-weight:800;'>{gas_delta}</span></td></tr>
-            <tr><th>경유</th><td>{oil_diesel} <span style='color:#FF3B30; font-size:0.85em; margin-left:4px; font-weight:800;'>{diesel_delta}</span></td></tr>
-            <tr><th>LPG</th><td>{oil_lpg} <span style='color:#8e8e93; font-size:0.85em; margin-left:4px; font-weight:800;'>{lpg_delta}</span></td></tr>
-        </table>
-    </div>
+    html_econ += f"<div class='econ-box'><div class='econ-title'>⛽ 부산 평균 유가 정보 (오피넷)</div><table class='econ-table'>"
+    html_econ += f"<tr><th>휘발유</th><td>{oil_gas} <span style='color:#FF3B30; font-size:0.85em; margin-left:4px; font-weight:800;'>{gas_delta}</span></td></tr>"
+    html_econ += f"<tr><th>경유</th><td>{oil_diesel} <span style='color:#FF3B30; font-size:0.85em; margin-left:4px; font-weight:800;'>{diesel_delta}</span></td></tr>"
+    html_econ += f"<tr><th>LPG</th><td>{oil_lpg} <span style='color:#8e8e93; font-size:0.85em; margin-left:4px; font-weight:800;'>{lpg_delta}</span></td></tr>"
+    html_econ += "</table></div>"
 
-    <div class='econ-box' style='border: 1px solid #D4AF37;'>
-        <div class='econ-title' style='color:#D4AF37;'>🌐 글로벌 주요 증시 현황</div>
-        <table class='econ-table'>
-    """
-    
+    html_econ += f"<div class='econ-box' style='border: 1px solid #D4AF37;'><div class='econ-title' style='color:#D4AF37;'>🌐 글로벌 주요 증시 현황</div><table class='econ-table'>"
     for name, price, delta, color in stocks:
         html_econ += f"<tr><th>{name}</th><td>{price} <span style='color:{color}; font-size:0.85em; margin-left:4px; font-weight:800;'>{delta}</span></td></tr>"
+    html_econ += "</table></div>"
 
-    html_econ += """
-        </table>
-    </div>
-    """
     st.markdown(html_econ, unsafe_allow_html=True)
 
 # 🔥 이스터에그
