@@ -417,13 +417,16 @@ def get_global_stocks_api():
 
     html = "<table class='econ-table'>"
     
+    # 1. 글로벌 주요 증시 (코스닥 추가)
     for name, sym in [("🇺🇸 나스닥", "^IXIC"), ("🇺🇸 S&P 500", "^GSPC"), ("🇰🇷 코스피", "^KS11"), ("🇰🇷 코스닥", "^KQ11")]:
         html += fetch_yahoo(name, sym)
     
+    # 2. 주요 국가 환율 (금색 구분선)
     html += "<tr style='background-color:rgba(255,255,255,0.05);'><th colspan='2' style='color:#D4AF37; text-align:center; padding:8px 0; border-top:1px solid #333; font-size:0.95em;'>💱 주요 국가 환율</th></tr>"
     for name, sym, mult in [("💵 미국 (USD/KRW)", "KRW=X", 1), ("💶 유럽 (EUR/KRW)", "EURKRW=X", 1), ("🇯🇵 일본 (100 JPY/KRW)", "JPYKRW=X", 100)]:
         html += fetch_yahoo(name, sym, mult)
         
+    # 3. 대한민국 10대 해외여행지 환율
     html += "<tr style='background-color:rgba(255,255,255,0.05);'><th colspan='2' style='color:#03C75A; text-align:center; padding:8px 0; border-top:1px solid #333; font-size:0.95em;'>✈️ 10대 해외여행지 환율</th></tr>"
     tourist_dests = [
         ("🇨🇳 중국 (CNY/KRW)", "CNYKRW=X", 1),
@@ -518,9 +521,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# [블록 5] 종합 포털 탭(Tab) 메뉴 (V20 동선 최적화 탭 배열)
+# [블록 5] 종합 포털 탭(Tab) 메뉴
 # ==========================================
-tab1, tab2, tab3, tab4 = st.tabs(["🏢 입주현황", "📈 생활경제", "🔮 오늘의 운세", "📰 관련뉴스"])
+tab1, tab2, tab3, tab4 = st.tabs(["🏢 입주현황", "📊 핵심비밀정보", "🔮 오늘의 운세", "📰 관련뉴스"])
 
 # ------------------------------------------
 # [탭 1] 메인: 세대별 입주현황
@@ -580,18 +583,18 @@ with tab1:
     st.markdown(html_grid, unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 2] 생활경제 (동선 최적화로 2번째 탭으로 이동)
+# [탭 2] 핵심비밀정보 (심리전 UX 탑재)
 # ------------------------------------------
 with tab2:
-    st.markdown("<h3 style='text-align:center; color:#D4AF37; font-weight:900; margin-top:10px; letter-spacing:-1px;'>📈 생활 경제 핵심 지표</h3>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em; margin-bottom:15px;'>※ 핵심 지표 실시간 요약</p>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align:center; color:#D4AF37; font-weight:900; margin-top:10px; letter-spacing:-1px;'>📊 VIP 핵심 비밀 정보</h3>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em; margin-bottom:15px;'>※ <span style='color:#03C75A;'>Advanced Data Pipeline</span> 기술로 수집된 최상급 실시간 지표</p>", unsafe_allow_html=True)
 
     apt_trades = get_real_estate_api()
     rates = get_interest_rate_api()
     oil_data = get_oil_price_api()
     global_html = get_global_stocks_api()
 
-    # 🔥 1. 실거래가 아코디언 (가장 완벽했던 V14 원본 복구)
+    # 🔥 1. 실거래가 아코디언 
     with st.expander("🏢 강서구(명지·강동) 최근 실거래가", expanded=True):
         search_kw = st.text_input("단지명 검색", placeholder="🔍 단지명을 입력하세요 (예: 호반, 더샵)", label_visibility="collapsed")
         
@@ -623,7 +626,7 @@ with tab2:
         html_rate += "</table>"
         st.markdown(html_rate, unsafe_allow_html=True)
 
-    # 🔥 3. 유가 정보 아코디언 (부산 평균 + 부산시 16개 구/군별 최저가 랭킹)
+    # 🔥 3. 유가 정보 아코디언 
     with st.expander("⛽ 부산 평균 및 구별 유가 랭킹 (오피넷)", expanded=False):
         if oil_data:
             b_avg = oil_data["busan_avg"]
@@ -653,29 +656,33 @@ with tab2:
         else:
             st.markdown("<div style='text-align:center; color:#8e8e93; padding:15px; font-size:0.85em;'>유가 데이터 점검중입니다.</div>", unsafe_allow_html=True)
 
-    # 🔥 4. 글로벌 증시 및 환율 통합 아코디언 (코스닥 + 관광지 환율 통합 완료)
+    # 🔥 4. 글로벌 증시 및 환율 현황
     with st.expander("🌐 글로벌 증시 & 환율 현황", expanded=False):
         st.markdown(global_html, unsafe_allow_html=True)
 
-    # 🔥 5. 공산품 최저가 검색기 (월요일 정식 오픈 전 티저 영역!)
-    with st.expander("🛍️ 마트/편의점 생필품 최저가 검색기 (준비중 ⏳)", expanded=False):
+    # 🔥 5. V23 신규: 농수산/공산품 융합 검색기 티저
+    with st.expander("🛒 주요 농수산품 시세 변동 및 공산품 평균 판매가 검색기 (준비중 ⏳)", expanded=False):
         html_coming_soon = """
-        <div style='text-align:center; padding: 25px 10px; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px dashed #555; margin-top: 5px;'>
-            <h4 style='color:#D4AF37; margin-bottom:8px; font-weight:900;'>🚧 월요일 정식 오픈 예정! 🚧</h4>
-            <p style='color:#d1d1d6; font-size:0.85em; line-height:1.6; margin-bottom:15px;'>
-                대형마트, 백화점, SSM, 편의점, 전통시장의<br>
-                <span style='color:#0A84FF; font-weight:800;'>주요 공산품 (라면, 우유, 화장지 등 150여 종)</span><br>
-                가격 비교 검색기가 곧 연동됩니다!
+        <div style='text-align:center; padding: 25px 15px; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px dashed #D4AF37; margin-top: 5px;'>
+            <h4 style='color:#D4AF37; margin-bottom:12px; font-weight:900;'>🚧 향후 정식 오픈 예정! 🚧</h4>
+            <p style='color:#d1d1d6; font-size:0.9em; line-height:1.6; margin-bottom:20px; word-break: keep-all;'>
+                <b style='color:#FF3B30;'>주요 농수산품</b>의 도/소매 시세 변동을 실시간 전광판으로 보여드리고,<br>
+                일반 <b style='color:#0A84FF;'>대형마트 및 편의점 공산품</b>은 검색을 통해<br>
+                평균 판매가를 즉시 찾아볼 수 있는 스마트 시스템입니다!
+            </p>
+            <p style='color:#8e8e93; font-size:0.8em; line-height:1.4; margin-bottom:15px; word-break: keep-all;'>
+                주부님들의 알뜰한 소비를 완벽하게 도와드릴 예정입니다.<br>
+                현재 안정적인 시스템 연동 개발에 시간이 다소 소요되고 있으니 조금만 더 기다려주세요!
             </p>
             <div style='display:inline-block; background:#1C1C1E; border:1px solid #333; padding:8px 15px; border-radius:20px;'>
-                <span style='color:#03C75A; font-size:0.8em; font-weight:800;'>💡 초고속 캐싱 필터 엔진 탑재 대기 중</span>
+                <span style='color:#03C75A; font-size:0.8em; font-weight:800;'>💡 Advanced Data Pipeline 연동 중</span>
             </div>
         </div>
         """
         st.markdown(html_coming_soon, unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 3] 오늘의 운세 (3번째 탭으로 이동)
+# [탭 3] 오늘의 운세 
 # ------------------------------------------
 with tab3:
     st.markdown("<h4 style='text-align:center; color:#D4AF37; margin-top:10px;'>🔮 팡도사의 동·호수 맞춤 신점</h4>", unsafe_allow_html=True)
@@ -697,7 +704,7 @@ with tab3:
                 st.markdown(get_custom_fortune(f_dong, f_ho, type_dict), unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 4] 관련뉴스 (4번째 탭으로 이동)
+# [탭 4] 관련뉴스 
 # ------------------------------------------
 with tab4:
     st.markdown("<div style='background: linear-gradient(90deg, #F0F4F8, #D9E2EC); padding: 12px; border-radius: 8px; margin-top: 10px; margin-bottom: 15px;'><h4 style='text-align:center; color:#0B1E36; font-weight:900; margin:0; letter-spacing:-0.5px;'>📰 우리단지 관련뉴스</h4></div>", unsafe_allow_html=True)
