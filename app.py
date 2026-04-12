@@ -13,7 +13,7 @@ from PIL import Image
 import streamlit.components.v1 as components
 
 # ==========================================
-# [블록 1] 기본 화면 설정 및 🚨 CCTV + 좀비 자동복구 엔진 (에러 감지 시 즉시 새로고침)
+# [블록 1] 기본 화면 설정 및 🚨 구글 애널리틱스 + 무한 불사조(좀비) 복구 엔진
 # ==========================================
 try:
     logo_img = Image.open("detre_logo.png")
@@ -22,53 +22,41 @@ except Exception:
     st.set_page_config(page_title="디에트르 그랑루체 입주민 포털", page_icon="🏢", layout="centered")
 
 GA_ID = "G-K4JM55MDEQ"
-cpr_script = f"""
+
+# 1. 구글 애널리틱스 (CCTV) - 기존 동일
+ga_script = f"""
 <script async src="https://www.googletagmanager.com/gtag/js?id={GA_ID}"></script>
 <script>
-  /* 1. 구글 애널리틱스 (CCTV) */
   window.dataLayer = window.dataLayer || [];
   function gtag(){{dataLayer.push(arguments);}}
   gtag('js', new Date());
   gtag('config', '{GA_ID}');
-
-  /* 2. 🔥 좀비 자동복구 엔진: 투명 방(iframe)을 넘어 본체(parent)를 직접 예의주시! */
-  // 1.5초마다 바깥 진짜 화면에 에러가 떴는지 감시합니다.
-  setInterval(function() {{
-      try {{
-          var parentDoc = window.parent.document;
-          var bodyText = parentDoc.body.innerText || "";
-          
-          // 화면에 아래와 같은 에러 단어들이 하나라도 포착되면!
-          if (bodyText.includes('500 Server Error') || 
-              bodyText.includes('Connection error') || 
-              bodyText.includes('Connection lost') ||
-              bodyText.includes('A fatal error has occurred')) {{
-              
-              // 아버님이 앱 끄고 다시 켤 필요 없이, 지가 알아서 즉시 새로고침!!!
-              window.parent.location.reload(true);
-          }}
-      }} catch(e) {{
-          // 권한 에러 무시
-      }}
-  }}, 1500);
-
-  // 사용자가 지니뮤직이나 유튜브를 보다가 다시 우리 어플 화면으로 돌아왔을 때 즉시 체크!
-  try {{
-      window.parent.document.addEventListener('visibilitychange', function() {{
-          if (window.parent.document.visibilityState === 'visible') {{
-              setTimeout(function() {{
-                  var parentDoc = window.parent.document;
-                  var bodyText = parentDoc.body.innerText || "";
-                  if (bodyText.includes('500 Server Error') || bodyText.includes('Connection error') || bodyText.includes('Connection lost')) {{
-                      window.parent.location.reload(true);
-                  }}
-              }}, 500); // 돌아오고 0.5초 뒤에 에러창 떠있으면 가차없이 새로고침!
-          }}
-      }});
-  }} catch(e) {{}}
 </script>
 """
-components.html(cpr_script, width=0, height=0)
+components.html(ga_script, width=0, height=0)
+
+# 2. 🔥 무한 불사조 복구 엔진 (유리 방을 부수고 본체에 직접 이식!)
+# img 태그의 에러 처리 기능을 역이용하여 부모 창(진짜 화면)에 직접 감시 카메라를 설치합니다.
+watchdog_js = """
+if(!window.zombieEngine){
+    window.zombieEngine=true;
+    const checkErr=()=>{
+        const t=document.body.innerText||'';
+        // 화면에 서버 에러나 연결 끊김 단어가 하나라도 보이면!
+        if(t.includes('Connection lost')||t.includes('500 Server Error')||t.includes('Server Error')||t.includes('Connection error')){
+            window.location.reload(); // 즉시 새로고침!!!
+        }
+    };
+    // 1.5초마다 무한 반복 감시
+    setInterval(checkErr, 1500);
+    // 아버님이 다른 앱 보다가 다시 어플로 돌아오는 순간 즉시 감시
+    document.addEventListener('visibilitychange', ()=>{
+        if(document.visibilityState==='visible') setTimeout(checkErr, 300);
+    });
+}
+"""
+# 파이썬 마크다운을 통해 진짜 화면에 백그라운드 스크립트 강제 주입
+st.markdown(f'<img src="dummy" onerror="{watchdog_js.replace(chr(10), " ")}" style="display:none;">', unsafe_allow_html=True)
 
 # ==========================================
 # [블록 2] CSS 스타일링 (📱 모바일 깨짐 완벽 방어 + UX 디테일 강화)
