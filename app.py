@@ -13,40 +13,26 @@ from PIL import Image
 import streamlit.components.v1 as components
 
 # ==========================================
-# [블록 1] 기본 화면 설정 및 🚨 CCTV + 모바일 에러 자동복구 엔진
+# [블록 1] 기본 화면 설정 및 🚨 구글 애널리틱스(CCTV) 가동
 # ==========================================
 try:
     logo_img = Image.open("detre_logo.png")
-    st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon=logo_img, layout="centered")
+    st.set_page_config(page_title="디에트르 그랑루체 입주민 포털", page_icon=logo_img, layout="centered")
 except Exception:
-    st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon="🏢", layout="centered")
+    st.set_page_config(page_title="디에트르 그랑루체 입주민 포털", page_icon="🏢", layout="centered")
 
 GA_ID = "G-K4JM55MDEQ"
-cpr_script = f"""
+ga_script = f"""
 <script async src="https://www.googletagmanager.com/gtag/js?id={GA_ID}"></script>
 <script>
-  /* 1. 구글 애널리틱스 (CCTV) */
+  /* 구글 애널리틱스 (CCTV) 전용 스크립트 */
   window.dataLayer = window.dataLayer || [];
   function gtag(){{dataLayer.push(arguments);}}
   gtag('js', new Date());
   gtag('config', '{GA_ID}');
-
-  /* 2. 모바일 백그라운드 복귀 시 에러 자동 복구 엔진 (심폐소생술 - 중괄호 2개 규칙 완벽 적용!) */
-  document.addEventListener('visibilitychange', function() {{
-      if (document.visibilityState === 'visible') {{
-          // 화면이 다시 켜졌을 때, 에러 모달 창이 떠있거나 연결이 끊겼다면 0.5초 뒤 자동 새로고침
-          setTimeout(function() {{
-              const errorModal = document.querySelector('[data-testid="stModal"]');
-              const disconnected = document.querySelector('[data-testid="stStatusWidget"]');
-              if (errorModal || (disconnected && disconnected.innerText.includes('Error'))) {{
-                  window.location.reload(true);
-              }}
-          }}, 500);
-      }}
-  }});
 </script>
 """
-components.html(cpr_script, width=0, height=0)
+components.html(ga_script, width=0, height=0)
 
 # ==========================================
 # [블록 2] CSS 스타일링 (📱 모바일 깨짐 완벽 방어 + UX 디테일 강화)
