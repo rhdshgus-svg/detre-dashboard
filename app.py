@@ -34,7 +34,7 @@ ga_script = f"""
 components.html(ga_script, width=0, height=0)
 
 # ==========================================
-# [블록 2] CSS 스타일링 (아버님 커스텀 CSS + 📱 모바일 깨짐 완벽 방어)
+# [블록 2] CSS 스타일링 (📱 모바일 깨짐 완벽 방어 + 입력창 글씨 하얗게)
 # ==========================================
 st.markdown("""
     <meta name="google" content="notranslate">
@@ -74,8 +74,9 @@ st.markdown("""
         .hl-green { color: #30D158; font-weight: 800; font-size: 1.0em; margin: 0 1px; }
         .divider { color: #555; margin: 0 2px; font-size: 0.9em; }
         
+        /* 🚨 라디오버튼 모바일 세로쓰기 깨짐 완벽 방어 (자동 폭 조절) */
         div[role="radiogroup"] { display: flex !important; flex-wrap: wrap !important; width: 100% !important; gap: 2px !important; justify-content: center !important; margin-bottom: 10px !important; }
-        div[role="radiogroup"] > label { flex: 0 0 calc(20% - 2px) !important; min-width: calc(20% - 2px) !important; background-color: transparent !important; border: none !important; border-bottom: 2px solid #333 !important; padding: 6px 0px !important; cursor: pointer !important; }
+        div[role="radiogroup"] > label { flex: 1 1 auto !important; min-width: 60px !important; background-color: transparent !important; border: none !important; border-bottom: 2px solid #333 !important; padding: 8px 4px !important; cursor: pointer !important; text-align: center !important; }
         div[role="radiogroup"] > label[data-checked="true"] { border-bottom: 2px solid #D4AF37 !important; }
         div[role="radiogroup"] > label > div:first-child { display: none !important; }
         div[role="radiogroup"] > label p { font-size: 0.85em !important; color: #888 !important; text-align: center !important; width: 100% !important; margin: 0 !important; }
@@ -133,7 +134,7 @@ st.markdown("""
         
         .by-text { text-align: right; color: #444; font-size: 0.6em; margin-top: 40px; margin-bottom: 10px; padding-right: 10px; }
 
-        /* 🔥 아버님 커스텀 계산기 CSS 추가 & 모바일 가로 스크롤 대응 */
+        /* 🔥 아버님 커스텀 계산기 CSS 추가 */
         .calc-premium-title { font-size: clamp(2.0em, 8vw, 2.5em); font-weight: 900; text-align: center; color: #0A84FF !important; margin-bottom: 12px; line-height: 1.2; text-shadow: 0px 2px 4px rgba(0,0,0,0.1); }
         .calc-box { background: linear-gradient(145deg, #1c1c1e, #111111); border: 1px solid #D4AF37; border-radius: 12px; padding: 20px 15px; margin-top: 15px; text-align: center; box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
         .calc-title { color: #D4AF37 !important; font-size: 0.95em; font-weight: 800; margin-bottom: 5px; }
@@ -147,7 +148,7 @@ st.markdown("""
         .summary-val-highlight { font-size: 1.6em; font-weight: 900; color: #fbbf24 !important; text-align: right; }
         
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 8px; }
-        .calc-table { width: 100%; border-collapse: collapse; font-size: 0.85em; min-width: 320px; background: rgba(0,0,0,0.4); overflow: hidden; }
+        .calc-table { width: 100%; border-collapse: collapse; font-size: 0.85em; margin-top: 10px; background: rgba(0,0,0,0.4); border-radius: 8px; overflow: hidden; min-width: 320px; }
         .calc-table th { background: rgba(212,175,55,0.15); color: #D4AF37 !important; border-bottom: 1px solid #444; padding: 12px 4px; font-weight: 800; text-align: center; }
         .calc-table td { color: #ffffff !important; border-bottom: 1px dotted #444; padding: 12px 4px; text-align: center; font-weight: 600; }
         .hl-fixed { color: #34d399 !important; font-weight: 800; } 
@@ -155,11 +156,16 @@ st.markdown("""
         .disclaimer-box { background: rgba(255, 59, 48, 0.05); border: 1px solid rgba(255, 59, 48, 0.3); border-radius: 8px; padding: 12px; text-align: center; margin-top: 10px; }
         .disclaimer-text { color: gray; font-size: 0.75em; margin-top: 5px; margin-bottom: 0; line-height: 1.5; }
 
-        /* 🔥 입력창(Input) 라벨 텍스트 하얗고 진하게 강제 변경 (흐림 현상 해결) */
-        .stNumberInput label p, .stDateInput label p, .stSelectbox label p, .stRadio label p {
+        /* 🔥 입력창(Input) 라벨 텍스트 하얗고 진하게 완벽 강제 변경 (흐림/투명도 제거) */
+        div[data-testid="stNumberInput"] label p, 
+        div[data-testid="stDateInput"] label p, 
+        div[data-testid="stSelectbox"] label p, 
+        div[data-testid="stRadio"] label p {
             color: #ffffff !important;
             font-weight: 900 !important;
             font-size: 0.95em !important;
+            opacity: 1.0 !important;
+            visibility: visible !important;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -562,7 +568,9 @@ def get_custom_fortune(dong, ho, type_dict):
 # ==========================================
 try:
     title_logo = Image.open("detre_logo.png")
+    st.markdown("<div style='text-align:center; margin-bottom:15px;'>", unsafe_allow_html=True)
     st.image(title_logo, use_column_width=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 except Exception:
     st.markdown("<div class='premium-title'>Detre Granluce</div>", unsafe_allow_html=True)
 
@@ -575,7 +583,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# [블록 5] 종합 포털 탭(Tab) 메뉴 (🔥 아버님 계산기가 2번째 탭으로!)
+# [블록 5] 종합 포털 탭(Tab) 메뉴
 # ==========================================
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏢 입주현황", "💰 이자계산기", "📊 입주민 전용정보", "🔮 오늘의 운세", "📰 관련뉴스"])
 
@@ -637,7 +645,7 @@ with tab1:
     st.markdown(html_grid, unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 2] 🚨 아버님표 이자계산기 시뮬레이션 (모바일 완전 최적화)
+# [탭 2] 🚨 아버님표 이자계산기 시뮬레이션
 # ------------------------------------------
 with tab2:
     st.markdown("<div class='calc-premium-title'>💰 이자계산기</div>", unsafe_allow_html=True)
@@ -658,8 +666,9 @@ with tab2:
         if selected_dong and selected_ho and selected_ho in price_data.get(selected_dong, {}):
             total_price = price_data[selected_dong][selected_ho]
             
-            # 🔥 라디오 버튼 텍스트 모바일에 맞게 축소
-            contract_type = st.radio("계약금 선택", ["5%", "10%"], horizontal=True)
+            # 🔥 계약금 5%, 10% 모바일 꽉 차게 한 줄로 정렬 및 타이틀 분리 고정
+            st.markdown("<p style='font-size:0.95em; font-weight:900; color:#D4AF37; margin-bottom:-10px; margin-top:10px;'>계약금 납부방법 선택</p>", unsafe_allow_html=True)
+            contract_type = st.radio("계약금 납부방법 선택", ["5%", "10%"], horizontal=True, label_visibility="collapsed")
             
             contract_total_amt = total_price * 0.1 
             installment_total_amt = total_price * 0.6
@@ -669,34 +678,33 @@ with tab2:
             unpaid_contract_amt = total_price * 0.05 if "5%" in contract_type else 0
             paid_contract_amt = contract_total_amt - unpaid_contract_amt
 
-            # 🔥 표(Table) 모바일 폰트 자동 압축 및 줄바꿈 방지 적용
             top_dashboard = f"""
             <div class='table-responsive'>
-                <table style='width:100%; border-collapse: collapse; text-align:center; background:#1c1c1e; border-radius:10px; border:1px solid #444; margin-top: 10px; margin-bottom: 25px; table-layout: fixed;'>
-                    <tr style='color:#D4AF37; font-size:clamp(0.6em, 2.5vw, 0.85em); font-weight:800; border-bottom:1px solid #333;'>
-                        <td style='padding:6px 1px; width:25%;'>계약금 10%</td>
-                        <td style='padding:6px 1px; width:25%; border-left:1px solid #333;'>중도금 60%</td>
-                        <td style='padding:6px 1px; width:25%; border-left:1px solid #333;'>잔금 30%</td>
-                        <td style='padding:6px 1px; width:25%; border-left:1px solid #333;'>총 분양가</td>
+                <table style='width:100%; border-collapse: collapse; text-align:center; background:#1c1c1e; border-radius:10px; border:1px solid #444; margin-top: 10px; margin-bottom: 25px;'>
+                    <tr style='color:#D4AF37; font-size:0.85em; font-weight:800; border-bottom:1px solid #333;'>
+                        <td style='padding:8px 2px; width:25%;'>계약금 10%</td>
+                        <td style='padding:8px 2px; width:25%; border-left:1px solid #333;'>중도금 60%</td>
+                        <td style='padding:8px 2px; width:25%; border-left:1px solid #333;'>잔금 30%</td>
+                        <td style='padding:8px 2px; width:25%; border-left:1px solid #333;'>총 분양가</td>
                     </tr>
-                    <tr style='color:#ffffff; font-size:clamp(0.7em, 2.5vw, 1.0em); font-weight:900; word-break: keep-all; white-space: nowrap;'>
-                        <td style='padding:8px 1px;'>{int(contract_total_amt):,}원</td>
-                        <td style='padding:8px 1px; border-left:1px solid #333;'>{int(installment_total_amt):,}원</td>
-                        <td style='padding:8px 1px; border-left:1px solid #333;'>{int(balance_amt):,}원</td>
-                        <td style='padding:8px 1px; border-left:1px solid #333; color:#fbbf24;'>{total_price:,}원</td>
+                    <tr style='color:#ffffff; font-size:1.05em; font-weight:900;'>
+                        <td style='padding:12px 2px;'>{int(contract_total_amt):,}원</td>
+                        <td style='padding:12px 2px; border-left:1px solid #333;'>{int(installment_total_amt):,}원</td>
+                        <td style='padding:12px 2px; border-left:1px solid #333;'>{int(balance_amt):,}원</td>
+                        <td style='padding:12px 2px; border-left:1px solid #333; color:#fbbf24;'>{total_price:,}원</td>
                     </tr>
-                    <tr style='font-size:clamp(0.55em, 2vw, 0.75em);'>
-                        <td style='padding:6px 1px; vertical-align:top;'>
-                            <div style='background:rgba(0,0,0,0.3); padding:4px; border-radius:4px; line-height:1.4;'>
-                                <span style='color:#34d399;'>기납부:<br>{int(paid_contract_amt):,}원</span><br>
-                                <span style='color:#f87171; font-weight:800;'>미납액:<br>{int(unpaid_contract_amt):,}원</span>
+                    <tr style='font-size:0.75em;'>
+                        <td style='padding:8px 2px; vertical-align:top;'>
+                            <div style='background:rgba(0,0,0,0.3); padding:6px; border-radius:6px; line-height:1.4;'>
+                                <span style='color:#34d399;'>기납부액: {int(paid_contract_amt):,}원</span><br>
+                                <span style='color:#f87171; font-weight:800;'>미납잔액: {int(unpaid_contract_amt):,}원</span>
                             </div>
                         </td>
-                        <td style='padding:6px 1px; border-left:1px solid #333; vertical-align:top;'>
-                            <div style='color:#bbb; padding-top:4px;'>회당(10%):<br>{int(installment_amt):,}원</div>
+                        <td style='padding:8px 2px; border-left:1px solid #333; vertical-align:top;'>
+                            <div style='color:#bbb; padding-top:6px;'>회당(10%):<br>{int(installment_amt):,}원</div>
                         </td>
-                        <td style='padding:6px 1px; border-left:1px solid #333;'></td>
-                        <td style='padding:6px 1px; border-left:1px solid #333;'></td>
+                        <td style='padding:8px 2px; border-left:1px solid #333;'></td>
+                        <td style='padding:8px 2px; border-left:1px solid #333;'></td>
                     </tr>
                 </table>
             </div>"""
@@ -992,7 +1000,7 @@ with tab4:
             valid_combinations = set(zip(df_layout['동'], df_layout['호']))
             input_ho_formatted = f_ho.strip().zfill(4) 
             if (f_dong, input_ho_formatted) not in valid_combinations:
-                st.warning("🔮 앗! 해당 동·호수는 팡도사의 레이더에 잡히지 않는 '없는 기운'입니다. 혹시 아직 지어지지 않은 허공의 터를 누르신 건 아니겠죠? 😅 동과 호수를 다시 한번 정확히 확인해 주세요!")
+                st.warning("🔮 앗! 해당 동·호수는 팡도사의 레이더에 잡히지 않는 '없는 기운'입니다. 혹시 아직 지어지지 허공의 터를 누르신 건 아니겠죠? 😅 동과 호수를 다시 한번 정확히 확인해 주세요!")
             else:
                 with st.spinner("🔮 팡도사가 고객님의 명조(命造)를 심층 분석 중입니다..."):
                     time.sleep(3.5) 
@@ -1003,7 +1011,7 @@ with tab4:
         <div style='text-align: center; margin-top: 25px; border-top: 1px dotted #333; padding-top: 15px;'>
             <p style='color:#8e8e93; font-size:0.75em; margin-bottom:5px;'>더 깊고 디테일한 운명이 궁금하시다면?</p>
             <a href="https://open.kakao.com/o/gEkb84oi" target="_blank" class='btn-vip-saju'>
-                🔮 [Sol 운명상점] 런칭준비중
+                🔮 [Sol 운명상점] 입주민 전용 1:1 사주상담 연결
             </a>
         </div>
     """, unsafe_allow_html=True)
