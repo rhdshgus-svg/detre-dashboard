@@ -16,8 +16,8 @@ import streamlit.components.v1 as components
 # [블록 1] 기본 화면 설정 및 🚨 구글 애널리틱스(CCTV) 강제 구동
 # ==========================================
 try:
-    favicon_img = Image.open("detre_logo.png")
-    st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon=favicon_img, layout="centered")
+    logo_img = Image.open("detre_logo.png")
+    st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon=logo_img, layout="centered")
 except Exception:
     st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon="🏢", layout="centered")
 
@@ -34,7 +34,7 @@ ga_script = f"""
 components.html(ga_script, width=0, height=0)
 
 # ==========================================
-# [블록 2] CSS 스타일링 (아버님 커스텀 CSS + 모바일 표 깨짐 방지)
+# [블록 2] CSS 스타일링 (아버님 커스텀 CSS + 📱 모바일 깨짐 완벽 방어)
 # ==========================================
 st.markdown("""
     <meta name="google" content="notranslate">
@@ -154,6 +154,13 @@ st.markdown("""
         .hl-var { color: #f87171 !important; font-weight: 800; }  
         .disclaimer-box { background: rgba(255, 59, 48, 0.05); border: 1px solid rgba(255, 59, 48, 0.3); border-radius: 8px; padding: 12px; text-align: center; margin-top: 10px; }
         .disclaimer-text { color: gray; font-size: 0.75em; margin-top: 5px; margin-bottom: 0; line-height: 1.5; }
+
+        /* 🔥 입력창(Input) 라벨 텍스트 하얗고 진하게 강제 변경 (흐림 현상 해결) */
+        .stNumberInput label p, .stDateInput label p, .stSelectbox label p, .stRadio label p {
+            color: #ffffff !important;
+            font-weight: 900 !important;
+            font-size: 0.95em !important;
+        }
     </style>
 """, unsafe_allow_html=True)
 
@@ -467,7 +474,7 @@ def get_global_stocks_api():
         except:
             return f"<tr><th>{name}</th><td>조회지연 <span class='delta-new' style='margin-left:4px; font-weight:800;'>-</span></td></tr>"
 
-    html = "<div class='table-responsive'><table class='econ-table'>"
+    html = "<table class='econ-table'>"
     
     # 1. 글로벌 주요 증시
     for name, sym in [("🇺🇸 나스닥", "^IXIC"), ("🇺🇸 S&P 500", "^GSPC"), ("🇰🇷 코스피", "^KS11"), ("🇰🇷 코스닥", "^KQ11")]:
@@ -490,7 +497,7 @@ def get_global_stocks_api():
     for name, sym, mult in tourist_dests:
         html += fetch_yahoo(name, sym, mult)
 
-    html += "</table></div>"
+    html += "</table>"
     return html
 
 # ==========================================
@@ -555,9 +562,7 @@ def get_custom_fortune(dong, ho, type_dict):
 # ==========================================
 try:
     title_logo = Image.open("detre_logo.png")
-    st.markdown("<div class='logo-container'>", unsafe_allow_html=True)
     st.image(title_logo, use_column_width=True)
-    st.markdown("</div>", unsafe_allow_html=True)
 except Exception:
     st.markdown("<div class='premium-title'>Detre Granluce</div>", unsafe_allow_html=True)
 
@@ -572,7 +577,7 @@ st.markdown("""
 # ==========================================
 # [블록 5] 종합 포털 탭(Tab) 메뉴 (🔥 아버님 계산기가 2번째 탭으로!)
 # ==========================================
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏢 입주현황", "💰 이자계산기", "📊 전용정보", "🔮 오늘의 운세", "📰 관련뉴스"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏢 입주현황", "💰 이자계산기", "📊 입주민 전용정보", "🔮 오늘의 운세", "📰 관련뉴스"])
 
 # ------------------------------------------
 # [탭 1] 메인: 세대별 입주현황
@@ -632,7 +637,7 @@ with tab1:
     st.markdown(html_grid, unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 2] 🚨 아버님표 이자계산기 시뮬레이션
+# [탭 2] 🚨 아버님표 이자계산기 시뮬레이션 (모바일 완전 최적화)
 # ------------------------------------------
 with tab2:
     st.markdown("<div class='calc-premium-title'>💰 이자계산기</div>", unsafe_allow_html=True)
@@ -653,7 +658,8 @@ with tab2:
         if selected_dong and selected_ho and selected_ho in price_data.get(selected_dong, {}):
             total_price = price_data[selected_dong][selected_ho]
             
-            contract_type = st.radio("계약금 납부 형태 선택 (대출 무이자)", ["5% 일부 납부 세대", "10% 완납 세대"], horizontal=True)
+            # 🔥 라디오 버튼 텍스트 모바일에 맞게 축소
+            contract_type = st.radio("계약금 선택", ["5%", "10%"], horizontal=True)
             
             contract_total_amt = total_price * 0.1 
             installment_total_amt = total_price * 0.6
@@ -663,33 +669,34 @@ with tab2:
             unpaid_contract_amt = total_price * 0.05 if "5%" in contract_type else 0
             paid_contract_amt = contract_total_amt - unpaid_contract_amt
 
+            # 🔥 표(Table) 모바일 폰트 자동 압축 및 줄바꿈 방지 적용
             top_dashboard = f"""
             <div class='table-responsive'>
-                <table style='width:100%; border-collapse: collapse; text-align:center; background:#1c1c1e; border-radius:10px; border:1px solid #444; margin-top: 10px; margin-bottom: 25px;'>
-                    <tr style='color:#D4AF37; font-size:0.85em; font-weight:800; border-bottom:1px solid #333;'>
-                        <td style='padding:8px 2px; width:25%;'>계약금 10%</td>
-                        <td style='padding:8px 2px; width:25%; border-left:1px solid #333;'>중도금 60%</td>
-                        <td style='padding:8px 2px; width:25%; border-left:1px solid #333;'>잔금 30%</td>
-                        <td style='padding:8px 2px; width:25%; border-left:1px solid #333;'>총 분양가</td>
+                <table style='width:100%; border-collapse: collapse; text-align:center; background:#1c1c1e; border-radius:10px; border:1px solid #444; margin-top: 10px; margin-bottom: 25px; table-layout: fixed;'>
+                    <tr style='color:#D4AF37; font-size:clamp(0.6em, 2.5vw, 0.85em); font-weight:800; border-bottom:1px solid #333;'>
+                        <td style='padding:6px 1px; width:25%;'>계약금 10%</td>
+                        <td style='padding:6px 1px; width:25%; border-left:1px solid #333;'>중도금 60%</td>
+                        <td style='padding:6px 1px; width:25%; border-left:1px solid #333;'>잔금 30%</td>
+                        <td style='padding:6px 1px; width:25%; border-left:1px solid #333;'>총 분양가</td>
                     </tr>
-                    <tr style='color:#ffffff; font-size:1.05em; font-weight:900;'>
-                        <td style='padding:12px 2px;'>{int(contract_total_amt):,}원</td>
-                        <td style='padding:12px 2px; border-left:1px solid #333;'>{int(installment_total_amt):,}원</td>
-                        <td style='padding:12px 2px; border-left:1px solid #333;'>{int(balance_amt):,}원</td>
-                        <td style='padding:12px 2px; border-left:1px solid #333; color:#fbbf24;'>{total_price:,}원</td>
+                    <tr style='color:#ffffff; font-size:clamp(0.7em, 2.5vw, 1.0em); font-weight:900; word-break: keep-all; white-space: nowrap;'>
+                        <td style='padding:8px 1px;'>{int(contract_total_amt):,}원</td>
+                        <td style='padding:8px 1px; border-left:1px solid #333;'>{int(installment_total_amt):,}원</td>
+                        <td style='padding:8px 1px; border-left:1px solid #333;'>{int(balance_amt):,}원</td>
+                        <td style='padding:8px 1px; border-left:1px solid #333; color:#fbbf24;'>{total_price:,}원</td>
                     </tr>
-                    <tr style='font-size:0.75em;'>
-                        <td style='padding:8px 2px; vertical-align:top;'>
-                            <div style='background:rgba(0,0,0,0.3); padding:6px; border-radius:6px; line-height:1.4;'>
-                                <span style='color:#34d399;'>기납부액: {int(paid_contract_amt):,}원</span><br>
-                                <span style='color:#f87171; font-weight:800;'>미납잔액: {int(unpaid_contract_amt):,}원</span>
+                    <tr style='font-size:clamp(0.55em, 2vw, 0.75em);'>
+                        <td style='padding:6px 1px; vertical-align:top;'>
+                            <div style='background:rgba(0,0,0,0.3); padding:4px; border-radius:4px; line-height:1.4;'>
+                                <span style='color:#34d399;'>기납부:<br>{int(paid_contract_amt):,}원</span><br>
+                                <span style='color:#f87171; font-weight:800;'>미납액:<br>{int(unpaid_contract_amt):,}원</span>
                             </div>
                         </td>
-                        <td style='padding:8px 2px; border-left:1px solid #333; vertical-align:top;'>
-                            <div style='color:#bbb; padding-top:6px;'>회당(10%):<br>{int(installment_amt):,}원</div>
+                        <td style='padding:6px 1px; border-left:1px solid #333; vertical-align:top;'>
+                            <div style='color:#bbb; padding-top:4px;'>회당(10%):<br>{int(installment_amt):,}원</div>
                         </td>
-                        <td style='padding:8px 2px; border-left:1px solid #333;'></td>
-                        <td style='padding:8px 2px; border-left:1px solid #333;'></td>
+                        <td style='padding:6px 1px; border-left:1px solid #333;'></td>
+                        <td style='padding:6px 1px; border-left:1px solid #333;'></td>
                     </tr>
                 </table>
             </div>"""
@@ -996,7 +1003,7 @@ with tab4:
         <div style='text-align: center; margin-top: 25px; border-top: 1px dotted #333; padding-top: 15px;'>
             <p style='color:#8e8e93; font-size:0.75em; margin-bottom:5px;'>더 깊고 디테일한 운명이 궁금하시다면?</p>
             <a href="https://open.kakao.com/o/gEkb84oi" target="_blank" class='btn-vip-saju'>
-                🔮 [Sol 운명상점] 입주민 전용 1:1 사주상담 연결
+                🔮 [Sol 운명상점] 런칭준비중
             </a>
         </div>
     """, unsafe_allow_html=True)
