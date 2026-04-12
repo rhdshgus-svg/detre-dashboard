@@ -34,7 +34,7 @@ ga_script = f"""
 components.html(ga_script, width=0, height=0)
 
 # ==========================================
-# [블록 2] CSS 스타일링 (📱 모바일 깨짐 완벽 방어 + 입력창 글씨 하얗게)
+# [블록 2] CSS 스타일링 (📱 모바일 깨짐 완벽 방어 + UX 디테일 강화)
 # ==========================================
 st.markdown("""
     <meta name="google" content="notranslate">
@@ -52,7 +52,6 @@ st.markdown("""
         
         .premium-title { font-size: clamp(2.0em, 8vw, 2.8em); font-weight: 900; text-align: center; color: #2b6cb0; text-shadow: 0 2px 10px rgba(43, 108, 176, 0.3); margin-bottom: 12px; line-height: 1.2; }
         
-        /* 🔥 신규: 사주 탭 전용 VIP 버튼 디자인 */
         .btn-vip-saju { display: flex; justify-content: center; align-items: center; background: linear-gradient(135deg, #800020, #4a0012); color: #D4AF37 !important; border: 1px solid #D4AF37; font-weight: 900; font-size: 0.9em; padding: 12px 16px; border-radius: 10px; text-decoration: none !important; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.4); text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
         
         .official-btn { display: flex; justify-content: center; align-items: center; font-weight: 900; font-size: 0.85em; padding: 12px 16px; border-radius: 10px; text-decoration: none !important; margin-bottom: 6px; transition: all 0.2s ease; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
@@ -74,10 +73,14 @@ st.markdown("""
         .hl-green { color: #30D158; font-weight: 800; font-size: 1.0em; margin: 0 1px; }
         .divider { color: #555; margin: 0 2px; font-size: 0.9em; }
         
-        /* 🚨 라디오버튼 모바일 세로쓰기 깨짐 완벽 방어 (자동 폭 조절) */
+        /* 🚨 라디오버튼 모바일 세로쓰기 깨짐 완벽 방어 & 선택 시 음영 채우기 */
         div[role="radiogroup"] { display: flex !important; flex-wrap: wrap !important; width: 100% !important; gap: 2px !important; justify-content: center !important; margin-bottom: 10px !important; }
-        div[role="radiogroup"] > label { flex: 1 1 auto !important; min-width: 60px !important; background-color: transparent !important; border: none !important; border-bottom: 2px solid #333 !important; padding: 8px 4px !important; cursor: pointer !important; text-align: center !important; }
-        div[role="radiogroup"] > label[data-checked="true"] { border-bottom: 2px solid #D4AF37 !important; }
+        div[role="radiogroup"] > label { flex: 1 1 auto !important; min-width: 60px !important; background-color: transparent !important; border: none !important; border-bottom: 2px solid #333 !important; padding: 8px 4px !important; cursor: pointer !important; text-align: center !important; transition: all 0.3s ease; }
+        div[role="radiogroup"] > label[data-checked="true"] { 
+            background: rgba(212, 175, 55, 0.2) !important; /* 🔥 아버님 요청: 선택 시 음영 팍! */
+            border-bottom: 2px solid #D4AF37 !important; 
+            border-radius: 6px 6px 0 0 !important;
+        }
         div[role="radiogroup"] > label > div:first-child { display: none !important; }
         div[role="radiogroup"] > label p { font-size: 0.85em !important; color: #888 !important; text-align: center !important; width: 100% !important; margin: 0 !important; }
         div[role="radiogroup"] > label[data-checked="true"] p { color: #D4AF37 !important; font-weight: 800 !important; }
@@ -134,7 +137,7 @@ st.markdown("""
         
         .by-text { text-align: right; color: #444; font-size: 0.6em; margin-top: 40px; margin-bottom: 10px; padding-right: 10px; }
 
-        /* 🔥 아버님 커스텀 계산기 CSS 추가 & 모바일 가로 스크롤 대응 */
+        /* 🔥 계산기 CSS 추가 & 모바일 가로 스크롤 대응 */
         .calc-premium-title { font-size: clamp(2.0em, 8vw, 2.5em); font-weight: 900; text-align: center; color: #0A84FF !important; margin-bottom: 12px; line-height: 1.2; text-shadow: 0px 2px 4px rgba(0,0,0,0.1); }
         .calc-box { background: linear-gradient(145deg, #1c1c1e, #111111); border: 1px solid #D4AF37; border-radius: 12px; padding: 20px 15px; margin-top: 15px; text-align: center; box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
         .calc-title { color: #D4AF37 !important; font-size: 0.95em; font-weight: 800; margin-bottom: 5px; }
@@ -145,7 +148,9 @@ st.markdown("""
         .summary-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         .summary-label { font-size: 0.9em; font-weight: 600; color: #e2e8f0 !important; text-align: left; line-height: 1.4;}
         .summary-val { font-size: 1.3em; font-weight: 900; color: #ffffff !important; text-align: right; }
-        .summary-val-highlight { font-size: 1.6em; font-weight: 900; color: #fbbf24 !important; text-align: right; }
+        
+        /* 🔥 아버님 요청: 순수 입주 현금 글자 크기 살짝 축소 & 강제 한줄 고정 */
+        .summary-val-highlight { font-size: clamp(1.15em, 4vw, 1.35em) !important; font-weight: 900; color: #fbbf24 !important; text-align: right; white-space: nowrap !important; word-break: keep-all; letter-spacing: -0.5px; }
         
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 8px; }
         .calc-table { width: 100%; border-collapse: collapse; font-size: 0.85em; min-width: 320px; background: rgba(0,0,0,0.4); overflow: hidden; }
@@ -156,7 +161,7 @@ st.markdown("""
         .disclaimer-box { background: rgba(255, 59, 48, 0.05); border: 1px solid rgba(255, 59, 48, 0.3); border-radius: 8px; padding: 12px; text-align: center; margin-top: 10px; }
         .disclaimer-text { color: gray; font-size: 0.75em; margin-top: 5px; margin-bottom: 0; line-height: 1.5; }
 
-        /* 🔥 입력창(Input) 라벨 텍스트 하얗고 진하게 완벽 강제 변경 (흐림/투명도 제거) */
+        /* 🔥 입력창(Input) 라벨 텍스트 하얗고 진하게 강제 변경 (흐림/투명도 제거) */
         div[data-testid="stNumberInput"] label p, 
         div[data-testid="stDateInput"] label p {
             color: #ffffff !important;
@@ -169,7 +174,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# [블록 3] 데이터 로딩 (구글 시트 연동 + 🚨 아버님 계산기 엑셀 연동 추가)
+# [블록 3] 데이터 로딩 (구글 시트 연동 + 엑셀 연동)
 # ==========================================
 SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQoR29bAcAP0KUBEvS3S6gn5Qz1MTKDJOxz-lW1UEyV_vOcISPxNW2uMuYMrz9HUw/pub?gid=1967078212&single=true&output=csv"
 LAYOUT_FILE = "디에트르 그랑루체 카페가입 현황.xlsx" 
@@ -213,7 +218,6 @@ def load_data():
         return kakao_dict, cafe_set, df_layout, type_dict
     except: return {}, set(), pd.DataFrame(), {}
 
-# 🔥 신규: 아버님 계산기용 엑셀 로더
 @st.cache_data
 def load_price_data():
     price_hierarchy = {}
@@ -228,7 +232,7 @@ def load_price_data():
                 if dong_val.isdigit() and ho_val.isdigit() and price_str.isdigit():
                     price_int = int(price_str)
                     
-                    if price_int > 1000000: # 엑셀 헤더 쓰레기 데이터 필터링
+                    if price_int > 1000000:
                         dong_str = f"{int(dong_val)}동"
                         ho_str = f"{int(ho_val):04d}호"
                         
@@ -237,11 +241,11 @@ def load_price_data():
                         price_hierarchy[dong_str][ho_str] = price_int
             except: continue 
     except Exception as e:
-        pass # 에러 발생시 빈 딕셔너리 반환
+        pass 
     return price_hierarchy
 
 kakao_dict, cafe_set, df_layout, type_dict = load_data()
-price_data = load_price_data() # 가격 데이터 로딩
+price_data = load_price_data()
 if df_layout.empty: st.stop()
 
 def format_korean_money(price_str):
@@ -278,7 +282,7 @@ def get_real_estate_api():
     try:
         molit_key = st.secrets["api_keys"]["molit_key"]
         encoded_key = urllib.parse.quote(urllib.parse.unquote(molit_key))
-        LAWD_CD = "26440" # 강서구
+        LAWD_CD = "26440"
         now = datetime.now()
         raw_trades = []
         
@@ -312,15 +316,10 @@ def get_real_estate_api():
                         dong_str = f"{apt_dong}동 " if apt_dong and apt_dong != " " else ""
                         detail_str = f"{dong_str}{floor}층" if floor else dong_str
                         
-                        try:
-                            price_int = int(price_str.replace(",", "").strip())
-                        except:
-                            price_int = 0
+                        try: price_int = int(price_str.replace(",", "").strip())
+                        except: price_int = 0
                             
-                        raw_trades.append({
-                            "apt": apt, "area": float(area), "price_int": price_int,
-                            "date": date_str, "detail": detail_str
-                        })
+                        raw_trades.append({"apt": apt, "area": float(area), "price_int": price_int, "date": date_str, "detail": detail_str})
 
         raw_trades.sort(key=lambda x: x['date'])
         
@@ -349,7 +348,6 @@ def get_real_estate_api():
 
         raw_trades.sort(key=lambda x: x['date'], reverse=True)
         return raw_trades
-            
     except Exception as e:
         return []
 
@@ -389,7 +387,6 @@ def get_interest_rate_api():
 def get_oil_price_api():
     try:
         opinet_key = st.secrets["api_keys"]["opinet_key"]
-        
         busan_cd = "08"
         try:
             req_find = urllib.request.Request(f"http://www.opinet.co.kr/api/avgSidoPrice.do?out=xml&prodcd=B027&code={opinet_key}")
@@ -399,8 +396,7 @@ def get_oil_price_api():
                 if "부산" in row.find('SIDONM').text:
                     busan_cd = row.find('SIDOCD').text
                     break
-        except:
-            pass
+        except: pass
 
         url_sido = f"http://www.opinet.co.kr/api/avgSidoPrice.do?out=xml&sido={busan_cd}&code={opinet_key}"
         req_sido = urllib.request.Request(url_sido)
@@ -437,23 +433,12 @@ def get_oil_price_api():
                 diff_str = f"▲{diff:,.0f}" if diff > 0 else (f"▼{abs(diff):,.0f}" if diff < 0 else "- 보합")
                 color = "delta-up" if diff > 0 else ("delta-down" if diff < 0 else "delta-new")
                 
-                if sigun_nm not in districts:
-                    districts[sigun_nm] = {"name": sigun_nm}
-                
-                districts[sigun_nm][prod_name] = {
-                    "price_val": price,
-                    "price_str": f"{price:,.0f}",
-                    "diff_str": diff_str,
-                    "color": color
-                }
+                if sigun_nm not in districts: districts[sigun_nm] = {"name": sigun_nm}
+                districts[sigun_nm][prod_name] = {"price_val": price, "price_str": f"{price:,.0f}", "diff_str": diff_str, "color": color}
         
         dist_list = list(districts.values())
         dist_list.sort(key=lambda x: x.get('gas', {}).get('price_val', 999999))
-        
-        return {
-            "busan_avg": {"gas": gas, "gas_d": gas_delta, "diesel": diesel, "diesel_d": diesel_delta, "lpg": lpg, "lpg_d": lpg_delta},
-            "districts": dist_list
-        }
+        return {"busan_avg": {"gas": gas, "gas_d": gas_delta, "diesel": diesel, "diesel_d": diesel_delta, "lpg": lpg, "lpg_d": lpg_delta}, "districts": dist_list}
     except Exception as e:
         return None
 
@@ -473,34 +458,22 @@ def get_global_stocks_api():
             
             diff_str = f"▲ {diff:,.2f}" if diff > 0 else (f"▼ {abs(diff):,.2f}" if diff < 0 else "- 보합")
             color = "delta-up" if diff > 0 else ("delta-down" if diff < 0 else "delta-new")
-            
             return f"<tr><th>{name}</th><td>{price:,.2f} <span class='{color}' style='margin-left:4px; font-weight:800;'>{diff_str}</span></td></tr>"
-        except:
-            return f"<tr><th>{name}</th><td>조회지연 <span class='delta-new' style='margin-left:4px; font-weight:800;'>-</span></td></tr>"
+        except: return f"<tr><th>{name}</th><td>조회지연 <span class='delta-new' style='margin-left:4px; font-weight:800;'>-</span></td></tr>"
 
     html = "<table class='econ-table'>"
+    for name, sym in [("🇺🇸 나스닥", "^IXIC"), ("🇺🇸 S&P 500", "^GSPC"), ("🇰🇷 코스피", "^KS11"), ("🇰🇷 코스닥", "^KQ11")]: html += fetch_yahoo(name, sym)
     
-    # 1. 글로벌 주요 증시
-    for name, sym in [("🇺🇸 나스닥", "^IXIC"), ("🇺🇸 S&P 500", "^GSPC"), ("🇰🇷 코스피", "^KS11"), ("🇰🇷 코스닥", "^KQ11")]:
-        html += fetch_yahoo(name, sym)
-    
-    # 2. 주요 국가 환율
     html += "<tr style='background-color:rgba(255,255,255,0.05);'><th colspan='2' style='color:#D4AF37; text-align:center; padding:8px 0; border-top:1px solid #333; font-size:0.95em;'>💱 주요 국가 환율</th></tr>"
-    for name, sym, mult in [("💵 미국 (USD/KRW)", "KRW=X", 1), ("💶 유럽 (EUR/KRW)", "EURKRW=X", 1), ("🇯🇵 일본 (100 JPY/KRW)", "JPYKRW=X", 100)]:
-        html += fetch_yahoo(name, sym, mult)
+    for name, sym, mult in [("💵 미국 (USD/KRW)", "KRW=X", 1), ("💶 유럽 (EUR/KRW)", "EURKRW=X", 1), ("🇯🇵 일본 (100 JPY/KRW)", "JPYKRW=X", 100)]: html += fetch_yahoo(name, sym, mult)
         
-    # 3. 대한민국 10대 해외여행지 환율
     html += "<tr style='background-color:rgba(255,255,255,0.05);'><th colspan='2' style='color:#03C75A; text-align:center; padding:8px 0; border-top:1px solid #333; font-size:0.95em;'>✈️ 10대 해외여행지 환율</th></tr>"
     tourist_dests = [
-        ("🇨🇳 중국 (CNY/KRW)", "CNYKRW=X", 1), ("🇹🇼 대만 (TWD/KRW)", "TWDKRW=X", 1),
-        ("🇻🇳 베트남 (100 VND/KRW)", "VNDKRW=X", 100), ("🇹🇭 태국 (THB/KRW)", "THBKRW=X", 1),
-        ("🇵🇭 필리핀 (PHP/KRW)", "PHPKRW=X", 1), ("🇸🇬 싱가포르 (SGD/KRW)", "SGDKRW=X", 1),
-        ("🇭🇰 홍콩 (HKD/KRW)", "HKDKRW=X", 1), ("🇲🇾 말레이시아 (MYR/KRW)", "MYRKRW=X", 1),
+        ("🇨🇳 중국 (CNY/KRW)", "CNYKRW=X", 1), ("🇹🇼 대만 (TWD/KRW)", "TWDKRW=X", 1), ("🇻🇳 베트남 (100 VND/KRW)", "VNDKRW=X", 100), ("🇹🇭 태국 (THB/KRW)", "THBKRW=X", 1),
+        ("🇵🇭 필리핀 (PHP/KRW)", "PHPKRW=X", 1), ("🇸🇬 싱가포르 (SGD/KRW)", "SGDKRW=X", 1), ("🇭🇰 홍콩 (HKD/KRW)", "HKDKRW=X", 1), ("🇲🇾 말레이시아 (MYR/KRW)", "MYRKRW=X", 1),
         ("🇮🇩 인니 (100 IDR/KRW)", "IDRKRW=X", 100), ("🇦🇺 호주 (AUD/KRW)", "AUDKRW=X", 1)
     ]
-    for name, sym, mult in tourist_dests:
-        html += fetch_yahoo(name, sym, mult)
-
+    for name, sym, mult in tourist_dests: html += fetch_yahoo(name, sym, mult)
     html += "</table>"
     return html
 
@@ -712,7 +685,7 @@ with tab2:
             # ==========================================
             # 4. 중도금 이자 계산 & 자납 설정 
             # ==========================================
-            st.markdown("#### 2️⃣ 중도금 대출 이자(자납설정)")
+            st.markdown("#### 2️⃣ 중도금 대출 이자 및 자납(직접납부) 설정")
             
             slider_rate = st.slider("4~6회차 예상 금리 (%)", 2.00, 6.00, 3.88, 0.01)
 
@@ -724,10 +697,8 @@ with tab2:
 
             self_pays = []
             total_self_pay_amt = 0 
-            
-            st.info(f"💡 각 회차별 최대 납부 가능액(중도금액)은 **{int(installment_amt):,}원** 입니다. 초과 입력 시 자동으로 경고가 발생합니다.")
 
-            with st.expander("💸 자납(직접 납부) 세대 상세 설정 (클릭)"):
+            with st.expander("💸 자납(직접 납부) 세대 상세 설정 (클릭하여 열기)"):
                 st.markdown("<p style='font-size:0.85em; color:#bbb; margin-bottom:15px;'>해당 회차에 직접 납부하신 금액이 있다면 아래에 적어주세요. (없는 회차는 0원 그대로 두시면 됩니다.)</p>", unsafe_allow_html=True)
                 
                 for i in range(6):
@@ -754,16 +725,16 @@ with tab2:
                 sp = self_pays[i]
                 
                 interest = 0
-                total_days = (end_date - exec_date).days
-                
                 if sp['is_self'] and sp['amt'] > 0:
                     sp_date = sp['date']
                     if sp_date <= exec_date: 
                         loan_amt = installment_amt - sp['amt']
-                        interest = loan_amt * (rate / 100) * (total_days / 365)
+                        days = (end_date - exec_date).days
+                        interest = loan_amt * (rate / 100) * (days / 365)
                     elif sp_date >= end_date: 
                         loan_amt = installment_amt
-                        interest = loan_amt * (rate / 100) * (total_days / 365)
+                        days = (end_date - exec_date).days
+                        interest = loan_amt * (rate / 100) * (days / 365)
                     else: 
                         days1 = (sp_date - exec_date).days
                         int1 = installment_amt * (rate / 100) * (days1 / 365)
@@ -773,12 +744,13 @@ with tab2:
                         interest = int1 + int2
                 else:
                     loan_amt = installment_amt
-                    interest = loan_amt * (rate / 100) * (total_days / 365)
+                    days = (end_date - exec_date).days
+                    interest = loan_amt * (rate / 100) * (days / 365)
                     
                 total_interest += interest
                 sp_mark = "<br><span style='color:#34d399; font-size:0.75em;'>(자납반영)</span>" if sp['is_self'] and sp['amt']>0 else ""
                 
-                html_table += f"<tr><td>{i+1}회차{sp_mark}<br><span style='font-size:0.7em; color:#888;'>({total_days}일)</span></td><td>{dates[i].strftime('%Y.%m.%d')}</td><td><span class='{status_tags[i]}'>{rates[i]:.2f}% ({status_texts[i]})</span></td><td style='text-align:right !important; padding-right:12px !important; color:#ffffff !important; font-weight:800;'>{int(interest):,} 원</td></tr>"
+                html_table += f"<tr><td>{i+1}회차{sp_mark}<br><span style='font-size:0.7em; color:#888;'>({days}일)</span></td><td>{dates[i].strftime('%Y.%m.%d')}</td><td><span class='{status_tags[i]}'>{rates[i]:.2f}% ({status_texts[i]})</span></td><td style='text-align:right !important; padding-right:12px !important; color:#ffffff !important; font-weight:800;'>{int(interest):,} 원</td></tr>"
 
             html_table += "</table></div>"
 
@@ -788,9 +760,10 @@ with tab2:
             total_loan_balance = installment_total_amt - total_self_pay_amt
 
             # ==========================================
-            # 5. 대환대출(주담대) 월 납입액 시뮬레이터
+            # 5. 대환대출(주담대) 월 납입액 시뮬레이터 (🔥 제목 마크다운 오류 수정 및 폰트 통일)
             # ==========================================
-            st.markdown("<br>#### 3️⃣ 입주 시 대환대출(주담대) 월 납입액 예상", unsafe_allow_html=True)
+            st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
+            st.markdown("#### 3️⃣ 입주 시 대환대출(주담대) 월 납입액 예상")
             st.markdown("<p style='font-size:0.85em; color:gray;'>중도금 대출 잔액을 일반 주담대로 대환 시 매월 납입액입니다.</p>", unsafe_allow_html=True)
             
             col_l1, col_l2 = st.columns(2)
@@ -995,7 +968,7 @@ with tab4:
     with col_h: f_ho = st.text_input("입주 예정 호수", placeholder="호수 입력 (예: 1201)", key="f_ho", label_visibility="collapsed")
     
     if st.button("✨ 오늘 나의 무료신점 뽑기", use_container_width=True):
-        # 🔥 사모님 맞춤형 패치: 사용자가 입력한 값에서 '숫자'가 아닌 모든 글자(호, 공백 등)를 강제 삭제!
+        # 🔥 사모님 맞춤형 패치: 숫자가 아닌 문자 완벽 제거
         clean_ho = re.sub(r'[^0-9]', '', f_ho)
         
         if clean_ho == "": 
@@ -1003,13 +976,11 @@ with tab4:
         else:
             valid_combinations = set(zip(df_layout['동'], df_layout['호']))
             input_ho_formatted = clean_ho.zfill(4) 
-            
             if (f_dong, input_ho_formatted) not in valid_combinations:
                 st.warning("🔮 앗! 해당 동·호수는 팡도사의 레이더에 잡히지 않는 '없는 기운'입니다. 혹시 아직 지어지지 않은 허공의 터를 누르신 건 아니겠죠? 😅 동과 호수를 다시 한번 정확히 확인해 주세요!")
             else:
                 with st.spinner("🔮 팡도사가 고객님의 명조(命造)를 심층 분석 중입니다..."):
                     time.sleep(3.5) 
-                # 결과 출력 시에도 '호호' 중복을 막기 위해 깔끔해진 clean_ho 전달
                 st.markdown(get_custom_fortune(f_dong, clean_ho, type_dict), unsafe_allow_html=True)
                 
     # 🔥 메인에서 이사 온 VIP 사주 상담 버튼 (항상 노출되도록 버튼 아래 배치)
