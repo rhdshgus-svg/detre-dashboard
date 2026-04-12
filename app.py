@@ -290,7 +290,48 @@ def format_korean_money(price_str):
             return f"{man:,}만원"
     except:
         return f"{price_str}만원"
+# ==========================================
+# 🚨 회장님 지시사항: 서버 접속 종료 대비 긴급 안내 및 새로고침 버튼
+# ==========================================
+st.markdown("""
+<style>
+    /* 상단 고정 안내 바 스타일 */
+    .emergency-box {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: #FF3B30; /* 눈에 확 띄는 빨간색 경고 */
+        color: white;
+        text-align: center;
+        padding: 10px 0;
+        z-index: 1000000; /* 모든 레이아웃의 최상단 */
+        font-size: 14px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+    }
+    .refresh-mini-btn {
+        background-color: white;
+        color: #FF3B30;
+        border: none;
+        padding: 5px 12px;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 13px;
+    }
+</style>
 
+<div class="emergency-box">
+    <span>⚠️ 배터리 절약을 위해 서버가 접속을 종료하였습니다.</span>
+    <button class="refresh-mini-btn" onclick="window.parent.location.reload();">🔄 새로고침 버튼을 눌러주세요</button>
+</div>
+
+<div style="margin-top: 50px;"></div>
+""", unsafe_allow_html=True)
 # ==========================================
 # [블록 4] 실시간 경제 API 연동 봇
 # ==========================================
@@ -569,20 +610,31 @@ def get_custom_fortune(dong, ho, type_dict):
 # ==========================================
 try:
     title_logo = Image.open("detre_logo.png")
+    # ✅ 툴바와의 완벽한 대비를 위해, 파이썬 화면 전체 배경을 흰색으로 강제 고정합니다!
+    st.markdown("""
+        <style>
+            [data-testid="stAppViewContainer"] {
+                background-color: #ffffff;
+            }
+            [data-testid="stHeader"] {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+        </style>
+    """, unsafe_allow_html=True)
+    
     st.markdown("<div style='text-align:center; margin-bottom:15px;'>", unsafe_allow_html=True)
     st.image(title_logo, use_column_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
 except Exception:
-    st.markdown("<div class='premium-title'>Detre Granluce</div>", unsafe_allow_html=True)
+    st.markdown("<div class='premium-title' style='color: #000000;'>Detre Granluce</div>", unsafe_allow_html=True)
 
 st.markdown("""
 <div style='display: flex; flex-direction: column; gap: 4px; margin-bottom: 15px;'>
-    <a href="https://form.jotform.com/240628865713463" target="_blank" class='official-btn btn-naver'>📝 그랑루체 공식카페 (위임동의서 제출)</a>
-    <a href="https://open.kakao.com/o/ggAiqg4f" target="_blank" class='official-btn btn-kakao-official'>💬 그랑루체 공식 카카오톡 입장</a>
+    <a href="https://form.jotform.com/240628865713463" target="_blank" class='official-btn btn-naver' style='color: #000000;'>📝 그랑루체 공식카페 (위임동의서 제출)</a>
+    <a href="https://open.kakao.com/o/ggAiqg4f" target="_blank" class='official-btn btn-kakao-official' style='color: #000000;'>💬 그랑루체 공식 카카오톡 입장</a>
 </div>
 <div class='notice-text'>🚨 현황판에 미표기된 세대는 회장님 및 임원진에게 요청부탁드립니다.</div>
 """, unsafe_allow_html=True)
-
 # ==========================================
 # [블록 5] 종합 포털 탭(Tab) 메뉴 
 # ==========================================
