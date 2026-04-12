@@ -156,7 +156,7 @@ st.markdown("""
         .disclaimer-box { background: rgba(255, 59, 48, 0.05); border: 1px solid rgba(255, 59, 48, 0.3); border-radius: 8px; padding: 12px; text-align: center; margin-top: 10px; }
         .disclaimer-text { color: gray; font-size: 0.75em; margin-top: 5px; margin-bottom: 0; line-height: 1.5; }
 
-        /* 🔥 라디오버튼/셀렉트박스는 원래 테마 유지하고, 자납 등 넘버/데이트 입력창 제목만 하얗게 강제 지정! */
+        /* 🔥 입력창(Input) 라벨 텍스트 하얗고 진하게 완벽 강제 변경 (흐림/투명도 제거) */
         div[data-testid="stNumberInput"] label p, 
         div[data-testid="stDateInput"] label p {
             color: #ffffff !important;
@@ -486,7 +486,7 @@ def get_global_stocks_api():
     
     # 2. 주요 국가 환율
     html += "<tr style='background-color:rgba(255,255,255,0.05);'><th colspan='2' style='color:#D4AF37; text-align:center; padding:8px 0; border-top:1px solid #333; font-size:0.95em;'>💱 주요 국가 환율</th></tr>"
-    for name, sym, mult in [("💵 미국 (USD/KRW)", "KRW=X", 1), ("💶 유럽 (EUR/KRW)", "EURKRW=X", 1), ("🇯 ঐতি 일본 (100 JPY/KRW)", "JPYKRW=X", 100)]:
+    for name, sym, mult in [("💵 미국 (USD/KRW)", "KRW=X", 1), ("💶 유럽 (EUR/KRW)", "EURKRW=X", 1), ("🇯🇵 일본 (100 JPY/KRW)", "JPYKRW=X", 100)]:
         html += fetch_yahoo(name, sym, mult)
         
     # 3. 대한민국 10대 해외여행지 환율
@@ -724,6 +724,8 @@ with tab2:
 
             self_pays = []
             total_self_pay_amt = 0 
+            
+            st.info(f"💡 각 회차별 최대 납부 가능액(중도금액)은 **{int(installment_amt):,}원** 입니다. 초과 입력 시 자동으로 경고가 발생합니다.")
 
             with st.expander("💸 자납(직접 납부) 세대 상세 설정 (클릭하여 열기)"):
                 st.markdown("<p style='font-size:0.85em; color:#bbb; margin-bottom:15px;'>해당 회차에 직접 납부하신 금액이 있다면 아래에 적어주세요. (없는 회차는 0원 그대로 두시면 됩니다.)</p>", unsafe_allow_html=True)
@@ -752,16 +754,16 @@ with tab2:
                 sp = self_pays[i]
                 
                 interest = 0
+                total_days = (end_date - exec_date).days
+                
                 if sp['is_self'] and sp['amt'] > 0:
                     sp_date = sp['date']
                     if sp_date <= exec_date: 
                         loan_amt = installment_amt - sp['amt']
-                        days = (end_date - exec_date).days
-                        interest = loan_amt * (rate / 100) * (days / 365)
+                        interest = loan_amt * (rate / 100) * (total_days / 365)
                     elif sp_date >= end_date: 
                         loan_amt = installment_amt
-                        days = (end_date - exec_date).days
-                        interest = loan_amt * (rate / 100) * (days / 365)
+                        interest = loan_amt * (rate / 100) * (total_days / 365)
                     else: 
                         days1 = (sp_date - exec_date).days
                         int1 = installment_amt * (rate / 100) * (days1 / 365)
@@ -771,13 +773,12 @@ with tab2:
                         interest = int1 + int2
                 else:
                     loan_amt = installment_amt
-                    days = (end_date - exec_date).days
-                    interest = loan_amt * (rate / 100) * (days / 365)
+                    interest = loan_amt * (rate / 100) * (total_days / 365)
                     
                 total_interest += interest
                 sp_mark = "<br><span style='color:#34d399; font-size:0.75em;'>(자납반영)</span>" if sp['is_self'] and sp['amt']>0 else ""
                 
-                html_table += f"<tr><td>{i+1}회차{sp_mark}<br><span style='font-size:0.7em; color:#888;'>({days}일)</span></td><td>{dates[i].strftime('%Y.%m.%d')}</td><td><span class='{status_tags[i]}'>{rates[i]:.2f}% ({status_texts[i]})</span></td><td style='text-align:right !important; padding-right:12px !important; color:#ffffff !important; font-weight:800;'>{int(interest):,} 원</td></tr>"
+                html_table += f"<tr><td>{i+1}회차{sp_mark}<br><span style='font-size:0.7em; color:#888;'>({total_days}일)</span></td><td>{dates[i].strftime('%Y.%m.%d')}</td><td><span class='{status_tags[i]}'>{rates[i]:.2f}% ({status_texts[i]})</span></td><td style='text-align:right !important; padding-right:12px !important; color:#ffffff !important; font-weight:800;'>{int(interest):,} 원</td></tr>"
 
             html_table += "</table></div>"
 
