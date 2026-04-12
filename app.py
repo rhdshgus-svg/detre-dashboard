@@ -16,8 +16,8 @@ import streamlit.components.v1 as components
 # [블록 1] 기본 화면 설정 및 🚨 구글 애널리틱스(CCTV) 강제 구동
 # ==========================================
 try:
-    logo_img = Image.open("logo.png")
-    st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon=logo_img, layout="centered")
+    favicon_img = Image.open("detre_logo.png")
+    st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon=favicon_img, layout="centered")
 except Exception:
     st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon="🏢", layout="centered")
 
@@ -34,10 +34,11 @@ ga_script = f"""
 components.html(ga_script, width=0, height=0)
 
 # ==========================================
-# [블록 2] CSS 스타일링 (아버님 커스텀 CSS 포함)
+# [블록 2] CSS 스타일링 (아버님 커스텀 CSS + 모바일 표 깨짐 방지)
 # ==========================================
 st.markdown("""
     <meta name="google" content="notranslate">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135673.png">
     <link rel="icon" sizes="192x192" href="https://cdn-icons-png.flaticon.com/512/3135/3135673.png">
     <style>
@@ -45,7 +46,7 @@ st.markdown("""
             overscroll-behavior: none !important; overscroll-behavior-y: none !important; overscroll-behavior-x: none !important;
         }
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-        * { font-family: 'Pretendard', sans-serif; }
+        * { font-family: 'Pretendard', sans-serif; box-sizing: border-box; }
         #MainMenu {visibility: hidden;} footer {visibility: hidden;} header {visibility: hidden;}
         .block-container { padding-top: 1.0rem !important; padding-bottom: 0.5rem !important; padding-left: 4px !important; padding-right: 4px !important; max-width: 100% !important; }
         
@@ -132,7 +133,7 @@ st.markdown("""
         
         .by-text { text-align: right; color: #444; font-size: 0.6em; margin-top: 40px; margin-bottom: 10px; padding-right: 10px; }
 
-        /* 🔥 아버님 커스텀 계산기 CSS 추가 */
+        /* 🔥 아버님 커스텀 계산기 CSS 추가 & 모바일 가로 스크롤 대응 */
         .calc-premium-title { font-size: clamp(2.0em, 8vw, 2.5em); font-weight: 900; text-align: center; color: #0A84FF !important; margin-bottom: 12px; line-height: 1.2; text-shadow: 0px 2px 4px rgba(0,0,0,0.1); }
         .calc-box { background: linear-gradient(145deg, #1c1c1e, #111111); border: 1px solid #D4AF37; border-radius: 12px; padding: 20px 15px; margin-top: 15px; text-align: center; box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
         .calc-title { color: #D4AF37 !important; font-size: 0.95em; font-weight: 800; margin-bottom: 5px; }
@@ -144,7 +145,9 @@ st.markdown("""
         .summary-label { font-size: 0.9em; font-weight: 600; color: #e2e8f0 !important; text-align: left; line-height: 1.4;}
         .summary-val { font-size: 1.3em; font-weight: 900; color: #ffffff !important; text-align: right; }
         .summary-val-highlight { font-size: 1.6em; font-weight: 900; color: #fbbf24 !important; text-align: right; }
-        .calc-table { width: 100%; border-collapse: collapse; font-size: 0.85em; margin-top: 10px; background: rgba(0,0,0,0.4); border-radius: 8px; overflow: hidden; }
+        
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 8px; }
+        .calc-table { width: 100%; border-collapse: collapse; font-size: 0.85em; min-width: 320px; background: rgba(0,0,0,0.4); overflow: hidden; }
         .calc-table th { background: rgba(212,175,55,0.15); color: #D4AF37 !important; border-bottom: 1px solid #444; padding: 12px 4px; font-weight: 800; text-align: center; }
         .calc-table td { color: #ffffff !important; border-bottom: 1px dotted #444; padding: 12px 4px; text-align: center; font-weight: 600; }
         .hl-fixed { color: #34d399 !important; font-weight: 800; } 
@@ -464,7 +467,7 @@ def get_global_stocks_api():
         except:
             return f"<tr><th>{name}</th><td>조회지연 <span class='delta-new' style='margin-left:4px; font-weight:800;'>-</span></td></tr>"
 
-    html = "<table class='econ-table'>"
+    html = "<div class='table-responsive'><table class='econ-table'>"
     
     # 1. 글로벌 주요 증시
     for name, sym in [("🇺🇸 나스닥", "^IXIC"), ("🇺🇸 S&P 500", "^GSPC"), ("🇰🇷 코스피", "^KS11"), ("🇰🇷 코스닥", "^KQ11")]:
@@ -487,7 +490,7 @@ def get_global_stocks_api():
     for name, sym, mult in tourist_dests:
         html += fetch_yahoo(name, sym, mult)
 
-    html += "</table>"
+    html += "</table></div>"
     return html
 
 # ==========================================
@@ -520,7 +523,7 @@ def get_custom_fortune(dong, ho, type_dict):
     
     if "59" in unit_type: 
         fortune_pools = [
-            "이 호수와 인연을 맺으실 귀하는 상황 판단이 빠르고 위기 속에서도 반드시 해결책을 찾아내는 남다른 생존력과 직관의 사주를 지녔습니다. 겉보기엔 상황에 순응하는 듯 보여도, 내면에는 절대 꺾이지 강한 승부욕을 품고 계시군요. 남들에게 크게 의지하기보다 스스로의 힘으로 길을 개척해 오느라 남몰래 겪은 고단함이 있었겠으나, 이 터의 맑은 기운이 귀하의 그 뚝심과 만나 마침내 폭발적인 보상으로 돌아오기 시작합니다.",
+            "이 호수와 인연을 맺으실 귀하는 상황 판단이 빠르고 위기 속에서도 반드시 해결책을 찾아내는 남다른 생존력과 직관의 사주를 지녔습니다. 겉보기엔 상황에 순응하는 듯 보여도, 내면에는 절대 꺾이지 않는 강한 승부욕을 품고 계시군요. 남들에게 크게 의지하기보다 스스로의 힘으로 길을 개척해 오느라 남몰래 겪은 고단함이 있었겠으나, 이 터의 맑은 기운이 귀하의 그 뚝심과 만나 마침내 폭발적인 보상으로 돌아오기 시작합니다.",
             "귀하는 타인의 화려한 겉치레에 휩쓸리지 않고, 자신만의 속도와 기준으로 내실을 단단하게 다질 줄 아는 현명한 명조를 타고났습니다. 때로는 주변에서 귀하의 깊은 뜻을 알아주지 않아 외로움을 느꼈을 수 있으나, 결국 최후에 웃는 것은 귀하입니다. 이 터는 그런 귀하의 실용적이고 단단한 기운을 완벽하게 품어주는 둥지 역할을 할 것입니다."
         ]
     elif "110" in unit_type or "114" in unit_type or "104" in unit_type: 
@@ -548,9 +551,16 @@ def get_custom_fortune(dong, ho, type_dict):
     return result_html
 
 # ==========================================
-# 🚨 메인 상단 타이틀 영역 
+# 🚨 메인 상단 타이틀 영역 (이미지 로고 적용)
 # ==========================================
-st.markdown("<div class='premium-title'>Detre Granluce</div>", unsafe_allow_html=True)
+try:
+    title_logo = Image.open("detre_logo.png")
+    st.markdown("<div class='logo-container'>", unsafe_allow_html=True)
+    st.image(title_logo, use_column_width=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+except Exception:
+    st.markdown("<div class='premium-title'>Detre Granluce</div>", unsafe_allow_html=True)
+
 st.markdown("""
 <div style='display: flex; flex-direction: column; gap: 4px; margin-bottom: 15px;'>
     <a href="https://form.jotform.com/240628865713463" target="_blank" class='official-btn btn-naver'>📝 그랑루체 공식카페 (위임동의서 제출)</a>
@@ -562,7 +572,7 @@ st.markdown("""
 # ==========================================
 # [블록 5] 종합 포털 탭(Tab) 메뉴 (🔥 아버님 계산기가 2번째 탭으로!)
 # ==========================================
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏢 입주현황", "💰 입주자금계산", "📊 입주민 전용정보", "🔮 오늘의 운세", "📰 관련뉴스"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏢 입주현황", "💰 이자계산기", "📊 전용정보", "🔮 오늘의 운세", "📰 관련뉴스"])
 
 # ------------------------------------------
 # [탭 1] 메인: 세대별 입주현황
@@ -622,10 +632,10 @@ with tab1:
     st.markdown(html_grid, unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 2] 🚨 아버님표 입주 자금 계산 시뮬레이션
+# [탭 2] 🚨 아버님표 이자계산기 시뮬레이션
 # ------------------------------------------
 with tab2:
-    st.markdown("<div class='calc-premium-title'>💰 입주 자금 계산 시뮬레이션</div>", unsafe_allow_html=True)
+    st.markdown("<div class='calc-premium-title'>💰 이자계산기</div>", unsafe_allow_html=True)
 
     if not price_data:
         st.warning("데이터가 없습니다. 엑셀 파일을 확인해주세요.")
@@ -653,7 +663,36 @@ with tab2:
             unpaid_contract_amt = total_price * 0.05 if "5%" in contract_type else 0
             paid_contract_amt = contract_total_amt - unpaid_contract_amt
 
-            top_dashboard = f"<div style='background:#1c1c1e; padding:15px; border-radius:10px; border:1px solid #444; margin-top: 10px; margin-bottom: 25px;'><table style='width:100%; border-collapse: collapse; text-align:center;'><tr style='color:#D4AF37; font-size:0.85em; font-weight:800; border-bottom:1px solid #333;'><td style='padding:5px 2px; width:25%;'>계약금 10%</td><td style='padding:5px 2px; width:25%; border-left:1px solid #333;'>중도금 60%</td><td style='padding:5px 2px; width:25%; border-left:1px solid #333;'>잔금 30%</td><td style='padding:5px 2px; width:25%; border-left:1px solid #333;'>총 분양가</td></tr><tr style='color:#ffffff; font-size:1.05em; font-weight:900;'><td style='padding:12px 2px;'>{int(contract_total_amt):,}원</td><td style='padding:12px 2px; border-left:1px solid #333;'>{int(installment_total_amt):,}원</td><td style='padding:12px 2px; border-left:1px solid #333;'>{int(balance_amt):,}원</td><td style='padding:12px 2px; border-left:1px solid #333; color:#fbbf24;'>{total_price:,}원</td></tr><tr style='font-size:0.75em;'><td style='padding:8px 2px; vertical-align:top;'><div style='background:rgba(0,0,0,0.3); padding:6px; border-radius:6px; line-height:1.4;'><span style='color:#34d399;'>기납부액: {int(paid_contract_amt):,}원</span><br><span style='color:#f87171; font-weight:800;'>미납잔액: {int(unpaid_contract_amt):,}원</span></div></td><td style='padding:8px 2px; border-left:1px solid #333; vertical-align:top;'><div style='color:#bbb; padding-top:6px;'>회당(10%):<br>{int(installment_amt):,}원</div></td><td style='padding:8px 2px; border-left:1px solid #333;'></td><td style='padding:8px 2px; border-left:1px solid #333;'></td></tr></table></div>"
+            top_dashboard = f"""
+            <div class='table-responsive'>
+                <table style='width:100%; border-collapse: collapse; text-align:center; background:#1c1c1e; border-radius:10px; border:1px solid #444; margin-top: 10px; margin-bottom: 25px;'>
+                    <tr style='color:#D4AF37; font-size:0.85em; font-weight:800; border-bottom:1px solid #333;'>
+                        <td style='padding:8px 2px; width:25%;'>계약금 10%</td>
+                        <td style='padding:8px 2px; width:25%; border-left:1px solid #333;'>중도금 60%</td>
+                        <td style='padding:8px 2px; width:25%; border-left:1px solid #333;'>잔금 30%</td>
+                        <td style='padding:8px 2px; width:25%; border-left:1px solid #333;'>총 분양가</td>
+                    </tr>
+                    <tr style='color:#ffffff; font-size:1.05em; font-weight:900;'>
+                        <td style='padding:12px 2px;'>{int(contract_total_amt):,}원</td>
+                        <td style='padding:12px 2px; border-left:1px solid #333;'>{int(installment_total_amt):,}원</td>
+                        <td style='padding:12px 2px; border-left:1px solid #333;'>{int(balance_amt):,}원</td>
+                        <td style='padding:12px 2px; border-left:1px solid #333; color:#fbbf24;'>{total_price:,}원</td>
+                    </tr>
+                    <tr style='font-size:0.75em;'>
+                        <td style='padding:8px 2px; vertical-align:top;'>
+                            <div style='background:rgba(0,0,0,0.3); padding:6px; border-radius:6px; line-height:1.4;'>
+                                <span style='color:#34d399;'>기납부액: {int(paid_contract_amt):,}원</span><br>
+                                <span style='color:#f87171; font-weight:800;'>미납잔액: {int(unpaid_contract_amt):,}원</span>
+                            </div>
+                        </td>
+                        <td style='padding:8px 2px; border-left:1px solid #333; vertical-align:top;'>
+                            <div style='color:#bbb; padding-top:6px;'>회당(10%):<br>{int(installment_amt):,}원</div>
+                        </td>
+                        <td style='padding:8px 2px; border-left:1px solid #333;'></td>
+                        <td style='padding:8px 2px; border-left:1px solid #333;'></td>
+                    </tr>
+                </table>
+            </div>"""
             st.markdown(top_dashboard, unsafe_allow_html=True)
 
             # ==========================================
@@ -691,7 +730,7 @@ with tab2:
                     st.markdown("<hr style='margin: 10px 0; border-color: #333;'>", unsafe_allow_html=True)
 
             total_interest = 0
-            html_table = "<table class='calc-table'><tr><th>회차</th><th>실행일</th><th>금리</th><th style='text-align:right !important; padding-right:12px !important;'>발생 이자액</th></tr>"
+            html_table = "<div class='table-responsive'><table class='calc-table'><tr><th>회차</th><th>실행일</th><th>금리</th><th style='text-align:right !important; padding-right:12px !important;'>발생 이자액</th></tr>"
 
             for i in range(6):
                 exec_date = dates[i]
@@ -726,7 +765,7 @@ with tab2:
                 
                 html_table += f"<tr><td>{i+1}회차{sp_mark}<br><span style='font-size:0.7em; color:#888;'>({days}일)</span></td><td>{dates[i].strftime('%Y.%m.%d')}</td><td><span class='{status_tags[i]}'>{rates[i]:.2f}% ({status_texts[i]})</span></td><td style='text-align:right !important; padding-right:12px !important; color:#ffffff !important; font-weight:800;'>{int(interest):,} 원</td></tr>"
 
-            html_table += "</table>"
+            html_table += "</table></div>"
 
             int_dashboard = f"<div class='calc-box'><div class='calc-title'>입주 시점(27.05.31) 총 중도금 이자 누적액</div><div class='calc-total'>{int(total_interest):,} 원</div>{html_table}</div>"
             st.markdown(int_dashboard, unsafe_allow_html=True)
