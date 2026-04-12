@@ -1011,7 +1011,7 @@ with tab4:
         <div style='text-align: center; margin-top: 25px; border-top: 1px dotted #333; padding-top: 15px;'>
             <p style='color:#8e8e93; font-size:0.75em; margin-bottom:5px;'>더 깊고 디테일한 운명이 궁금하시다면?</p>
             <a href="https://open.kakao.com/o/gEkb84oi" target="_blank" class='btn-vip-saju'>
-                🔮 [Sol 운명상점] 입주민 전용 1:1 사주상담 연결
+                🔮 [Sol 운명상점] 서비스 준비중
             </a>
         </div>
     """, unsafe_allow_html=True)
