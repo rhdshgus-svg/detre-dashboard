@@ -10,9 +10,10 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 from email.utils import parsedate_to_datetime
 from PIL import Image
+import streamlit.components.v1 as components
 
 # ==========================================
-# [블록 1] 기본 화면 설정 및 🚨 구글 애널리틱스(CCTV) 탑재
+# [블록 1] 기본 화면 설정 및 🚨 구글 애널리틱스(CCTV) 강제 구동
 # ==========================================
 try:
     logo_img = Image.open("logo.png")
@@ -20,7 +21,6 @@ try:
 except Exception:
     st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon="🏢", layout="centered")
 
-# 🔥 아버님의 구글 애널리틱스 추적 코드 심기!
 GA_ID = "G-K4JM55MDEQ"
 ga_script = f"""
 <script async src="https://www.googletagmanager.com/gtag/js?id={GA_ID}"></script>
@@ -31,7 +31,7 @@ ga_script = f"""
   gtag('config', '{GA_ID}');
 </script>
 """
-st.markdown(ga_script, unsafe_allow_html=True)
+components.html(ga_script, width=0, height=0)
 
 # ==========================================
 # [블록 2] CSS 스타일링
@@ -49,10 +49,11 @@ st.markdown("""
         #MainMenu {visibility: hidden;} footer {visibility: hidden;} header {visibility: hidden;}
         .block-container { padding-top: 1.0rem !important; padding-bottom: 0.5rem !important; padding-left: 4px !important; padding-right: 4px !important; max-width: 100% !important; }
         
-        .premium-title { font-size: clamp(2.0em, 8vw, 2.8em); font-weight: 900; text-align: center; color: #2b6cb0; text-shadow: 0 2px 10px rgba(43, 108, 176, 0.3); margin-bottom: 4px; line-height: 1.2; }
-        .promo-title { font-size: 0.85em; text-align: center; color: #D4AF37; font-weight: 700; margin-top: 0px; margin-bottom: 8px; line-height: 1.3; }
+        .premium-title { font-size: clamp(2.0em, 8vw, 2.8em); font-weight: 900; text-align: center; color: #2b6cb0; text-shadow: 0 2px 10px rgba(43, 108, 176, 0.3); margin-bottom: 12px; line-height: 1.2; }
         
-        .btn-saju { background-color: rgba(212, 175, 55, 0.1); color: #D4AF37 !important; border: 1px solid #D4AF37; display: inline-flex; justify-content: center; align-items: center; font-weight: 800; font-size: 0.75em; padding: 6px 16px; border-radius: 8px; text-decoration: none !important; margin-bottom: 15px; transition: all 0.2s ease; }
+        /* 🔥 신규: 사주 탭 전용 VIP 버튼 디자인 */
+        .btn-vip-saju { display: flex; justify-content: center; align-items: center; background: linear-gradient(135deg, #800020, #4a0012); color: #D4AF37 !important; border: 1px solid #D4AF37; font-weight: 900; font-size: 0.9em; padding: 12px 16px; border-radius: 10px; text-decoration: none !important; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.4); text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+        
         .official-btn { display: flex; justify-content: center; align-items: center; font-weight: 900; font-size: 0.85em; padding: 12px 16px; border-radius: 10px; text-decoration: none !important; margin-bottom: 6px; transition: all 0.2s ease; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         .btn-naver { background-color: #03C75A; color: white !important; }
         .btn-kakao-official { background-color: #FEE500; color: #191919 !important; }
@@ -499,15 +500,10 @@ def get_custom_fortune(dong, ho, type_dict):
     return result_html
 
 # ==========================================
-# 상단 타이틀 및 공통 배너 
+# 🚨 [수정됨] 메인 상단 타이틀 영역 (사주 버튼 제거 후 깔끔하게 정리)
 # ==========================================
 st.markdown("<div class='premium-title'>Detre Granluce</div>", unsafe_allow_html=True)
 st.markdown("""
-<div class='promo-title'>[Sol 운명상점] 사주 & MBTI 솔루션</div>
-<div style='text-align: center; width: 100%;'>
-    <a href="https://open.kakao.com/o/gEkb84oi" target="_blank" class='btn-saju'>💬 입주민전용 사주상담 연결</a>
-</div>
-
 <div style='display: flex; flex-direction: column; gap: 4px; margin-bottom: 15px;'>
     <a href="https://form.jotform.com/240628865713463" target="_blank" class='official-btn btn-naver'>📝 그랑루체 공식카페 (위임동의서 제출)</a>
     <a href="https://open.kakao.com/o/ggAiqg4f" target="_blank" class='official-btn btn-kakao-official'>💬 그랑루체 공식 카카오톡 입장</a>
@@ -717,11 +713,12 @@ with tab2:
         st.markdown(html_coming_soon, unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 3] 오늘의 운세 
+# [탭 3] 오늘의 운세 (🚨 사주 버튼 이동 및 디자인 강화)
 # ------------------------------------------
 with tab3:
     st.markdown("<h4 style='text-align:center; color:#D4AF37; margin-top:10px;'>🔮 팡도사의 동·호수 맞춤 신점</h4>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em;'>개인정보 입력 없이, 귀하의 사주 명조를 심층 분석하여 점쳐드립니다.</p>", unsafe_allow_html=True)
+    
     col_d, col_h = st.columns(2)
     with col_d: f_dong = st.selectbox("입주 예정 동", all_dongs_raw, key="f_dong", label_visibility="collapsed")
     with col_h: f_ho = st.text_input("입주 예정 호수", placeholder="호수 입력 (예: 1201)", key="f_ho", label_visibility="collapsed")
@@ -737,6 +734,16 @@ with tab3:
                 with st.spinner("🔮 팡도사가 고객님의 명조(命造)를 심층 분석 중입니다..."):
                     time.sleep(3.5) 
                 st.markdown(get_custom_fortune(f_dong, f_ho, type_dict), unsafe_allow_html=True)
+                
+    # 🔥 메인에서 이사 온 VIP 사주 상담 버튼 (항상 노출되도록 버튼 아래 배치)
+    st.markdown("""
+        <div style='text-align: center; margin-top: 25px; border-top: 1px dotted #333; padding-top: 15px;'>
+            <p style='color:#8e8e93; font-size:0.75em; margin-bottom:5px;'>더 깊고 디테일한 운명이 궁금하시다면?</p>
+            <a href="https://open.kakao.com/o/gEkb84oi" target="_blank" class='btn-vip-saju'>
+                🔮 [Sol 운명상점] 입주민 전용 1:1 사주상담 연결
+            </a>
+        </div>
+    """, unsafe_allow_html=True)
 
 # ------------------------------------------
 # [탭 4] 관련뉴스 
