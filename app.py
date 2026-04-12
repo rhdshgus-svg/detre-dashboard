@@ -16,7 +16,7 @@ import streamlit.components.v1 as components
 # [블록 1] 기본 화면 설정 및 🚨 구글 애널리틱스(CCTV) 강제 구동
 # ==========================================
 try:
-    logo_img = Image.open("detre_logo.png") # 파비콘(탭 아이콘)도 공식 로고로 변경!
+    logo_img = Image.open("logo.png")
     st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon=logo_img, layout="centered")
 except Exception:
     st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon="🏢", layout="centered")
@@ -500,17 +500,9 @@ def get_custom_fortune(dong, ho, type_dict):
     return result_html
 
 # ==========================================
-# 🚨 [수정됨] 메인 상단 타이틀 영역 (대방건설 공식 로고 적용)
+# 🚨 메인 상단 타이틀 영역
 # ==========================================
-col_logo1, col_logo2, col_logo3 = st.columns([1, 2, 1])
-with col_logo2:
-    try:
-        st.image("detre_logo.png", use_container_width=True)
-    except:
-        st.markdown("<div class='premium-title'>Detre Granluce</div>", unsafe_allow_html=True)
-
-st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
-
+st.markdown("<div class='premium-title'>Detre Granluce</div>", unsafe_allow_html=True)
 st.markdown("""
 <div style='display: flex; flex-direction: column; gap: 4px; margin-bottom: 15px;'>
     <a href="https://form.jotform.com/240628865713463" target="_blank" class='official-btn btn-naver'>📝 그랑루체 공식카페 (위임동의서 제출)</a>
@@ -520,9 +512,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# [블록 5] 종합 포털 탭(Tab) 메뉴
+# [블록 5] 종합 포털 탭(Tab) 메뉴 (🔥 이자계산기 추가하여 5개 탭으로 구성)
 # ==========================================
-tab1, tab2, tab3, tab4 = st.tabs(["🏢 입주현황", "📊 입주민 전용정보", "🔮 오늘의 운세", "📰 관련뉴스"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏢 입주현황", "💰 이자계산기", "📊 입주민 전용정보", "🔮 오늘의 운세", "📰 관련뉴스"])
 
 # ------------------------------------------
 # [탭 1] 메인: 세대별 입주현황
@@ -582,9 +574,83 @@ with tab1:
     st.markdown(html_grid, unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 2] 핵심비밀정보 (심리전 UX 탑재)
+# [탭 2] 신규 탑재: 💰 대출이자 계산기
 # ------------------------------------------
 with tab2:
+    st.markdown("<h3 style='text-align:center; color:#D4AF37; font-weight:900; margin-top:5px; margin-bottom:2px; letter-spacing:-1px;'>💰 스마트 대출이자 계산기</h3>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em; margin-bottom:15px;'>※ 복잡한 엑셀 파일 없이, 내 손안에서 즉시 확인하는 자금 계획</p>", unsafe_allow_html=True)
+
+    with st.container():
+        st.markdown("<div style='background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; border: 1px solid #333; margin-bottom: 10px;'>", unsafe_allow_html=True)
+        
+        # 1. 입력부 (디자인 최적화를 위해 컬럼 분할)
+        col_p, col_r = st.columns(2)
+        with col_p:
+            principal_man = st.number_input("대출 원금 (단위: 만원)", min_value=100, max_value=200000, value=30000, step=1000, format="%d")
+        with col_r:
+            annual_rate = st.number_input("연 이자율 (%)", min_value=0.1, max_value=20.0, value=3.5, step=0.1, format="%.2f")
+
+        col_y, col_t = st.columns(2)
+        with col_y:
+            years = st.selectbox("대출 기간", [1, 2, 3, 5, 10, 15, 20, 30, 40, 50], index=7, format_func=lambda x: f"{x}년")
+        with col_t:
+            repay_type = st.selectbox("상환 방식", ["원리금균등", "원금균등", "만기일시"])
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        # 2. 파이썬 기반 금융 알고리즘 계산부
+        if st.button("계산 결과 확인하기", use_container_width=True):
+            P = principal_man * 10000  # 만원 단위를 원 단위로 변환
+            r = annual_rate / 100 / 12 # 월 이자율
+            n = years * 12             # 총 상환 개월 수
+
+            total_interest = 0
+            total_payment = 0
+            monthly_payment_str = ""
+
+            if P > 0 and n > 0:
+                if repay_type == "원리금균등":
+                    if r == 0:
+                        monthly_pmt = P / n
+                        total_interest = 0
+                    else:
+                        monthly_pmt = P * r * ((1+r)**n) / (((1+r)**n) - 1)
+                        total_payment = monthly_pmt * n
+                        total_interest = total_payment - P
+                    monthly_payment_str = f"매월 <b style='font-size:1.1em;'>{int(monthly_pmt):,}</b>원 (일정)"
+
+                elif repay_type == "원금균등":
+                    monthly_principal = P / n
+                    if r == 0:
+                        total_interest = 0
+                        first_month = monthly_principal
+                    else:
+                        total_interest = P * r * (n + 1) / 2
+                        first_month = monthly_principal + (P * r)
+                    total_payment = P + total_interest
+                    monthly_payment_str = f"첫 달 <b style='font-size:1.1em;'>{int(first_month):,}</b>원 (매월 감소)"
+
+                elif repay_type == "만기일시":
+                    monthly_interest = P * r
+                    total_interest = monthly_interest * n
+                    total_payment = P + total_interest
+                    monthly_payment_str = f"매월 <b style='font-size:1.1em;'>{int(monthly_interest):,}</b>원 (이자만)"
+
+                # 3. 결과 출력부 (기존 프리미엄 CSS 테마 활용)
+                res_html = f"""
+                <div class='stat-box-new' style='flex-direction:column; padding:15px; margin-top:5px; border:1px solid #D4AF37; background: linear-gradient(145deg, #2c2c2e, #1c1c1e);'>
+                    <div style='text-align:center; color:#8e8e93; font-size:0.85em; margin-bottom:15px; font-weight:800;'>📌 {repay_type}상환 | 연 {annual_rate}% | {years}년</div>
+                    <div class='stat-row' style='margin-bottom:10px;'><span class='stat-label'>월별 상환액</span><span class='stat-value' style='font-size:1.0em; color:#03C75A;'>{monthly_payment_str}</span></div>
+                    <div class='stat-row' style='margin-bottom:10px;'><span class='stat-label'>총 납부 이자액</span><span class='stat-value' style='color:#FF3B30; font-weight:900;'>{int(total_interest):,}원</span></div>
+                    <div class='stat-row' style='border-top:1px dashed #555; padding-top:12px; margin-top:5px;'><span class='stat-label' style='color:#d1d1d6; font-weight:900;'>총 상환금액 (원금+이자)</span><span class='stat-value' style='font-size:1.25em; color:#D4AF37; font-weight:900;'>{int(total_payment):,}원</span></div>
+                </div>
+                """
+                st.markdown(res_html, unsafe_allow_html=True)
+
+
+# ------------------------------------------
+# [탭 3] 핵심비밀정보 (심리전 UX 탑재)
+# ------------------------------------------
+with tab3:
     st.markdown("<h3 style='text-align:center; color:#D4AF37; font-weight:900; margin-top:0px; margin-bottom:2px; letter-spacing:-1px;'>📊 입주민 전용정보</h3>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em; margin-bottom:10px;'>※ <span style='color:#03C75A;'>Advanced Data Pipeline</span> 기술로 수집된 실시간 지표</p>", unsafe_allow_html=True)
 
@@ -721,9 +787,9 @@ with tab2:
         st.markdown(html_coming_soon, unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 3] 오늘의 운세 (🚨 사주 버튼 이동 및 디자인 강화)
+# [탭 4] 오늘의 운세 (🚨 사주 버튼 이동 및 디자인 강화)
 # ------------------------------------------
-with tab3:
+with tab4:
     st.markdown("<h4 style='text-align:center; color:#D4AF37; margin-top:10px;'>🔮 팡도사의 동·호수 맞춤 신점</h4>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em;'>개인정보 입력 없이, 귀하의 사주 명조를 심층 분석하여 점쳐드립니다.</p>", unsafe_allow_html=True)
     
@@ -754,9 +820,9 @@ with tab3:
     """, unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 4] 관련뉴스 
+# [탭 5] 관련뉴스 
 # ------------------------------------------
-with tab4:
+with tab5:
     st.markdown("<div style='background: linear-gradient(90deg, #F0F4F8, #D9E2EC); padding: 12px; border-radius: 8px; margin-top: 10px; margin-bottom: 15px;'><h4 style='text-align:center; color:#0B1E36; font-weight:900; margin:0; letter-spacing:-0.5px;'>📰 우리단지 관련뉴스</h4></div>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; color:#ff9f0a; font-size:0.75em; margin-bottom:15px;'>🚨 최근 30일이내 기사중 중복내용 제외 10건만 노출됩니다.</p>", unsafe_allow_html=True)
     try:
