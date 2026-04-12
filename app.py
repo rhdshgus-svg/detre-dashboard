@@ -995,16 +995,22 @@ with tab4:
     with col_h: f_ho = st.text_input("입주 예정 호수", placeholder="호수 입력 (예: 1201)", key="f_ho", label_visibility="collapsed")
     
     if st.button("✨ 오늘 나의 무료신점 뽑기", use_container_width=True):
-        if f_ho.strip() == "": st.warning("호수를 정확히 입력해주세요! (예: 1201)")
+        # 🔥 사모님 맞춤형 패치: 사용자가 입력한 값에서 '숫자'가 아닌 모든 글자(호, 공백 등)를 강제 삭제!
+        clean_ho = re.sub(r'[^0-9]', '', f_ho)
+        
+        if clean_ho == "": 
+            st.warning("호수를 정확히 숫자로 입력해주세요! (예: 1201)")
         else:
             valid_combinations = set(zip(df_layout['동'], df_layout['호']))
-            input_ho_formatted = f_ho.strip().zfill(4) 
+            input_ho_formatted = clean_ho.zfill(4) 
+            
             if (f_dong, input_ho_formatted) not in valid_combinations:
                 st.warning("🔮 앗! 해당 동·호수는 팡도사의 레이더에 잡히지 않는 '없는 기운'입니다. 혹시 아직 지어지지 않은 허공의 터를 누르신 건 아니겠죠? 😅 동과 호수를 다시 한번 정확히 확인해 주세요!")
             else:
                 with st.spinner("🔮 팡도사가 고객님의 명조(命造)를 심층 분석 중입니다..."):
                     time.sleep(3.5) 
-                st.markdown(get_custom_fortune(f_dong, f_ho, type_dict), unsafe_allow_html=True)
+                # 결과 출력 시에도 '호호' 중복을 막기 위해 깔끔해진 clean_ho 전달
+                st.markdown(get_custom_fortune(f_dong, clean_ho, type_dict), unsafe_allow_html=True)
                 
     # 🔥 메인에서 이사 온 VIP 사주 상담 버튼 (항상 노출되도록 버튼 아래 배치)
     st.markdown("""
