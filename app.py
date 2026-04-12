@@ -13,7 +13,7 @@ from PIL import Image
 import streamlit.components.v1 as components
 
 # ==========================================
-# [블록 1] 기본 화면 설정 및 🚨 구글 애널리틱스(CCTV) 가동
+# [블록 1] 기본 화면 설정 및 🚨 슈퍼 자동 복구 엔진 (500 에러 원천 봉쇄)
 # ==========================================
 try:
     logo_img = Image.open("detre_logo.png")
@@ -22,17 +22,52 @@ except Exception:
     st.set_page_config(page_title="디에트르 그랑루체 입주민 포털", page_icon="🏢", layout="centered")
 
 GA_ID = "G-K4JM55MDEQ"
-ga_script = f"""
+# 🔥 이 스크립트가 아버님의 불편함을 해결해줄 핵심 엔진입니다!
+repair_script = f"""
 <script async src="https://www.googletagmanager.com/gtag/js?id={GA_ID}"></script>
 <script>
-  /* 구글 애널리틱스 (CCTV) 전용 스크립트 */
+  /* 1. 구글 애널리틱스 (CCTV) */
   window.dataLayer = window.dataLayer || [];
   function gtag(){{dataLayer.push(arguments);}}
   gtag('js', new Date());
   gtag('config', '{GA_ID}');
+
+  /* 2. 슈퍼 자동 복구 엔진 (Auto-Repair) */
+  // 사용자가 유튜브 보다가 돌아오는 '복귀' 시점을 감시합니다.
+  document.addEventListener('visibilitychange', function() {{
+    if (document.visibilityState === 'visible') {{
+      // 0.3초 정도 여유를 주고 상태를 체크합니다.
+      setTimeout(function() {{
+        // 에러 모달, 연결 끊김 메시지, 혹은 500 에러 특유의 UI 요소가 있는지 확인
+        const errorText = document.body.innerText;
+        const hasError = errorText.includes('Connection lost') || 
+                         errorText.includes('500') || 
+                         errorText.includes('Server Error') ||
+                         document.querySelector('[data-testid="stNotification"]');
+
+        if (hasError) {{
+          // 만약 에러가 감지되면, 아버님이 새로고침 누를 필요 없이 앱이 스스로 재시작!
+          window.location.reload(true);
+        }}
+      }}, 300);
+    }}
+  }});
+
+  // 연결이 끊겼을 때 나타나는 스트림릿 특유의 '오버레이'도 감시해서 즉시 새로고침
+  const observer = new MutationObserver(function(mutations) {{
+    mutations.forEach(function(mutation) {{
+      if (mutation.addedNodes.length) {{
+        const overlay = document.querySelector('.stStatusWidget');
+        if (overlay && overlay.innerText.includes('Error')) {{
+          window.location.reload(true);
+        }}
+      }}
+    }});
+  }});
+  observer.observe(document.body, {{ childList: true, subtree: true }});
 </script>
 """
-components.html(ga_script, width=0, height=0)
+components.html(repair_script, width=0, height=0)
 
 # ==========================================
 # [블록 2] CSS 스타일링 (📱 모바일 깨짐 완벽 방어 + UX 디테일 강화)
