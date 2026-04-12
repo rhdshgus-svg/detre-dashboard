@@ -290,48 +290,7 @@ def format_korean_money(price_str):
             return f"{man:,}만원"
     except:
         return f"{price_str}만원"
-# ==========================================
-# 🚨 회장님 지시사항: 서버 접속 종료 대비 긴급 안내 및 새로고침 버튼
-# ==========================================
-st.markdown("""
-<style>
-    /* 상단 고정 안내 바 스타일 */
-    .emergency-box {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        background-color: #FF3B30; /* 눈에 확 띄는 빨간색 경고 */
-        color: white;
-        text-align: center;
-        padding: 10px 0;
-        z-index: 1000000; /* 모든 레이아웃의 최상단 */
-        font-size: 14px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 15px;
-    }
-    .refresh-mini-btn {
-        background-color: white;
-        color: #FF3B30;
-        border: none;
-        padding: 5px 12px;
-        border-radius: 5px;
-        font-weight: bold;
-        cursor: pointer;
-        font-size: 13px;
-    }
-</style>
 
-<div class="emergency-box">
-    <span>⚠️ 배터리 절약을 위해 서버가 접속을 종료하였습니다.</span>
-    <button class="refresh-mini-btn" onclick="window.parent.location.reload();">🔄 새로고침 버튼을 눌러주세요</button>
-</div>
-
-<div style="margin-top: 50px;"></div>
-""", unsafe_allow_html=True)
 # ==========================================
 # [블록 4] 실시간 경제 API 연동 봇
 # ==========================================
