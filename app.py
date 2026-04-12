@@ -16,7 +16,7 @@ import streamlit.components.v1 as components
 # [블록 1] 기본 화면 설정 및 🚨 구글 애널리틱스(CCTV) 강제 구동
 # ==========================================
 try:
-    logo_img = Image.open("logo.png")
+    logo_img = Image.open("detre_logo.png") # 파비콘(탭 아이콘)도 공식 로고로 변경!
     st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon=logo_img, layout="centered")
 except Exception:
     st.set_page_config(page_title="디에트르 그랑루체 가입현황", page_icon="🏢", layout="centered")
@@ -500,9 +500,17 @@ def get_custom_fortune(dong, ho, type_dict):
     return result_html
 
 # ==========================================
-# 🚨 [수정됨] 메인 상단 타이틀 영역 (사주 버튼 제거 후 깔끔하게 정리)
+# 🚨 [수정됨] 메인 상단 타이틀 영역 (대방건설 공식 로고 적용)
 # ==========================================
-st.markdown("<div class='premium-title'>Detre Granluce</div>", unsafe_allow_html=True)
+col_logo1, col_logo2, col_logo3 = st.columns([1, 2, 1])
+with col_logo2:
+    try:
+        st.image("detre_logo.png", use_container_width=True)
+    except:
+        st.markdown("<div class='premium-title'>Detre Granluce</div>", unsafe_allow_html=True)
+
+st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+
 st.markdown("""
 <div style='display: flex; flex-direction: column; gap: 4px; margin-bottom: 15px;'>
     <a href="https://form.jotform.com/240628865713463" target="_blank" class='official-btn btn-naver'>📝 그랑루체 공식카페 (위임동의서 제출)</a>
