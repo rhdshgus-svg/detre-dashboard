@@ -77,9 +77,14 @@ st.markdown("""
         div[role="radiogroup"] { display: flex !important; flex-wrap: wrap !important; width: 100% !important; gap: 2px !important; justify-content: center !important; margin-bottom: 10px !important; }
         div[role="radiogroup"] > label { flex: 1 1 auto !important; min-width: 60px !important; background-color: transparent !important; border: none !important; border-bottom: 2px solid #333 !important; padding: 8px 4px !important; cursor: pointer !important; text-align: center !important; transition: all 0.3s ease; }
         div[role="radiogroup"] > label[data-checked="true"] { 
-            background: rgba(212, 175, 55, 0.2) !important; /* 🔥 아버님 요청: 선택 시 음영 팍! */
+            background: #D4AF37 !important; /* 🔥 찐한 골드 100% 팍! */
             border-bottom: 2px solid #D4AF37 !important; 
             border-radius: 6px 6px 0 0 !important;
+        }
+        div[role="radiogroup"] > label[data-checked="true"] p { 
+            color: #111111 !important; /* 🔥 배경이 골드니까 글씨는 진한 흑색으로! */
+            font-weight: 900 !important; 
+        }
         }
         div[role="radiogroup"] > label > div:first-child { display: none !important; }
         div[role="radiogroup"] > label p { font-size: 0.85em !important; color: #888 !important; text-align: center !important; width: 100% !important; margin: 0 !important; }
