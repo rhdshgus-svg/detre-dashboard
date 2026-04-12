@@ -31,19 +31,19 @@ cpr_script = f"""
   gtag('js', new Date());
   gtag('config', '{GA_ID}');
 
-  /* 2. 모바일 백그라운드 복귀 시 에러 자동 복구 엔진 (심폐소생술) */
-  document.addEventListener('visibilitychange', function() {
-      if (document.visibilityState === 'visible') {
+  /* 2. 모바일 백그라운드 복귀 시 에러 자동 복구 엔진 (심폐소생술 - 중괄호 2개 규칙 완벽 적용!) */
+  document.addEventListener('visibilitychange', function() {{
+      if (document.visibilityState === 'visible') {{
           // 화면이 다시 켜졌을 때, 에러 모달 창이 떠있거나 연결이 끊겼다면 0.5초 뒤 자동 새로고침
-          setTimeout(function() {
+          setTimeout(function() {{
               const errorModal = document.querySelector('[data-testid="stModal"]');
               const disconnected = document.querySelector('[data-testid="stStatusWidget"]');
-              if (errorModal || (disconnected && disconnected.innerText.includes('Error'))) {
+              if (errorModal || (disconnected && disconnected.innerText.includes('Error'))) {{
                   window.location.reload(true);
-              }
-          }, 500);
-      }
-  });
+              }}
+          }}, 500);
+      }}
+  }});
 </script>
 """
 components.html(cpr_script, width=0, height=0)
