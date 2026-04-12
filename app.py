@@ -134,7 +134,7 @@ st.markdown("""
         
         .by-text { text-align: right; color: #444; font-size: 0.6em; margin-top: 40px; margin-bottom: 10px; padding-right: 10px; }
 
-        /* 🔥 아버님 커스텀 계산기 CSS 추가 */
+        /* 🔥 아버님 커스텀 계산기 CSS 추가 & 모바일 가로 스크롤 대응 */
         .calc-premium-title { font-size: clamp(2.0em, 8vw, 2.5em); font-weight: 900; text-align: center; color: #0A84FF !important; margin-bottom: 12px; line-height: 1.2; text-shadow: 0px 2px 4px rgba(0,0,0,0.1); }
         .calc-box { background: linear-gradient(145deg, #1c1c1e, #111111); border: 1px solid #D4AF37; border-radius: 12px; padding: 20px 15px; margin-top: 15px; text-align: center; box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
         .calc-title { color: #D4AF37 !important; font-size: 0.95em; font-weight: 800; margin-bottom: 5px; }
@@ -148,7 +148,7 @@ st.markdown("""
         .summary-val-highlight { font-size: 1.6em; font-weight: 900; color: #fbbf24 !important; text-align: right; }
         
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 8px; }
-        .calc-table { width: 100%; border-collapse: collapse; font-size: 0.85em; margin-top: 10px; background: rgba(0,0,0,0.4); border-radius: 8px; overflow: hidden; min-width: 320px; }
+        .calc-table { width: 100%; border-collapse: collapse; font-size: 0.85em; min-width: 320px; background: rgba(0,0,0,0.4); overflow: hidden; }
         .calc-table th { background: rgba(212,175,55,0.15); color: #D4AF37 !important; border-bottom: 1px solid #444; padding: 12px 4px; font-weight: 800; text-align: center; }
         .calc-table td { color: #ffffff !important; border-bottom: 1px dotted #444; padding: 12px 4px; text-align: center; font-weight: 600; }
         .hl-fixed { color: #34d399 !important; font-weight: 800; } 
@@ -156,11 +156,9 @@ st.markdown("""
         .disclaimer-box { background: rgba(255, 59, 48, 0.05); border: 1px solid rgba(255, 59, 48, 0.3); border-radius: 8px; padding: 12px; text-align: center; margin-top: 10px; }
         .disclaimer-text { color: gray; font-size: 0.75em; margin-top: 5px; margin-bottom: 0; line-height: 1.5; }
 
-        /* 🔥 입력창(Input) 라벨 텍스트 하얗고 진하게 완벽 강제 변경 (흐림/투명도 제거) */
+        /* 🔥 라디오버튼/셀렉트박스는 원래 테마 유지하고, 자납 등 넘버/데이트 입력창 제목만 하얗게 강제 지정! */
         div[data-testid="stNumberInput"] label p, 
-        div[data-testid="stDateInput"] label p, 
-        div[data-testid="stSelectbox"] label p, 
-        div[data-testid="stRadio"] label p {
+        div[data-testid="stDateInput"] label p {
             color: #ffffff !important;
             font-weight: 900 !important;
             font-size: 0.95em !important;
@@ -488,7 +486,7 @@ def get_global_stocks_api():
     
     # 2. 주요 국가 환율
     html += "<tr style='background-color:rgba(255,255,255,0.05);'><th colspan='2' style='color:#D4AF37; text-align:center; padding:8px 0; border-top:1px solid #333; font-size:0.95em;'>💱 주요 국가 환율</th></tr>"
-    for name, sym, mult in [("💵 미국 (USD/KRW)", "KRW=X", 1), ("💶 유럽 (EUR/KRW)", "EURKRW=X", 1), ("🇯🇵 일본 (100 JPY/KRW)", "JPYKRW=X", 100)]:
+    for name, sym, mult in [("💵 미국 (USD/KRW)", "KRW=X", 1), ("💶 유럽 (EUR/KRW)", "EURKRW=X", 1), ("🇯 ঐতি 일본 (100 JPY/KRW)", "JPYKRW=X", 100)]:
         html += fetch_yahoo(name, sym, mult)
         
     # 3. 대한민국 10대 해외여행지 환율
@@ -583,7 +581,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# [블록 5] 종합 포털 탭(Tab) 메뉴
+# [블록 5] 종합 포털 탭(Tab) 메뉴 
 # ==========================================
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏢 입주현황", "💰 이자계산기", "📊 입주민 전용정보", "🔮 오늘의 운세", "📰 관련뉴스"])
 
@@ -678,26 +676,27 @@ with tab2:
             unpaid_contract_amt = total_price * 0.05 if "5%" in contract_type else 0
             paid_contract_amt = contract_total_amt - unpaid_contract_amt
 
+            # 🔥 표(Table) 모바일 폰트 더 작게, 강제 한 줄 유지(nowrap)로 '원' 자 떨어짐 완벽 방지
             top_dashboard = f"""
             <div class='table-responsive'>
-                <table style='width:100%; border-collapse: collapse; text-align:center; background:#1c1c1e; border-radius:10px; border:1px solid #444; margin-top: 10px; margin-bottom: 25px;'>
-                    <tr style='color:#D4AF37; font-size:0.85em; font-weight:800; border-bottom:1px solid #333;'>
-                        <td style='padding:8px 2px; width:25%;'>계약금 10%</td>
-                        <td style='padding:8px 2px; width:25%; border-left:1px solid #333;'>중도금 60%</td>
-                        <td style='padding:8px 2px; width:25%; border-left:1px solid #333;'>잔금 30%</td>
-                        <td style='padding:8px 2px; width:25%; border-left:1px solid #333;'>총 분양가</td>
+                <table style='width:100%; border-collapse: collapse; text-align:center; background:#1c1c1e; border-radius:10px; border:1px solid #444; margin-top: 10px; margin-bottom: 25px; table-layout: auto;'>
+                    <tr style='color:#D4AF37; font-size:clamp(0.65em, 2vw, 0.85em); font-weight:800; border-bottom:1px solid #333;'>
+                        <td style='padding:8px 1px;'>계약금 10%</td>
+                        <td style='padding:8px 1px; border-left:1px solid #333;'>중도금 60%</td>
+                        <td style='padding:8px 1px; border-left:1px solid #333;'>잔금 30%</td>
+                        <td style='padding:8px 1px; border-left:1px solid #333;'>총 분양가</td>
                     </tr>
-                    <tr style='color:#ffffff; font-size:1.05em; font-weight:900;'>
-                        <td style='padding:12px 2px;'>{int(contract_total_amt):,}원</td>
-                        <td style='padding:12px 2px; border-left:1px solid #333;'>{int(installment_total_amt):,}원</td>
-                        <td style='padding:12px 2px; border-left:1px solid #333;'>{int(balance_amt):,}원</td>
-                        <td style='padding:12px 2px; border-left:1px solid #333; color:#fbbf24;'>{total_price:,}원</td>
+                    <tr style='color:#ffffff; font-size:clamp(0.65em, 2.2vw, 1.0em); font-weight:900; white-space: nowrap !important; word-break: keep-all;'>
+                        <td style='padding:10px 1px; letter-spacing:-0.5px;'>{int(contract_total_amt):,}원</td>
+                        <td style='padding:10px 1px; border-left:1px solid #333; letter-spacing:-0.5px;'>{int(installment_total_amt):,}원</td>
+                        <td style='padding:10px 1px; border-left:1px solid #333; letter-spacing:-0.5px;'>{int(balance_amt):,}원</td>
+                        <td style='padding:10px 1px; border-left:1px solid #333; color:#fbbf24; letter-spacing:-0.5px;'>{total_price:,}원</td>
                     </tr>
-                    <tr style='font-size:0.75em;'>
+                    <tr style='font-size:clamp(0.6em, 2vw, 0.75em);'>
                         <td style='padding:8px 2px; vertical-align:top;'>
                             <div style='background:rgba(0,0,0,0.3); padding:6px; border-radius:6px; line-height:1.4;'>
-                                <span style='color:#34d399;'>기납부액: {int(paid_contract_amt):,}원</span><br>
-                                <span style='color:#f87171; font-weight:800;'>미납잔액: {int(unpaid_contract_amt):,}원</span>
+                                <span style='color:#34d399;'>기납부:<br>{int(paid_contract_amt):,}원</span><br>
+                                <span style='color:#f87171; font-weight:800;'>미납액:<br>{int(unpaid_contract_amt):,}원</span>
                             </div>
                         </td>
                         <td style='padding:8px 2px; border-left:1px solid #333; vertical-align:top;'>
@@ -1000,7 +999,7 @@ with tab4:
             valid_combinations = set(zip(df_layout['동'], df_layout['호']))
             input_ho_formatted = f_ho.strip().zfill(4) 
             if (f_dong, input_ho_formatted) not in valid_combinations:
-                st.warning("🔮 앗! 해당 동·호수는 팡도사의 레이더에 잡히지 않는 '없는 기운'입니다. 혹시 아직 지어지지 허공의 터를 누르신 건 아니겠죠? 😅 동과 호수를 다시 한번 정확히 확인해 주세요!")
+                st.warning("🔮 앗! 해당 동·호수는 팡도사의 레이더에 잡히지 않는 '없는 기운'입니다. 혹시 아직 지어지지 않은 허공의 터를 누르신 건 아니겠죠? 😅 동과 호수를 다시 한번 정확히 확인해 주세요!")
             else:
                 with st.spinner("🔮 팡도사가 고객님의 명조(命造)를 심층 분석 중입니다..."):
                     time.sleep(3.5) 
