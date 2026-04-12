@@ -7,7 +7,7 @@ import json
 import random
 import time
 import xml.etree.ElementTree as ET
-from datetime import datetime
+from datetime import datetime, date
 from email.utils import parsedate_to_datetime
 from PIL import Image
 import streamlit.components.v1 as components
@@ -34,7 +34,7 @@ ga_script = f"""
 components.html(ga_script, width=0, height=0)
 
 # ==========================================
-# [블록 2] CSS 스타일링
+# [블록 2] CSS 스타일링 (아버님 커스텀 CSS 포함)
 # ==========================================
 st.markdown("""
     <meta name="google" content="notranslate">
@@ -131,11 +131,31 @@ st.markdown("""
         .delta-new { color: #FFFFFF !important; }  
         
         .by-text { text-align: right; color: #444; font-size: 0.6em; margin-top: 40px; margin-bottom: 10px; padding-right: 10px; }
+
+        /* 🔥 아버님 커스텀 계산기 CSS 추가 */
+        .calc-premium-title { font-size: clamp(2.0em, 8vw, 2.5em); font-weight: 900; text-align: center; color: #0A84FF !important; margin-bottom: 12px; line-height: 1.2; text-shadow: 0px 2px 4px rgba(0,0,0,0.1); }
+        .calc-box { background: linear-gradient(145deg, #1c1c1e, #111111); border: 1px solid #D4AF37; border-radius: 12px; padding: 20px 15px; margin-top: 15px; text-align: center; box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
+        .calc-title { color: #D4AF37 !important; font-size: 0.95em; font-weight: 800; margin-bottom: 5px; }
+        .calc-total { color: #ffffff !important; font-size: 2.2em; font-weight: 900; letter-spacing: -1px; margin-bottom: 10px; }
+        .summary-box { background: linear-gradient(135deg, #1e3a8a, #0f172a); border-radius: 12px; padding: 25px 20px; color: white !important; margin-top: 25px; margin-bottom: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+        .summary-title { font-size: 1.3em; font-weight: 900; color: #93c5fd !important; margin-bottom: 15px; text-align: center; }
+        .summary-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .summary-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .summary-label { font-size: 0.9em; font-weight: 600; color: #e2e8f0 !important; text-align: left; line-height: 1.4;}
+        .summary-val { font-size: 1.3em; font-weight: 900; color: #ffffff !important; text-align: right; }
+        .summary-val-highlight { font-size: 1.6em; font-weight: 900; color: #fbbf24 !important; text-align: right; }
+        .calc-table { width: 100%; border-collapse: collapse; font-size: 0.85em; margin-top: 10px; background: rgba(0,0,0,0.4); border-radius: 8px; overflow: hidden; }
+        .calc-table th { background: rgba(212,175,55,0.15); color: #D4AF37 !important; border-bottom: 1px solid #444; padding: 12px 4px; font-weight: 800; text-align: center; }
+        .calc-table td { color: #ffffff !important; border-bottom: 1px dotted #444; padding: 12px 4px; text-align: center; font-weight: 600; }
+        .hl-fixed { color: #34d399 !important; font-weight: 800; } 
+        .hl-var { color: #f87171 !important; font-weight: 800; }  
+        .disclaimer-box { background: rgba(255, 59, 48, 0.05); border: 1px solid rgba(255, 59, 48, 0.3); border-radius: 8px; padding: 12px; text-align: center; margin-top: 10px; }
+        .disclaimer-text { color: gray; font-size: 0.75em; margin-top: 5px; margin-bottom: 0; line-height: 1.5; }
     </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# [블록 3] 데이터 로딩 (구글 시트 연동)
+# [블록 3] 데이터 로딩 (구글 시트 연동 + 🚨 아버님 계산기 엑셀 연동 추가)
 # ==========================================
 SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQoR29bAcAP0KUBEvS3S6gn5Qz1MTKDJOxz-lW1UEyV_vOcISPxNW2uMuYMrz9HUw/pub?gid=1967078212&single=true&output=csv"
 LAYOUT_FILE = "디에트르 그랑루체 카페가입 현황.xlsx" 
@@ -179,7 +199,35 @@ def load_data():
         return kakao_dict, cafe_set, df_layout, type_dict
     except: return {}, set(), pd.DataFrame(), {}
 
+# 🔥 신규: 아버님 계산기용 엑셀 로더
+@st.cache_data
+def load_price_data():
+    price_hierarchy = {}
+    try:
+        df_p = pd.read_excel("디에트르 그랑루체 이자계산기.xlsx", sheet_name="Sheet2", header=None, dtype=str)
+        for _, row in df_p.iterrows():
+            try:
+                dong_val = str(row.iloc[1]).replace(".0", "").strip()
+                ho_val = str(row.iloc[2]).replace(".0", "").strip()
+                price_str = str(row.iloc[4]).replace(",", "").replace(".0", "").strip()
+                
+                if dong_val.isdigit() and ho_val.isdigit() and price_str.isdigit():
+                    price_int = int(price_str)
+                    
+                    if price_int > 1000000: # 엑셀 헤더 쓰레기 데이터 필터링
+                        dong_str = f"{int(dong_val)}동"
+                        ho_str = f"{int(ho_val):04d}호"
+                        
+                        if dong_str not in price_hierarchy:
+                            price_hierarchy[dong_str] = {}
+                        price_hierarchy[dong_str][ho_str] = price_int
+            except: continue 
+    except Exception as e:
+        pass # 에러 발생시 빈 딕셔너리 반환
+    return price_hierarchy
+
 kakao_dict, cafe_set, df_layout, type_dict = load_data()
+price_data = load_price_data() # 가격 데이터 로딩
 if df_layout.empty: st.stop()
 
 def format_korean_money(price_str):
@@ -472,7 +520,7 @@ def get_custom_fortune(dong, ho, type_dict):
     
     if "59" in unit_type: 
         fortune_pools = [
-            "이 호수와 인연을 맺으실 귀하는 상황 판단이 빠르고 위기 속에서도 반드시 해결책을 찾아내는 남다른 생존력과 직관의 사주를 지녔습니다. 겉보기엔 상황에 순응하는 듯 보여도, 내면에는 절대 꺾이지 않는 강한 승부욕을 품고 계시군요. 남들에게 크게 의지하기보다 스스로의 힘으로 길을 개척해 오느라 남몰래 겪은 고단함이 있었겠으나, 이 터의 맑은 기운이 귀하의 그 뚝심과 만나 마침내 폭발적인 보상으로 돌아오기 시작합니다.",
+            "이 호수와 인연을 맺으실 귀하는 상황 판단이 빠르고 위기 속에서도 반드시 해결책을 찾아내는 남다른 생존력과 직관의 사주를 지녔습니다. 겉보기엔 상황에 순응하는 듯 보여도, 내면에는 절대 꺾이지 강한 승부욕을 품고 계시군요. 남들에게 크게 의지하기보다 스스로의 힘으로 길을 개척해 오느라 남몰래 겪은 고단함이 있었겠으나, 이 터의 맑은 기운이 귀하의 그 뚝심과 만나 마침내 폭발적인 보상으로 돌아오기 시작합니다.",
             "귀하는 타인의 화려한 겉치레에 휩쓸리지 않고, 자신만의 속도와 기준으로 내실을 단단하게 다질 줄 아는 현명한 명조를 타고났습니다. 때로는 주변에서 귀하의 깊은 뜻을 알아주지 않아 외로움을 느꼈을 수 있으나, 결국 최후에 웃는 것은 귀하입니다. 이 터는 그런 귀하의 실용적이고 단단한 기운을 완벽하게 품어주는 둥지 역할을 할 것입니다."
         ]
     elif "110" in unit_type or "114" in unit_type or "104" in unit_type: 
@@ -500,7 +548,7 @@ def get_custom_fortune(dong, ho, type_dict):
     return result_html
 
 # ==========================================
-# 🚨 메인 상단 타이틀 영역
+# 🚨 메인 상단 타이틀 영역 
 # ==========================================
 st.markdown("<div class='premium-title'>Detre Granluce</div>", unsafe_allow_html=True)
 st.markdown("""
@@ -512,9 +560,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# [블록 5] 종합 포털 탭(Tab) 메뉴 (🔥 이자계산기 추가하여 5개 탭으로 구성)
+# [블록 5] 종합 포털 탭(Tab) 메뉴 (🔥 아버님 계산기가 2번째 탭으로!)
 # ==========================================
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏢 입주현황", "💰 이자계산기", "📊 입주민 전용정보", "🔮 오늘의 운세", "📰 관련뉴스"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏢 입주현황", "💰 입주자금계산", "📊 입주민 전용정보", "🔮 오늘의 운세", "📰 관련뉴스"])
 
 # ------------------------------------------
 # [탭 1] 메인: 세대별 입주현황
@@ -574,78 +622,173 @@ with tab1:
     st.markdown(html_grid, unsafe_allow_html=True)
 
 # ------------------------------------------
-# [탭 2] 신규 탑재: 💰 대출이자 계산기
+# [탭 2] 🚨 아버님표 입주 자금 계산 시뮬레이션
 # ------------------------------------------
 with tab2:
-    st.markdown("<h3 style='text-align:center; color:#D4AF37; font-weight:900; margin-top:5px; margin-bottom:2px; letter-spacing:-1px;'>💰 스마트 대출이자 계산기</h3>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:#aaa; font-size:0.75em; margin-bottom:15px;'>※ 복잡한 엑셀 파일 없이, 내 손안에서 즉시 확인하는 자금 계획</p>", unsafe_allow_html=True)
+    st.markdown("<div class='calc-premium-title'>💰 입주 자금 계산 시뮬레이션</div>", unsafe_allow_html=True)
 
-    with st.container():
-        st.markdown("<div style='background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; border: 1px solid #333; margin-bottom: 10px;'>", unsafe_allow_html=True)
-        
-        # 1. 입력부 (디자인 최적화를 위해 컬럼 분할)
-        col_p, col_r = st.columns(2)
-        with col_p:
-            principal_man = st.number_input("대출 원금 (단위: 만원)", min_value=100, max_value=200000, value=30000, step=1000, format="%d")
-        with col_r:
-            annual_rate = st.number_input("연 이자율 (%)", min_value=0.1, max_value=20.0, value=3.5, step=0.1, format="%.2f")
+    if not price_data:
+        st.warning("데이터가 없습니다. 엑셀 파일을 확인해주세요.")
+    else:
+        st.markdown("#### 1️⃣ 세대 정보 및 계약금 선택")
+        col_d, col_h = st.columns(2)
+        with col_d:
+            selected_dong = st.selectbox("🏢 동 선택", options=sorted(list(price_data.keys())), index=None)
+        with col_h:
+            if selected_dong and selected_dong in price_data:
+                selected_ho = st.selectbox("🚪 호수 선택", options=sorted(list(price_data[selected_dong].keys())), index=None)
+            else:
+                selected_ho = st.selectbox("🚪 호수 선택", options=["동 선택 필요"], disabled=True)
 
-        col_y, col_t = st.columns(2)
-        with col_y:
-            years = st.selectbox("대출 기간", [1, 2, 3, 5, 10, 15, 20, 30, 40, 50], index=7, format_func=lambda x: f"{x}년")
-        with col_t:
-            repay_type = st.selectbox("상환 방식", ["원리금균등", "원금균등", "만기일시"])
-        st.markdown("</div>", unsafe_allow_html=True)
+        if selected_dong and selected_ho and selected_ho in price_data.get(selected_dong, {}):
+            total_price = price_data[selected_dong][selected_ho]
+            
+            contract_type = st.radio("계약금 납부 형태 선택 (대출 무이자)", ["5% 일부 납부 세대", "10% 완납 세대"], horizontal=True)
+            
+            contract_total_amt = total_price * 0.1 
+            installment_total_amt = total_price * 0.6
+            installment_amt = total_price * 0.1 
+            balance_amt = total_price * 0.3
+            
+            unpaid_contract_amt = total_price * 0.05 if "5%" in contract_type else 0
+            paid_contract_amt = contract_total_amt - unpaid_contract_amt
 
-        # 2. 파이썬 기반 금융 알고리즘 계산부
-        if st.button("계산 결과 확인하기", use_container_width=True):
-            P = principal_man * 10000  # 만원 단위를 원 단위로 변환
-            r = annual_rate / 100 / 12 # 월 이자율
-            n = years * 12             # 총 상환 개월 수
+            top_dashboard = f"<div style='background:#1c1c1e; padding:15px; border-radius:10px; border:1px solid #444; margin-top: 10px; margin-bottom: 25px;'><table style='width:100%; border-collapse: collapse; text-align:center;'><tr style='color:#D4AF37; font-size:0.85em; font-weight:800; border-bottom:1px solid #333;'><td style='padding:5px 2px; width:25%;'>계약금 10%</td><td style='padding:5px 2px; width:25%; border-left:1px solid #333;'>중도금 60%</td><td style='padding:5px 2px; width:25%; border-left:1px solid #333;'>잔금 30%</td><td style='padding:5px 2px; width:25%; border-left:1px solid #333;'>총 분양가</td></tr><tr style='color:#ffffff; font-size:1.05em; font-weight:900;'><td style='padding:12px 2px;'>{int(contract_total_amt):,}원</td><td style='padding:12px 2px; border-left:1px solid #333;'>{int(installment_total_amt):,}원</td><td style='padding:12px 2px; border-left:1px solid #333;'>{int(balance_amt):,}원</td><td style='padding:12px 2px; border-left:1px solid #333; color:#fbbf24;'>{total_price:,}원</td></tr><tr style='font-size:0.75em;'><td style='padding:8px 2px; vertical-align:top;'><div style='background:rgba(0,0,0,0.3); padding:6px; border-radius:6px; line-height:1.4;'><span style='color:#34d399;'>기납부액: {int(paid_contract_amt):,}원</span><br><span style='color:#f87171; font-weight:800;'>미납잔액: {int(unpaid_contract_amt):,}원</span></div></td><td style='padding:8px 2px; border-left:1px solid #333; vertical-align:top;'><div style='color:#bbb; padding-top:6px;'>회당(10%):<br>{int(installment_amt):,}원</div></td><td style='padding:8px 2px; border-left:1px solid #333;'></td><td style='padding:8px 2px; border-left:1px solid #333;'></td></tr></table></div>"
+            st.markdown(top_dashboard, unsafe_allow_html=True)
+
+            # ==========================================
+            # 4. 중도금 이자 계산 & 자납 설정 
+            # ==========================================
+            st.markdown("#### 2️⃣ 중도금 대출 이자 및 자납(직접납부) 설정")
+            
+            slider_rate = st.slider("4~6회차 예상 금리 (%)", 2.00, 6.00, 3.88, 0.01)
+
+            dates = [date(2024, 5, 20), date(2024, 12, 20), date(2025, 7, 20), date(2026, 3, 20), date(2026, 7, 20), date(2026, 11, 20)]
+            end_date = date(2027, 5, 31)
+            rates = [4.85, 4.68, 3.88, slider_rate, slider_rate, slider_rate]
+            status_tags = ["hl-fixed", "hl-fixed", "hl-fixed", "hl-var", "hl-var", "hl-var"]
+            status_texts = ["확정", "확정", "확정", "예상", "예상", "예상"]
+
+            self_pays = []
+            total_self_pay_amt = 0 
+
+            with st.expander("💸 자납(직접 납부) 세대 상세 설정 (클릭하여 열기)"):
+                st.markdown("<p style='font-size:0.85em; color:#bbb; margin-bottom:15px;'>해당 회차에 직접 납부하신 금액이 있다면 아래에 적어주세요. (없는 회차는 0원 그대로 두시면 됩니다.)</p>", unsafe_allow_html=True)
+                
+                for i in range(6):
+                    c1, c2 = st.columns([1.5, 1.5])
+                    with c1:
+                        sp_amt = st.number_input(f"{i+1}회차 자납 금액(원)", min_value=0, max_value=int(installment_amt), value=0, step=1000000, format="%d", key=f"amt_{i}")
+                        if sp_amt > 0:
+                            st.markdown(f"<div style='text-align: right; color: #0A84FF; font-weight: 800; font-size: 0.85em; margin-top: -10px; margin-bottom: 10px;'>입력액: {int(sp_amt):,} 원</div>", unsafe_allow_html=True)
+                    with c2:
+                        sp_date = st.date_input(f"{i+1}회차 입금일자", value=dates[i], key=f"date_{i}", format="YYYY/MM/DD")
+                    
+                    is_self = sp_amt > 0
+                    amt_to_apply = sp_amt if is_self else 0
+                    total_self_pay_amt += amt_to_apply
+                    self_pays.append({'is_self': is_self, 'amt': amt_to_apply, 'date': sp_date})
+                    st.markdown("<hr style='margin: 10px 0; border-color: #333;'>", unsafe_allow_html=True)
 
             total_interest = 0
-            total_payment = 0
-            monthly_payment_str = ""
+            html_table = "<table class='calc-table'><tr><th>회차</th><th>실행일</th><th>금리</th><th style='text-align:right !important; padding-right:12px !important;'>발생 이자액</th></tr>"
 
-            if P > 0 and n > 0:
-                if repay_type == "원리금균등":
-                    if r == 0:
-                        monthly_pmt = P / n
-                        total_interest = 0
-                    else:
-                        monthly_pmt = P * r * ((1+r)**n) / (((1+r)**n) - 1)
-                        total_payment = monthly_pmt * n
-                        total_interest = total_payment - P
-                    monthly_payment_str = f"매월 <b style='font-size:1.1em;'>{int(monthly_pmt):,}</b>원 (일정)"
+            for i in range(6):
+                exec_date = dates[i]
+                rate = rates[i]
+                sp = self_pays[i]
+                
+                interest = 0
+                if sp['is_self'] and sp['amt'] > 0:
+                    sp_date = sp['date']
+                    if sp_date <= exec_date: 
+                        loan_amt = installment_amt - sp['amt']
+                        days = (end_date - exec_date).days
+                        interest = loan_amt * (rate / 100) * (days / 365)
+                    elif sp_date >= end_date: 
+                        loan_amt = installment_amt
+                        days = (end_date - exec_date).days
+                        interest = loan_amt * (rate / 100) * (days / 365)
+                    else: 
+                        days1 = (sp_date - exec_date).days
+                        int1 = installment_amt * (rate / 100) * (days1 / 365)
+                        loan_amt2 = installment_amt - sp['amt']
+                        days2 = (end_date - sp_date).days
+                        int2 = loan_amt2 * (rate / 100) * (days2 / 365)
+                        interest = int1 + int2
+                else:
+                    loan_amt = installment_amt
+                    days = (end_date - exec_date).days
+                    interest = loan_amt * (rate / 100) * (days / 365)
+                    
+                total_interest += interest
+                sp_mark = "<br><span style='color:#34d399; font-size:0.75em;'>(자납반영)</span>" if sp['is_self'] and sp['amt']>0 else ""
+                
+                html_table += f"<tr><td>{i+1}회차{sp_mark}<br><span style='font-size:0.7em; color:#888;'>({days}일)</span></td><td>{dates[i].strftime('%Y.%m.%d')}</td><td><span class='{status_tags[i]}'>{rates[i]:.2f}% ({status_texts[i]})</span></td><td style='text-align:right !important; padding-right:12px !important; color:#ffffff !important; font-weight:800;'>{int(interest):,} 원</td></tr>"
 
-                elif repay_type == "원금균등":
-                    monthly_principal = P / n
-                    if r == 0:
-                        total_interest = 0
-                        first_month = monthly_principal
-                    else:
-                        total_interest = P * r * (n + 1) / 2
-                        first_month = monthly_principal + (P * r)
-                    total_payment = P + total_interest
-                    monthly_payment_str = f"첫 달 <b style='font-size:1.1em;'>{int(first_month):,}</b>원 (매월 감소)"
+            html_table += "</table>"
 
-                elif repay_type == "만기일시":
-                    monthly_interest = P * r
-                    total_interest = monthly_interest * n
-                    total_payment = P + total_interest
-                    monthly_payment_str = f"매월 <b style='font-size:1.1em;'>{int(monthly_interest):,}</b>원 (이자만)"
+            int_dashboard = f"<div class='calc-box'><div class='calc-title'>입주 시점(27.05.31) 총 중도금 이자 누적액</div><div class='calc-total'>{int(total_interest):,} 원</div>{html_table}</div>"
+            st.markdown(int_dashboard, unsafe_allow_html=True)
 
-                # 3. 결과 출력부 (기존 프리미엄 CSS 테마 활용)
-                res_html = f"""
-                <div class='stat-box-new' style='flex-direction:column; padding:15px; margin-top:5px; border:1px solid #D4AF37; background: linear-gradient(145deg, #2c2c2e, #1c1c1e);'>
-                    <div style='text-align:center; color:#8e8e93; font-size:0.85em; margin-bottom:15px; font-weight:800;'>📌 {repay_type}상환 | 연 {annual_rate}% | {years}년</div>
-                    <div class='stat-row' style='margin-bottom:10px;'><span class='stat-label'>월별 상환액</span><span class='stat-value' style='font-size:1.0em; color:#03C75A;'>{monthly_payment_str}</span></div>
-                    <div class='stat-row' style='margin-bottom:10px;'><span class='stat-label'>총 납부 이자액</span><span class='stat-value' style='color:#FF3B30; font-weight:900;'>{int(total_interest):,}원</span></div>
-                    <div class='stat-row' style='border-top:1px dashed #555; padding-top:12px; margin-top:5px;'><span class='stat-label' style='color:#d1d1d6; font-weight:900;'>총 상환금액 (원금+이자)</span><span class='stat-value' style='font-size:1.25em; color:#D4AF37; font-weight:900;'>{int(total_payment):,}원</span></div>
-                </div>
-                """
-                st.markdown(res_html, unsafe_allow_html=True)
+            total_loan_balance = installment_total_amt - total_self_pay_amt
 
+            # ==========================================
+            # 5. 대환대출(주담대) 월 납입액 시뮬레이터
+            # ==========================================
+            st.markdown("<br>#### 3️⃣ 입주 시 대환대출(주담대) 월 납입액 예상", unsafe_allow_html=True)
+            st.markdown("<p style='font-size:0.85em; color:gray;'>중도금 대출 잔액을 일반 주담대로 대환 시 매월 납입액입니다.</p>", unsafe_allow_html=True)
+            
+            col_l1, col_l2 = st.columns(2)
+            with col_l1:
+                repay_type = st.selectbox("상환 방식", ["원리금균등상환", "원금균등상환", "만기일시상환(이자만)"])
+                loan_years = st.slider("대출 기간 (년)", 10, 50, 30, 5)
+            with col_l2:
+                bank_type = st.selectbox("대출 금융권 (금리 기준)", ["1금융권 주담대 (약 4.0%)", "2금융권 주담대 (약 5.2%)", "정부기금/디딤돌 (약 2.5%)", "직접 입력"])
+                if "1금융권" in bank_type: default_b_rate = 4.0
+                elif "2금융권" in bank_type: default_b_rate = 5.2
+                elif "정부기금" in bank_type: default_b_rate = 2.5
+                else: default_b_rate = 4.0
+                b_rate = st.number_input("적용 금리 (%)", value=default_b_rate, step=0.1, disabled=(bank_type != "직접 입력"))
+                
+            n_months = loan_years * 12
+            S = total_loan_balance
+            R = (b_rate / 100) / 12
+
+            if S > 0:
+                first_month_interest = S * R
+                
+                if repay_type == "원리금균등상환":
+                    monthly_pay = S * R * ((1 + R)**n_months) / (((1 + R)**n_months) - 1) if R > 0 else S / n_months
+                    first_month_principal = monthly_pay - first_month_interest
+                    pay_text = f"매월 <b style='color:#fbbf24; font-size:1.2em;'>{int(monthly_pay):,}</b> 원"
+                    pay_sub = f"(첫 달 기준: 원금 {int(first_month_principal):,}원 + 이자 {int(first_month_interest):,}원)"
+                    
+                elif repay_type == "원금균등상환":
+                    monthly_principal = S / n_months
+                    first_month_pay = monthly_principal + first_month_interest
+                    pay_text = f"첫 달 <b style='color:#fbbf24; font-size:1.2em;'>{int(first_month_pay):,}</b> 원"
+                    pay_sub = f"(매월 감소: 원금 {int(monthly_principal):,}원 + 첫 달 이자 {int(first_month_interest):,}원)"
+                    
+                else: 
+                    monthly_pay = S * R
+                    pay_text = f"매월 <b style='color:#fbbf24; font-size:1.2em;'>{int(monthly_pay):,}</b> 원"
+                    pay_sub = f"(만기 전액 상환: 원금 0원 + 이자 {int(monthly_pay):,}원)"
+            else:
+                pay_text = "<b style='color:#34d399;'>중도금 대출 잔액이 없습니다 (전액 자납)</b>"
+                pay_sub = ""
+
+            loan_dashboard = f"<div style='background:#1c1c1e; border-left: 4px solid #D4AF37; padding: 15px; border-radius: 4px; margin-top: 10px;'><div style='font-size:0.9em; color:#ddd;'>대환대출 원금 (자납 제외 중도금 잔액): <b style='color:#fff;'>{int(S):,} 원</b></div><div style='font-size:1.1em; color:#fff; margin-top:8px;'>예상 납입액: {pay_text}</div><div style='font-size:0.85em; color:#aaa; margin-top:5px;'>{pay_sub}</div></div>"
+            st.markdown(loan_dashboard, unsafe_allow_html=True)
+
+            # ==========================================
+            # 6. 최종 총 비용 요약 전광판
+            # ==========================================
+            actual_price = total_price + total_interest
+            move_in_funds = unpaid_contract_amt + balance_amt + total_interest
+            
+            final_dashboard = f"<div class='summary-box'><div class='summary-title'>🎉 입주 시나리오 최종 요약</div><div class='summary-row'><div class='summary-label'>실질적 분양가<br><span style='font-size:0.8em; font-weight:400;'>(분양가 + 중도금 누적 이자액)</span></div><div class='summary-val'>{int(actual_price):,} 원</div></div><div class='summary-row'><div class='summary-label'>잔금 30%<br><span style='font-size:0.8em; font-weight:400;'>(분양가의 30% / 입주 지정 시 납부)</span></div><div class='summary-val'>{int(balance_amt):,} 원</div></div><div class='summary-row' style='margin-top: 15px; border-top: 1px dashed rgba(255,255,255,0.3); padding-top: 15px;'><div class='summary-label' style='color:#93c5fd !important;'>순수 입주 필요 현금<br><span style='font-size:0.8em; font-weight:400;'>(미납 계약금 + 잔금 30% + 중도금 이자)</span></div><div class='summary-val-highlight'>{int(move_in_funds):,} 원</div></div></div><div class='disclaimer-box'><b style='color:#f87171; font-size:0.85em;'>🚨 [필독] 제외 사항</b><p class='disclaimer-text'>※ 본 계산결과는 발코니 확장비, 유상옵션, 취득세 등 기타 제반 비용이 <b>제외된 금액</b>입니다.<br>※ 잔금 대출(LTV, DSR 등) 및 개인 신용도에 따른 기타 변수는 배제된 <b>보편적 시뮬레이션</b>이므로, 정확한 잔금 대출 및 이율에 대해서는 입주 지정일 전 <b>반드시 개별적인 은행 상담 및 확인</b>이 필요합니다.</p></div>"
+            st.markdown(final_dashboard, unsafe_allow_html=True)
 
 # ------------------------------------------
 # [탭 3] 핵심비밀정보 (심리전 UX 탑재)
